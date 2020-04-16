@@ -1,183 +1,183 @@
 ---
-title: Zagadnienia dotyczące wydajności dla EF4, EF5 i EF6-EF6
+title: Zagadnienia dotyczące wydajności dla EF4, EF5 i EF6 — EF6
 author: divega
 ms.date: 10/23/2016
 ms.assetid: d6d5a465-6434-45fa-855d-5eb48c61a2ea
-ms.openlocfilehash: 07eb605f0d39f0c1bcfe781540525180f0dd0b22
-ms.sourcegitcommit: cc0ff36e46e9ed3527638f7208000e8521faef2e
+ms.openlocfilehash: 0ece383bb5083b41c7a2636c009473333af6d3e2
+ms.sourcegitcommit: 144edccf9b29a7ffad119c235ac9808ec1a46193
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 03/06/2020
-ms.locfileid: "78419448"
+ms.lasthandoff: 04/16/2020
+ms.locfileid: "81434342"
 ---
 # <a name="performance-considerations-for-ef-4-5-and-6"></a>Zagadnienia dotyczące wydajności dla EF 4, 5 i 6
-Przez David Obando, Eric Dettinger i inne
+Autorstwa Davida Obando, Erica Dettingera i innych
 
-Opublikowano: kwiecień 2012
+Opublikowano: kwiecień 2012 r.
 
-Ostatnia aktualizacja: maj 2014
+Ostatnia aktualizacja: maj 2014 r.
 
 ------------------------------------------------------------------------
 
 ## <a name="1-introduction"></a>1. Wprowadzenie
 
-Struktury mapowania relacyjnego obiektów są wygodnym sposobem zapewnienia abstrakcji dostępu do danych w aplikacji zorientowanej obiektowo. W przypadku aplikacji .NET zalecana firma Microsoft ma Entity Framework. W przypadku jakichkolwiek streszczeń, wydajność może być istotna.
+Struktury mapowania obiektowo-relacyjnego są wygodnym sposobem zapewnienia abstrakcji dostępu do danych w aplikacji obiektowej. W przypadku aplikacji platformy .NET zalecana o/rm firmy Microsoft to entity framework. Z każdej abstrakcji jednak, wydajność może stać się problemem.
 
-Niniejszy dokument został zapisany, aby pokazać zagadnienia dotyczące wydajności podczas tworzenia aplikacji przy użyciu Entity Framework, aby dać deweloperom pomysł Entity Framework wewnętrznych algorytmów, które mogą wpływać na wydajność, oraz zapewnić wskazówki dotyczące badania i Poprawa wydajności w aplikacjach korzystających z Entity Framework. Istnieje kilka dobrych tematów dotyczących wydajności już dostępnych w sieci Web. Ponadto podjęto próbę przeprowadzenia tych zasobów, jeśli jest to możliwe.
+Ten oficjalny dokument został napisany w celu wyświetlenia zagadnień dotyczących wydajności podczas tworzenia aplikacji przy użyciu entity framework, aby dać deweloperom pomysł entity framework wewnętrznych algorytmów, które mogą mieć wpływ na wydajność i aby zapewnić wskazówki dotyczące badania i poprawy wydajności w swoich aplikacjach, które używają entity framework. Istnieje wiele dobrych tematów dotyczących wydajności już dostępnych w internecie, a my również próbowaliśmy wskazać te zasoby tam, gdzie to możliwe.
 
-Wydajność to Lewa sekcja. Ten oficjalny dokument jest przeznaczony dla zasobów, które ułatwiają podejmowanie decyzji dotyczących wydajności dla aplikacji korzystających z Entity Framework. Dodaliśmy pewne metryki testów w celu zademonstrowania wydajności, ale te metryki nie zamierzą bezwzględnych wskaźników wydajności, które będą widoczne w aplikacji.
+Wydajność to trudny temat. Ten oficjalny dokument jest przeznaczony jako zasób ułatwiające podejmowanie decyzji związanych z wydajnością dla aplikacji korzystających z entity framework. Uwzględniliśmy niektóre metryki testu, aby zademonstrować wydajność, ale te metryki nie są przeznaczone jako bezwzględne wskaźniki wydajności, które zostaną wyświetleni w aplikacji.
 
-W praktyce w tym dokumencie przyjęto, że Entity Framework 4 jest uruchamiany na platformie .NET 4,0 i Entity Framework 5 i 6 są uruchamiane w ramach platformy .NET 4,5. Wiele ulepszeń wydajności Entity Framework 5 znajduje się w podstawowych składnikach dostarczanych z platformą .NET 4,5.
+Dla praktycznych celów ten dokument zakłada Entity Framework 4 jest uruchamiany w obszarze .NET 4.0 i Entity Framework 5 i 6 są uruchamiane w ramach .NET 4.5. Wiele ulepszeń wydajności wprowadzonych dla entity framework 5 znajduje się w podstawowych komponentach dostarczanych z programem .NET 4.5.
 
-Entity Framework 6 to wersja poza pasmem i nie zależy od składników Entity Framework dostarczanych z platformą .NET. Entity Framework 6 działa na platformach .NET 4,0 i .NET 4,5 oraz oferuje dużą wydajność dla tych, którzy nie zostali uaktualnioni z platformy .NET 4,0, ale chcą mieć najnowsze Entity Framework BITS w swojej aplikacji. W tym dokumencie znajduje się Entity Framework 6, odnosi się do najnowszej wersji dostępnej w momencie zapisu: wersja 6.1.0.
+Entity Framework 6 jest wydaniem poza pasmem i nie zależy od składników entity framework, które są dostarczane z .NET. Entity Framework 6 działa zarówno na .NET 4.0 i .NET 4.5 i może zaoferować duże korzyści wydajności dla tych, którzy nie uaktualniony z .NET 4.0, ale chcą najnowsze bity entity framework w aplikacji. Gdy ten dokument wspomina Entity Framework 6, odnosi się do najnowszej wersji dostępnej w momencie pisania tego tekstu: wersja 6.1.0.
 
-## <a name="2-cold-vs-warm-query-execution"></a>2. zimne i grzane wykonywanie zapytań
+## <a name="2-cold-vs-warm-query-execution"></a>2. Zimne i ciepłe wykonywanie zapytań
 
-Podczas pierwszego wykonywania zapytania dotyczącego danego modelu, Entity Framework wykonuje wiele pracy w tle, aby załadować i zweryfikować model. Często odwołujemy się do pierwszego zapytania jako "zimne".  Dalsze zapytania dotyczące już załadowanego modelu są znane jako zapytania "grzane" i są znacznie szybsze.
+Po raz pierwszy wszelkie kwerendy jest wykonany w stosunku do danego modelu, Entity Framework wykonuje wiele pracy za kulisami, aby załadować i sprawdzić poprawność modelu. Często nazywamy to pierwsze zapytanie kwerendą "zimną" kwerendą.Dalsze zapytania dotyczące już załadowanego modelu są znane jako "ciepłe" zapytania i są znacznie szybsze.
 
-Przyjrzyjmy się ogólnemu w miejscu, gdzie podczas wykonywania zapytania przy użyciu Entity Framework i zobacz, w jaki sposób poprawiamy działania w Entity Framework 6.
+Przyjrzyjmy się widok wysokiego poziomu, gdzie czas spędza się podczas wykonywania kwerendy przy użyciu entity framework i zobacz, gdzie rzeczy są ulepszane w entity framework 6.
 
-**Pierwsze wykonanie zapytania — zimna kwerenda**
+**Pierwsze wykonanie kwerendy — zimne zapytanie**
 
-| Kod zapisy użytkownika                                                                                     | Akcja                    | Wpływ na wydajność EF4                                                                                                                                                                                                                                                                                                                                                                                                        | Wpływ na wydajność EF5                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Wpływ na wydajność EF6                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Zapisy użytkownika kodu                                                                                     | Akcja                    | Wpływ na wydajność EF4                                                                                                                                                                                                                                                                                                                                                                                                        | Wpływ na wydajność EF5                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Wpływ na wydajność EF6                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 |:-----------------------------------------------------------------------------------------------------|:--------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `using(var db = new MyContext())` <br/> `{`                                                          | Tworzenie kontekstu          | Medium                                                                                                                                                                                                                                                                                                                                                                                                                        | Medium                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Małe                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `  var q1 = ` <br/> `    from c in db.Customers` <br/> `    where c.Id == id1` <br/> `    select c;` | Tworzenie wyrażenia zapytania | Małe                                                                                                                                                                                                                                                                                                                                                                                                                           | Małe                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Małe                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `  var c1 = q1.First();`                                                                             | Wykonanie zapytania LINQ      | -Ładowanie metadanych: wysokie, ale buforowane <br/> -Wyświetl generowanie: prawdopodobnie bardzo duże, ale w pamięci podręcznej <br/> -Obliczanie parametrów: Średni <br/> -Tłumaczenie zapytania: Średni <br/> -Materializer generacji: Średnia, ale buforowana <br/> -Wykonywanie zapytania do bazy danych: potencjalnie wysokie <br/> + Połączenie. Otwórz <br/> + Command. ExecuteReader <br/> + DataReader.Read <br/> Materializację obiektu: Średni <br/> -Wyszukiwanie tożsamości: Średnia | -Ładowanie metadanych: wysokie, ale buforowane <br/> -Wyświetl generowanie: prawdopodobnie bardzo duże, ale w pamięci podręcznej <br/> -Obliczanie parametrów: niski <br/> -Tłumaczenie zapytania: Średni, ale buforowany <br/> -Materializer generacji: Średnia, ale buforowana <br/> -Wykonywanie zapytania do bazy danych: potencjalnie wysokie (lepsze zapytania w niektórych sytuacjach) <br/> + Połączenie. Otwórz <br/> + Command. ExecuteReader <br/> + DataReader.Read <br/> Materializację obiektu: Średni <br/> -Wyszukiwanie tożsamości: Średnia | -Ładowanie metadanych: wysokie, ale buforowane <br/> -Wyświetl generowanie: Średni, ale buforowany <br/> -Obliczanie parametrów: niski <br/> -Tłumaczenie zapytania: Średni, ale buforowany <br/> -Materializer generacji: Średnia, ale buforowana <br/> -Wykonywanie zapytania do bazy danych: potencjalnie wysokie (lepsze zapytania w niektórych sytuacjach) <br/> + Połączenie. Otwórz <br/> + Command. ExecuteReader <br/> + DataReader.Read <br/> Materializację obiektów: Średni (szybszy niż EF5) <br/> -Wyszukiwanie tożsamości: Średnia |
-| `}`                                                                                                  | Połączenie. Zamknij          | Małe                                                                                                                                                                                                                                                                                                                                                                                                                           | Małe                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Małe                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `  var q1 = ` <br/> `    from c in db.Customers` <br/> `    where c.Id == id1` <br/> `    select c;` | Tworzenie wyrażenia kwerendy | Małe                                                                                                                                                                                                                                                                                                                                                                                                                           | Małe                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Małe                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `  var c1 = q1.First();`                                                                             | Wykonanie kwerendy LINQ      | - Ładowanie metadanych: Wysokie, ale buforowane <br/> - Wyświetl generację: Potencjalnie bardzo wysoka, ale buforowana <br/> - Ocena parametrów: Średnia <br/> - Tłumaczenie zapytania: Medium <br/> - Generowanie Materializer: Średnie, ale buforowane <br/> - Wykonywanie kwerendy bazy danych: Potencjalnie wysokie <br/> + Connection.Otwórz <br/> + Command.ExecuteReader <br/> + DataReader.Read <br/> Materializacja obiektów: Średnia <br/> - Wyszukiwanie tożsamości: Medium | - Ładowanie metadanych: Wysokie, ale buforowane <br/> - Wyświetl generację: Potencjalnie bardzo wysoka, ale buforowana <br/> - Ocena parametrów: Niska <br/> - Tłumaczenie zapytania: Średnie, ale buforowane <br/> - Generowanie Materializer: Średnie, ale buforowane <br/> - Wykonywanie zapytań bazy danych: Potencjalnie wysokie (Lepsze zapytania w niektórych sytuacjach) <br/> + Connection.Otwórz <br/> + Command.ExecuteReader <br/> + DataReader.Read <br/> Materializacja obiektów: Średnia <br/> - Wyszukiwanie tożsamości: Medium | - Ładowanie metadanych: Wysokie, ale buforowane <br/> - Wyświetl generację: Średni, ale buforowany <br/> - Ocena parametrów: Niska <br/> - Tłumaczenie zapytania: Średnie, ale buforowane <br/> - Generowanie Materializer: Średnie, ale buforowane <br/> - Wykonywanie zapytań bazy danych: Potencjalnie wysokie (Lepsze zapytania w niektórych sytuacjach) <br/> + Connection.Otwórz <br/> + Command.ExecuteReader <br/> + DataReader.Read <br/> Materializacja obiektów: Średnia (szybsza niż EF5) <br/> - Wyszukiwanie tożsamości: Medium |
+| `}`                                                                                                  | Connection.Close          | Małe                                                                                                                                                                                                                                                                                                                                                                                                                           | Małe                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Małe                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 
 
-**Drugie wykonanie zapytania — grzane zapytanie**
+**Drugie wykonanie zapytania – ciepłe zapytanie**
 
-| Kod zapisy użytkownika                                                                                     | Akcja                    | Wpływ na wydajność EF4                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Wpływ na wydajność EF5                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Wpływ na wydajność EF6                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| Zapisy użytkownika kodu                                                                                     | Akcja                    | Wpływ na wydajność EF4                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Wpływ na wydajność EF5                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Wpływ na wydajność EF6                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 |:-----------------------------------------------------------------------------------------------------|:--------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `using(var db = new MyContext())` <br/> `{`                                                          | Tworzenie kontekstu          | Medium                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Medium                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Małe                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `  var q1 = ` <br/> `    from c in db.Customers` <br/> `    where c.Id == id1` <br/> `    select c;` | Tworzenie wyrażenia zapytania | Małe                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Małe                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Małe                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `  var c1 = q1.First();`                                                                             | Wykonanie zapytania LINQ      | -Wyszukiwanie ~~ładowania~~ metadanych: ~~wysoka, ale buforowana~~ niska <br/> -Wyświetl wyszukiwanie ~~generowania~~ : ~~prawdopodobnie bardzo wysokie, ale w pamięci podręcznej~~ niskie <br/> -Obliczanie parametrów: Średni <br/> -Wyszukiwanie ~~tłumaczenia~~ zapytania: Średni <br/> -Materializer — wyszukiwanie ~~generacji~~ : ~~średnia, ale buforowana~~ niska <br/> -Wykonywanie zapytania do bazy danych: potencjalnie wysokie <br/> + Połączenie. Otwórz <br/> + Command. ExecuteReader <br/> + DataReader.Read <br/> Materializację obiektu: Średni <br/> -Wyszukiwanie tożsamości: Średnia | -Wyszukiwanie ~~ładowania~~ metadanych: ~~wysoka, ale buforowana~~ niska <br/> -Wyświetl wyszukiwanie ~~generowania~~ : ~~prawdopodobnie bardzo wysokie, ale w pamięci podręcznej~~ niskie <br/> -Obliczanie parametrów: niski <br/> -Wyszukiwanie ~~tłumaczenia~~ zapytania: ~~średnia, ale buforowana~~ niska <br/> -Materializer — wyszukiwanie ~~generacji~~ : ~~średnia, ale buforowana~~ niska <br/> -Wykonywanie zapytania do bazy danych: potencjalnie wysokie (lepsze zapytania w niektórych sytuacjach) <br/> + Połączenie. Otwórz <br/> + Command. ExecuteReader <br/> + DataReader.Read <br/> Materializację obiektu: Średni <br/> -Wyszukiwanie tożsamości: Średnia | -Wyszukiwanie ~~ładowania~~ metadanych: ~~wysoka, ale buforowana~~ niska <br/> — Wyszukiwanie ~~generowania~~ widoku: ~~Średni, ale buforowany~~ jako niski <br/> -Obliczanie parametrów: niski <br/> -Wyszukiwanie ~~tłumaczenia~~ zapytania: ~~średnia, ale buforowana~~ niska <br/> -Materializer — wyszukiwanie ~~generacji~~ : ~~średnia, ale buforowana~~ niska <br/> -Wykonywanie zapytania do bazy danych: potencjalnie wysokie (lepsze zapytania w niektórych sytuacjach) <br/> + Połączenie. Otwórz <br/> + Command. ExecuteReader <br/> + DataReader.Read <br/> Materializację obiektów: Średni (szybszy niż EF5) <br/> -Wyszukiwanie tożsamości: Średnia |
-| `}`                                                                                                  | Połączenie. Zamknij          | Małe                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Małe                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Małe                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `  var q1 = ` <br/> `    from c in db.Customers` <br/> `    where c.Id == id1` <br/> `    select c;` | Tworzenie wyrażenia kwerendy | Małe                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Małe                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Małe                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `  var c1 = q1.First();`                                                                             | Wykonanie kwerendy LINQ      | - Wyszukiwanie ~~ładowania~~ metadanych: ~~Wysokie, ale buforowane~~ Niskie <br/> - Zobacz wyszukiwanie ~~generacji:~~ ~~Potencjalnie bardzo wysoki, ale buforowane~~ Niskie <br/> - Ocena parametrów: Średnia <br/> - Wyszukiwanie ~~tłumaczenia~~ zapytań: Medium <br/> - Wyszukiwanie ~~generowania~~ Materializer: ~~Średnie, ale buforowane~~ Niskie <br/> - Wykonywanie kwerendy bazy danych: Potencjalnie wysokie <br/> + Connection.Otwórz <br/> + Command.ExecuteReader <br/> + DataReader.Read <br/> Materializacja obiektów: Średnia <br/> - Wyszukiwanie tożsamości: Medium | - Wyszukiwanie ~~ładowania~~ metadanych: ~~Wysokie, ale buforowane~~ Niskie <br/> - Zobacz wyszukiwanie ~~generacji:~~ ~~Potencjalnie bardzo wysoki, ale buforowane~~ Niskie <br/> - Ocena parametrów: Niska <br/> - Wyszukiwanie ~~tłumaczenia~~ zapytań: ~~Średni, ale buforowany~~ niski <br/> - Wyszukiwanie ~~generowania~~ Materializer: ~~Średnie, ale buforowane~~ Niskie <br/> - Wykonywanie zapytań bazy danych: Potencjalnie wysokie (Lepsze zapytania w niektórych sytuacjach) <br/> + Connection.Otwórz <br/> + Command.ExecuteReader <br/> + DataReader.Read <br/> Materializacja obiektów: Średnia <br/> - Wyszukiwanie tożsamości: Medium | - Wyszukiwanie ~~ładowania~~ metadanych: ~~Wysokie, ale buforowane~~ Niskie <br/> - Zobacz wyszukiwanie ~~generacji:~~ ~~Średni, ale buforowany~~ niski <br/> - Ocena parametrów: Niska <br/> - Wyszukiwanie ~~tłumaczenia~~ zapytań: ~~Średni, ale buforowany~~ niski <br/> - Wyszukiwanie ~~generowania~~ Materializer: ~~Średnie, ale buforowane~~ Niskie <br/> - Wykonywanie zapytań bazy danych: Potencjalnie wysokie (Lepsze zapytania w niektórych sytuacjach) <br/> + Connection.Otwórz <br/> + Command.ExecuteReader <br/> + DataReader.Read <br/> Materializacja obiektów: Średnia (szybsza niż EF5) <br/> - Wyszukiwanie tożsamości: Medium |
+| `}`                                                                                                  | Connection.Close          | Małe                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Małe                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Małe                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
 
-Istnieje kilka sposobów zmniejszenia kosztów wydajności zarówno w przypadku zapytań zimnych, jak i ciepłej. Zapoznaj się z nimi w poniższej sekcji. Zapoznaj się z tym, jak zmniejszyć koszt ładowania modelu w zimnych zapytaniach, używając wstępnie wygenerowanych widoków, które powinny pomóc w zmniejszeniu wydajności podczas generowania widoku. W przypadku zapytań ciepłej będziemy obejmować buforowanie planu zapytania, brak zapytań śledzenia i różne opcje wykonywania zapytania.
+Istnieje kilka sposobów, aby zmniejszyć koszt wydajności zarówno zimnych, jak i ciepłych zapytań, a my przyjrzymy się tym w poniższej sekcji. W szczególności przyjrzymy się zmniejszeniu kosztów ładowania modelu w zimnych zapytaniach przy użyciu wstępnie wygenerowanych widoków, co powinno pomóc złagodzić bóle wydajności doświadczane podczas generowania widoku. W przypadku ciepłych zapytań omówimy buforowanie planu kwerend, brak zapytań śledzenia i różne opcje wykonywania kwerend.
 
-### <a name="21-what-is-view-generation"></a>2,1 co to jest generacja widoku?
+### <a name="21-what-is-view-generation"></a>2.1 Co to jest generowanie widoku?
 
-Aby zrozumieć, jaka jest generacja widoku, należy najpierw zrozumieć, co to jest "widoki mapowania". Widoki mapowania są wykonywalnymi reprezentacjami przekształceń określonych w mapowaniu dla każdego zestawu jednostek i skojarzenia. Wewnętrznie te widoki mapowania przyjmują kształt CQTs (kanoniczne drzewa zapytań). Istnieją dwa typy widoków mapowania:
+Aby zrozumieć, czym jest generowanie widoku, musimy najpierw zrozumieć, czym są "Widoki mapowania". Widoki mapowania są wykonywalnymi reprezentacjami przekształceń określonych w mapowaniu dla każdego zestawu jednostek i skojarzenia. Wewnętrznie te widoki mapowania przybierają kształt CQTs (kanonicznych drzew zapytań). Istnieją dwa typy widoków mapowania:
 
--   Widoki zapytań: reprezentuje transformację niezbędną do przechodzenia ze schematu bazy danych do modelu koncepcyjnego.
--   Aktualizuj widoki: reprezentuje transformację niezbędną do przechodzenia z modelu koncepcyjnego do schematu bazy danych.
+-   Widoki kwerendy: reprezentują one transformację niezbędną do przejścia ze schematu bazy danych do modelu koncepcyjnego.
+-   Widoki aktualizacji: reprezentują one transformację niezbędną do przejścia z modelu koncepcyjnego do schematu bazy danych.
 
-Należy pamiętać, że model koncepcyjny może się różnić od schematu bazy danych na różne sposoby. Na przykład jedna tabela może być używana do przechowywania danych dla dwóch różnych typów jednostek. Dziedziczenie i nieuproszczone mapowania odgrywają rolę w złożoności widoków mapowania.
+Należy pamiętać, że model koncepcyjny może się różnić od schematu bazy danych na różne sposoby. Na przykład jedna tabela może służyć do przechowywania danych dla dwóch różnych typów jednostek. Dziedziczenie i nietrywialne mapowania odgrywają rolę w złożoności widoków mapowania.
 
-Proces przetwarzania tych widoków na podstawie specyfikacji mapowania to to, co wywołujemy generowanie widoku. Generowanie widoku może być wykonywane dynamicznie podczas ładowania modelu lub w czasie kompilacji przy użyciu "wstępnie wygenerowanych widoków"; drugi z nich jest serializowany w postaci instrukcji Entity SQL do pliku C\# lub VB.
+Proces obliczania tych widoków na podstawie specyfikacji mapowania jest tym, co nazywamy generowaniem widoku. Generowanie widoku może odbywać się dynamicznie po załadowaniu modelu lub w czasie kompilacji przy użyciu "wstępnie wygenerowanych widoków"; te ostatnie są serializowane w formie instrukcji\# Entity SQL do pliku C lub VB.
 
-Po wygenerowaniu widoków są one również weryfikowane. Z punktu widzenia wydajności zdecydowana większość kosztów generowania widoku jest w rzeczywistości walidacją widoków, które zapewniają, że połączenia między jednostkami mają sens i mają prawidłową Kardynalność dla wszystkich obsługiwanych operacji.
+Podczas generowania widoków są one również sprawdzane. Z punktu widzenia wydajności zdecydowana większość generowania widoku jest faktycznie sprawdzanie poprawności widoków, co zapewnia, że połączenia między jednostkami mają sens i mają poprawną kardynalność dla wszystkich obsługiwanych operacji.
 
-Gdy wykonywane jest zapytanie nad zestawem jednostek, zapytanie jest połączone z odpowiednim widokiem zapytania, a wynik tej kompozycji jest uruchamiany za pośrednictwem kompilatora planu, aby utworzyć reprezentację zapytania, które może zrozumieć magazyn zapasowy. W przypadku SQL Server końcowy wynik tej kompilacji będzie instrukcją SELECT języka T-SQL. Podczas pierwszego wykonywania aktualizacji przez zestaw jednostek widok aktualizacji jest uruchamiany przez podobny proces, aby przekształcić go w Instrukcje DML dla docelowej bazy danych.
+Po wykonaniu kwerendy za pośrednictwem zestawu jednostek kwerenda jest łączona z odpowiednim widokiem kwerendy, a wynik tej kompozycji jest uruchamiany za pośrednictwem kompilatora planu w celu utworzenia reprezentacji kwerendy, którą magazyn zapasowy może zrozumieć. W przypadku programu SQL Server końcowym wynikiem tej kompilacji będzie instrukcja T-SQL SELECT. Przy pierwszej aktualizacji za pośrednictwem zestawu jednostek jest uruchamiany przez podobny proces, aby przekształcić go w instrukcje DML dla docelowej bazy danych.
 
-### <a name="22-factors-that-affect-view-generation-performance"></a>2,2 czynników wpływających na wydajność generowania widoku
+### <a name="22-factors-that-affect-view-generation-performance"></a>2.2 Czynniki wpływające na wydajność generowania widoku
 
-Krok generowania widoku wydajności nie tylko zależy od rozmiaru modelu, ale również od tego, jak jest on połączony z modelem. Jeśli dwie jednostki są połączone za pośrednictwem łańcucha dziedziczenia lub skojarzenia, są one znane jako połączone. Podobnie, jeśli dwie tabele są połączone za pośrednictwem klucza obcego, są one połączone. Wraz ze wzrostem liczby połączonych jednostek i tabel w schematach zwiększa się koszt generowania widoku.
+Wydajność kroku generowania widoku zależy nie tylko od rozmiaru modelu, ale także od tego, jak połączony jest model. Jeśli dwa jednostki są połączone za pośrednictwem łańcucha dziedziczenia lub skojarzenia, są one uważane za połączone. Podobnie, jeśli dwie tabele są połączone za pomocą klucza obcego, są one połączone. Wraz ze wzrostem liczby połączonych jednostek i tabel w schematach zwiększa się koszt generowania widoku.
 
-Algorytm używany do generowania i weryfikowania widoków jest wykładniczy w najgorszym przypadku, chociaż używamy pewnych optymalizacji, aby usprawnić ten proces. Największe czynniki wpływające negatywnie na wydajność są następujące:
+Algorytm, którego używamy do generowania i sprawdzania poprawności widoków jest wykładniczy w najgorszym przypadku, chociaż używamy niektórych optymalizacji, aby to poprawić. Największe czynniki, które wydają się negatywnie wpływać na wydajność są:
 
--   Rozmiar modelu, odnoszący się do liczby jednostek i ilości skojarzeń między tymi jednostkami.
--   Złożoność modelu, w tym dziedziczenie obejmujące dużą liczbę typów.
--   Używanie niezależnych skojarzeń zamiast skojarzeń kluczy obcych.
+-   Rozmiar modelu, odnosząc się do liczby jednostek i liczby skojarzeń między tymi jednostkami.
+-   Złożoność modelu, w szczególności dziedziczenie obejmujące dużą liczbę typów.
+-   Korzystanie z niezależnych skojarzeń zamiast skojarzeń kluczy zagranicznych.
 
-W przypadku małych modeli prosta koszt może być wystarczająco mały, aby nie bother przy użyciu wstępnie wygenerowanych widoków. W miarę wzrostu rozmiaru modelu i stopnia złożoności dostępnych jest kilka opcji zmniejszania kosztów generowania i walidacji widoku.
+W przypadku małych, prostych modeli koszt może być wystarczająco mały, aby nie przejmować się korzystaniem z wstępnie wygenerowanych widoków. Wraz ze wzrostem rozmiaru i złożoności modelu dostępnych jest kilka opcji zmniejszających koszt generowania i sprawdzania poprawności widoku.
 
-### <a name="23-using-pre-generated-views-to-decrease-model-load-time"></a>2,3 użycie wstępnie wygenerowanych widoków w celu zmniejszenia czasu ładowania modelu
+### <a name="23-using-pre-generated-views-to-decrease-model-load-time"></a>2.3 Wykorzystanie wstępnie wygenerowanych widoków do skrócenia czasu ładowania modelu
 
-Aby uzyskać szczegółowe informacje na temat używania wstępnie wygenerowanych widoków w Entity Framework 6 odwiedź [wstępnie wygenerowane widoki mapowania](~/ef6/fundamentals/performance/pre-generated-views.md)
+Szczegółowe informacje na temat korzystania z wstępnie wygenerowanych widoków w programie Entity Framework 6 można znaleźć na stronie [Wstępnie wygenerowane widoki mapowania](~/ef6/fundamentals/performance/pre-generated-views.md)
 
-#### <a name="231-pre-generated-views-using-the-entity-framework-power-tools-community-edition"></a>2.3.1 wstępnie wygenerowane widoki przy użyciu Entity Framework narzędzia do zarządzania wersjami Community
+#### <a name="231-pre-generated-views-using-the-entity-framework-power-tools-community-edition"></a>2.3.1 Wstępnie wygenerowane widoki przy użyciu wersji community entity framework power tools
 
-Aby wygenerować widoki modeli EDMX i Code First, można użyć [wersji Community Tools programu Entity Framework 6](https://marketplace.visualstudio.com/items?itemName=ErikEJ.EntityFramework6PowerToolsCommunityEdition) , klikając prawym przyciskiem myszy plik klasy modelu i używając menu Entity Framework, aby wybrać polecenie "Generuj widoki". Entity Framework narzędzia do zarządzania wersjami Professional działają tylko w kontekstach pochodnych DbContext.
+Za pomocą [programu Entity Framework 6 Power Tools Community Edition](https://marketplace.visualstudio.com/items?itemName=ErikEJ.EntityFramework6PowerToolsCommunityEdition) można generować widoki modeli EDMX i Code First, klikając prawym przyciskiem myszy plik klasy modelu i korzystając z menu Entity Framework, aby wybrać opcję "Generowanie widoków". Entity Framework Power Tools Community Edition działa tylko w kontekstach pochodzących z DbContext.
 
-#### <a name="232-how-to-use-pre-generated-views-with-a-model-created-by-edmgen"></a>2.3.2 użycie wstępnie wygenerowanych widoków z modelem utworzonym przez EDMGen
+#### <a name="232-how-to-use-pre-generated-views-with-a-model-created-by-edmgen"></a>2.3.2 Jak korzystać z wstępnie wygenerowanych widoków z modelem stworzonym przez EDMGen
 
-EDMGen to narzędzie, które jest dostarczane z platformą .NET i współpracuje z Entity Framework 4 i 5, ale nie z Entity Framework 6. EDMGen umożliwia wygenerowanie pliku modelu, warstwy obiektu i widoków z wiersza polecenia. Jednym z danych wyjściowych będzie plik widoków w wybranym języku, VB lub C\#. Jest to plik kodu zawierający Entity SQL fragmenty kodu dla każdego zestawu jednostek. Aby włączyć wstępnie wygenerowane widoki, wystarczy dołączyć plik do projektu.
+EDMGen jest narzędziem, które jest dostarczane z .NET i współpracuje z Entity Framework 4 i 5, ale nie z Entity Framework 6. EDMGen umożliwia generowanie pliku modelu, warstwy obiektu i widoków z wiersza polecenia. Jednym z wyjść będzie plik Widoków w wybranym języku,\#VB lub C . Jest to plik kodu zawierający fragmenty kodu ENCJI SQL dla każdego zestawu jednostek. Aby włączyć wstępnie wygenerowane widoki, wystarczy dołączyć plik do projektu.
 
-Jeśli ręcznie wprowadzisz zmiany do plików schematu dla modelu, konieczne będzie ponowne wygenerowanie pliku widoków. Można to zrobić, uruchamiając EDMGen z flagą **/Mode: ViewGeneration** .
+Jeśli ręcznie wniesiesz zmiany do plików schematu dla modelu, musisz ponownie wygenerować plik widoków. Można to zrobić, uruchamiając EDMGen z **/mode:ViewGeneration** flagi.
 
-#### <a name="233-how-to-use-pre-generated-views-with-an-edmx-file"></a>2.3.3, jak używać wstępnie wygenerowanych widoków z plikiem EDMX
+#### <a name="233-how-to-use-pre-generated-views-with-an-edmx-file"></a>2.3.3 Jak korzystać z wstępnie wygenerowanych widoków z plikiem EDMX
 
-Można również użyć EDMGen do wygenerowania widoków dla pliku EDMX — w poprzednim temacie opisano, jak dodać do tego celu zdarzenie sprzed kompilacji, ale jest to skomplikowane, a w niektórych przypadkach nie jest to możliwe. Zwykle łatwiej jest używać szablonu T4 do generowania widoków, gdy model znajduje się w pliku edmx.
+Można również użyć EDMGen do generowania widoków dla pliku EDMX - wcześniej przywoływany temat MSDN opisuje, jak dodać zdarzenie przed kompilacją, aby to zrobić — ale jest to skomplikowane i są przypadki, w których nie jest to możliwe. Zazwyczaj łatwiej jest użyć szablonu T4 do generowania widoków, gdy model znajduje się w pliku edmx.
 
-Blog zespołu ADO.NET zawiera wpis opisujący sposób użycia szablonu T4 do generowania widoku (\<http://blogs.msdn.com/b/adonet/archive/2008/06/20/how-to-use-a-t4-template-for-view-generation.aspx>). Ten wpis obejmuje szablon, który można pobrać i dodać do projektu. Szablon został zapisany dla pierwszej wersji Entity Framework, więc nie gwarantujemy pracy z najnowszymi wersjami Entity Framework. Można jednak pobrać bardziej aktualny zestaw szablonów generacji widoku dla Entity Framework 4 i 5from galerię programu Visual Studio:
+ADO.NET blogu zespołu zawiera post, który opisuje, jak używać szablonu \< https://docs.microsoft.com/archive/blogs/adonet/how-to-use-a-t4-template-for-view-generation>)T4 do generowania widoku ( . Ten post zawiera szablon, który można pobrać i dodać do projektu. Szablon został napisany dla pierwszej wersji entity framework, więc nie są one gwarantowane do pracy z najnowszymi wersjami entity framework. Można jednak pobrać bardziej aktualny zestaw szablonów generowania widoku dla programu Entity Framework 4 i 5 z galerii programu Visual Studio:
 
--   VB.NET: \<http://visualstudiogallery.msdn.microsoft.com/118b44f2-1b91-4de2-a584-7a680418941d>
--   C\#: \<http://visualstudiogallery.msdn.microsoft.com/ae7730ce-ddab-470f-8456-1b313cd2c44d>
+-   VB.NET:\<http://visualstudiogallery.msdn.microsoft.com/118b44f2-1b91-4de2-a584-7a680418941d>
+-   C\#:\<http://visualstudiogallery.msdn.microsoft.com/ae7730ce-ddab-470f-8456-1b313cd2c44d>
 
-Jeśli używasz programu Entity Framework 6, możesz uzyskać szablony z galerii programu Visual Studio w \<http://visualstudiogallery.msdn.microsoft.com/18a7db90-6705-4d19-9dd1-0a6c23d0751f>.
+Jeśli używasz entity framework 6 można uzyskać szablony T4 generacji \< http://visualstudiogallery.msdn.microsoft.com/18a7db90-6705-4d19-9dd1-0a6c23d0751f>widoku z Galerii programu Visual Studio w .
 
-### <a name="24-reducing-the-cost-of-view-generation"></a>2,4 zmniejszenie kosztów generowania widoku
+### <a name="24-reducing-the-cost-of-view-generation"></a>2.4 Obniżenie kosztów generowania widoku
 
-Użycie wstępnie wygenerowanych widoków przenosi koszt generowania widoku z ładowania modelu (czasu wykonywania) do czasu projektowania. Chociaż zwiększa to wydajność uruchamiania w czasie wykonywania, nadal będziesz mieć problemy z generowaniem widoku podczas opracowywania. Istnieje kilka dodatkowych lew, które mogą pomóc w zmniejszeniu kosztów generowania widoku zarówno w czasie kompilacji, jak i w czasie wykonywania.
+Za pomocą wstępnie wygenerowanych widoków przenosi koszt generowania widoku z ładowania modelu (czas wykonywania) do czasu projektowania. Chociaż poprawia to wydajność uruchamiania w czasie wykonywania, nadal będzie odczuwać ból generowania widoku podczas tworzenia. Istnieje kilka dodatkowych sztuczek, które mogą pomóc zmniejszyć koszt generowania widoku, zarówno w czasie kompilacji, jak i czasie wykonywania.
 
-#### <a name="241-using-foreign-key-associations-to-reduce-view-generation-cost"></a>2.4.1 użycie skojarzenia klucza obcego w celu zmniejszenia kosztów generowania widoku
+#### <a name="241-using-foreign-key-associations-to-reduce-view-generation-cost"></a>2.4.1 Korzystanie ze stowarzyszeń kluczy obcych w celu zmniejszenia kosztów generowania widoku
 
-Napotkano wiele przypadków, w których zmiana skojarzeń w modelu z niezależnych skojarzeń z kluczami obcym znacznie poprawiła czas poświęcony na generowanie widoku.
+Widzieliśmy wiele przypadków, w których zmiana skojarzeń w modelu z niezależnych stowarzyszeń na stowarzyszenia kluczy zagranicznych znacznie poprawiła czas spędzony w generowaniu widoków.
 
-Aby zademonstrować to ulepszenie, Wygenerowano dwie wersje modelu systemu Navision przy użyciu EDMGen. *Uwaga: Aby zapoznać się z opisem modelu systemu Navision, zobacz Dodatek C.* Model systemu Navision jest interesujący dla tego ćwiczenia z powodu bardzo dużej liczby jednostek i relacji między nimi.
+Aby zademonstrować to ulepszenie, wygenerowaliśmy dwie wersje modelu Navision przy użyciu EDMGen. *Uwaga: opis modelu systemu Navision można znaleźć w załączniku C.* Model Navision jest interesujący dla tego ćwiczenia ze względu na bardzo dużą ilość jednostek i relacji między nimi.
 
-Jedna wersja tego bardzo dużego modelu została wygenerowana przy użyciu skojarzeń kluczy obcych, a druga została wygenerowana z niezależnymi skojarzeniami. Następnie przekroczyć czas trwania generowania widoków dla każdego modelu. Entity Framework 5 test użył metody GenerateViews () z klasy EntityViewGenerator do wygenerowania widoków, podczas gdy test Entity Framework 6 użył metody GenerateViews () z klasy StorageMappingItemCollection. Dzieje się tak z powodu restrukturyzacji kodu, która wystąpiła w bazie kodu Entity Framework 6.
+Jedna wersja tego bardzo dużego modelu została wygenerowana za pomocą stowarzyszeń kluczy zagranicznych, a druga została wygenerowana za pomocą niezależnych skojarzeń. Następnie czas czasu, jak długo zajęło wygenerowanie widoków dla każdego modelu. Entity Framework 5 test używany GenerateViews() metoda z klasy EntityViewGenerator do generowania widoków, podczas gdy entity framework 6 test używany GenerateViews() metoda z klasy StorageMappingItemCollection. To z powodu restrukturyzacji kodu, które miały miejsce w entity framework 6 codebase.
 
-Przy użyciu Entity Framework 5, generowanie widoku dla modelu z użyciem kluczy obcych trwało 65 minut na maszynie laboratoryjnej. Jest to nieznane, jak długo zostałyby wykonane w celu wygenerowania widoków dla modelu, który używa niezależnych skojarzeń. Pozostawiłem test uruchomiony przez ponad miesiąc przed ponownym uruchomieniem maszyny w naszym laboratorium w celu zainstalowania comiesięcznych aktualizacji.
+Za pomocą entity framework 5, generowanie widoku dla modelu z kluczami obcymi trwało 65 minut na komputerze laboratoryjnym. Nie wiadomo, jak długo zajęłoby wygenerowanie widoków dla modelu, który używał niezależnych skojarzeń. Pozostawiliśmy test uruchomiony przez ponad miesiąc, zanim komputer został ponownie uruchomiony w naszym laboratorium, aby zainstalować miesięczne aktualizacje.
 
-Przy użyciu Entity Framework 6, generowanie widoku dla modelu z kluczami obcymi trwało 28 sekund na tej samej maszynie laboratoryjnej. Generowanie widoku dla modelu, który używa niezależnych skojarzeń zajęło 58 sekund. Ulepszenia wykonywane w Entity Framework 6 w swoim kodzie generacji widoku oznaczają, że wiele projektów nie potrzebuje wstępnie wygenerowanych widoków w celu uzyskania krótszych czasu uruchamiania.
+Za pomocą entity framework 6, generowanie widoku dla modelu z kluczami obcymi trwało 28 sekund na tej samej maszynie laboratoryjnych. Wyświetl generowanie dla modelu, który używa niezależnych skojarzeń trwało 58 sekund. Ulepszenia wprowadzone do entity framework 6 na jego kod generowania widoku oznacza, że wiele projektów nie będzie potrzebować wstępnie wygenerowanych widoków, aby uzyskać szybsze czasy uruchamiania.
 
-Ważne jest, aby zwrócić uwagę, że wstępnie generowane widoki w Entity Framework 4 i 5 można wykonać za pomocą EDMGen lub Entity Framework narzędzia do zarządzania. Generowanie widoku Entity Framework 6 można przeprowadzić za pomocą narzędzi Entity Framework lub programowo, zgodnie z opisem w [wstępnie wygenerowanych widokach mapowania](~/ef6/fundamentals/performance/pre-generated-views.md).
+Należy zauważyć, że wstępnie generujące widoki w entity framework 4 i 5 można wykonać za pomocą EDMGen lub entity framework power tools. Dla entity framework 6 generowania widoku można wykonać za pośrednictwem entity framework power tools lub programowo, jak opisano w [wstępnie wygenerowanych widoków mapowania](~/ef6/fundamentals/performance/pre-generated-views.md).
 
-##### <a name="2411-how-to-use-foreign-keys-instead-of-independent-associations"></a>2.4.1.1, jak używać kluczy obcych zamiast niezależnych skojarzeń
+##### <a name="2411-how-to-use-foreign-keys-instead-of-independent-associations"></a>2.4.1.1 Jak używać kluczy zagranicznych zamiast niezależnych stowarzyszeń
 
-W przypadku korzystania z EDMGen lub Entity Designer w programie Visual Studio, domyślnie otrzymujesz FKs i tylko jedno pole wyboru lub flagę wiersza polecenia, aby przełączać się między FKs i IAs.
+Podczas korzystania z EDMGen lub Projektanta jednostek w programie Visual Studio, można uzyskać FKs domyślnie i trwa tylko jedno pole wyboru lub flagi wiersza polecenia, aby przełączyć się między FKs i IAs.
 
-Jeśli masz duży model Code First, użycie niezależnych skojarzeń będzie miało ten sam wpływ na generowanie widoku. Można uniknąć tego wpływu, dołączając właściwości klucza obcego klas dla obiektów zależnych, chociaż niektórzy deweloperzy rozważą to zanieczyszczenie modelu obiektów. Więcej informacji na temat tego tematu można znaleźć w \<http://blog.oneunicorn.com/2011/12/11/whats-the-deal-with-mapping-foreign-keys-using-the-entity-framework/>.
+Jeśli masz duży model Code First, przy użyciu niezależnych skojarzeń będzie mieć taki sam wpływ na generowanie widoku. Można uniknąć tego wpływu, dołączając właściwości klucza obcego na klasach dla obiektów zależnych, chociaż niektórzy deweloperzy uznają to za zanieczyszczające ich model obiektu. Więcej informacji na ten temat \< http://blog.oneunicorn.com/2011/12/11/whats-the-deal-with-mapping-foreign-keys-using-the-entity-framework/>można znaleźć w programie .
 
-| W przypadku korzystania z      | Zrób to                                                                                                                                                                                                                                                                                                                              |
+| Podczas korzystania z      | Zrób to                                                                                                                                                                                                                                                                                                                              |
 |:----------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Entity Designer | Po dodaniu skojarzenia między dwiema jednostkami upewnij się, że masz ograniczenie referencyjne. Więzy referencyjne informują Entity Framework o użyciu kluczy obcych zamiast niezależnych skojarzeń. Aby uzyskać dodatkowe informacje, odwiedź \<http://blogs.msdn.com/b/efdesign/archive/2009/03/16/foreign-keys-in-the-entity-framework.aspx>. |
-| EDMGen          | W przypadku generowania plików z bazy danych przy użyciu programu EDMGen klucze obce będą przestrzegane i dodawane do modelu. Aby uzyskać więcej informacji na temat różnych opcji udostępnianych przez EDMGen, odwiedź witrynę [http://msdn.microsoft.com/library/bb387165.aspx](https://msdn.microsoft.com/library/bb387165.aspx).                           |
-| Code First      | Zapoznaj się z sekcją "Konwencja relacji" tematu [Code First Konwencji](~/ef6/modeling/code-first/conventions/built-in.md) , aby uzyskać informacje na temat dołączania właściwości klucza obcego do obiektów zależnych podczas korzystania z Code First.                                                                                              |
+| Projektant encji | Po dodaniu skojarzenia między dwoma encjami upewnij się, że masz ograniczenie referencyjne. Ograniczenia referencyjne informują entity framework o użyciu kluczy obcych zamiast niezależnych skojarzeń. Aby uzyskać \< https://docs.microsoft.com/archive/blogs/efdesign/foreign-keys-in-the-entity-framework>więcej informacji odwiedź . |
+| EDMGen ( EDMGen )          | Podczas korzystania z EDMGen do generowania plików z bazy danych, klucze obce będą przestrzegane i dodawane do modelu jako takie. Aby uzyskać więcej informacji na temat różnych [http://msdn.microsoft.com/library/bb387165.aspx](https://msdn.microsoft.com/library/bb387165.aspx)opcji oferowanych przez EDMGen wizyta .                           |
+| Najpierw kod      | Zobacz sekcję "Konwencja relacji" w temacie [Konwencje code first,](~/ef6/modeling/code-first/conventions/built-in.md) aby uzyskać informacje na temat dołączania właściwości klucza obcego do obiektów zależnych podczas korzystania z code first.                                                                                              |
 
-#### <a name="242-moving-your-model-to-a-separate-assembly"></a>2.4.2 przeniesienie modelu do oddzielnego zestawu
+#### <a name="242-moving-your-model-to-a-separate-assembly"></a>2.4.2 Przenoszenie modelu do oddzielnego zespołu
 
-Gdy model zostanie uwzględniony bezpośrednio w projekcie aplikacji, a widoki są generowane za pomocą zdarzenia przed kompilacją lub szablonu T4, generowanie i walidacja widoku są przeprowadzane zawsze wtedy, gdy projekt zostanie odbudowany, nawet jeśli model nie został zmieniony. Jeśli przeniesiesz model do oddzielnego zestawu i odwołujesz się do niego z projektu aplikacji, możesz wprowadzić inne zmiany w aplikacji bez konieczności ponownego kompilowania projektu zawierającego model.
+Gdy model jest uwzględniony bezpośrednio w projekcie aplikacji i generujesz widoki za pośrednictwem zdarzenia przed kompilacji lub szablonu T4, generowanie i sprawdzanie poprawności widoku odbędzie się za każdym razem, gdy projekt zostanie przebudowany, nawet jeśli model nie został zmieniony. Jeśli przeniesiesz model do oddzielnego zestawu i odwołujesz się do niego z projektu aplikacji, można wprowadzić inne zmiany w aplikacji bez konieczności odbudowywania projektu zawierającego model.
 
-*Uwaga:*  podczas przesuwania modelu do oddzielnych zestawów Pamiętaj, aby skopiować parametry połączenia dla modelu do pliku konfiguracji aplikacji w projekcie klienta.
+*Uwaga:*  podczas przenoszenia modelu do oddzielnych zestawów należy pamiętać, aby skopiować parametry połączenia dla modelu do pliku konfiguracji aplikacji projektu klienta.
 
-#### <a name="243-disable-validation-of-an-edmx-based-model"></a>2.4.3 Wyłącz weryfikację modelu opartego na edmx
+#### <a name="243-disable-validation-of-an-edmx-based-model"></a>2.4.3 Wyłącz sprawdzanie poprawności modelu opartego na edmx
 
-Modele EDMX są weryfikowane w czasie kompilacji, nawet jeśli model nie został zmieniony. Jeśli Twój model został już zweryfikowany, możesz pominąć walidację w czasie kompilacji, ustawiając właściwość "Weryfikuj przy kompilacji" na wartość false w oknie właściwości. Gdy zmienisz mapowanie lub model, możesz tymczasowo ponownie włączyć weryfikację, aby zweryfikować zmiany.
+Modele EDMX są sprawdzane w czasie kompilacji, nawet jeśli model pozostaje niezmieniony. Jeśli model został już zweryfikowany, można pominąć sprawdzanie poprawności w czasie kompilacji, ustawiając właściwość "Sprawdź poprawność na kompilacji" na false w oknie właściwości. Po zmianie mapowania lub modelu można tymczasowo ponownie włączyć sprawdzanie poprawności, aby zweryfikować zmiany.
 
-Należy zauważyć, że wprowadzono ulepszenia wydajności w Entity Framework Designer dla Entity Framework 6, a koszt "Walidacja w kompilacji" jest znacznie mniejszy niż w poprzednich wersjach projektanta.
+Należy zauważyć, że wprowadzono ulepszenia wydajności do projektanta struktury jednostek dla entity framework 6, a koszt "Sprawdź poprawność na kompilacji" jest znacznie niższa niż w poprzednich wersjach projektanta.
 
-## <a name="3-caching-in-the-entity-framework"></a>3 buforowanie w Entity Framework
+## <a name="3-caching-in-the-entity-framework"></a>3 Buforowanie w ramach jednostki
 
-Entity Framework ma następujące formy buforowania:
+Entity Framework ma wbudowane następujące formy buforowania:
 
-1.  Buforowanie obiektów — obiekt ObjectStateManager wbudowany w wystąpienie obiektu ObjectContext śledzi w pamięci pamięć obiektów, które zostały pobrane przy użyciu tego wystąpienia. Jest to również nazywane pamięcią podręczną pierwszego poziomu.
-2.  Buforowanie planu zapytania — ponowne użycie wygenerowanego magazynu, gdy zapytanie jest wykonywane więcej niż raz.
-3.  Buforowanie metadanych — udostępnia metadane dla modelu w różnych połączeniach z tym samym modelem.
+1.  Buforowanie obiektów — ObjectStateManager wbudowany w wystąpienie ObjectContext przechowuje śledzenie w pamięci obiektów, które zostały pobrane przy użyciu tego wystąpienia. Jest to również znane jako pamięci podręcznej pierwszego poziomu.
+2.  Buforowanie planu kwerendy — ponowne ponowne połączenie wygenerowanego polecenia magazynu, gdy kwerenda jest wykonywana więcej niż jeden raz.
+3.  Buforowanie metadanych — udostępnianie metadanych dla modelu w różnych połączeniach z tym samym modelem.
 
-Oprócz pamięci podręcznych, które są dostępne w ramach usługi Box, można również użyć specjalnego rodzaju dostawcy danych ADO.NET, znanego jako dostawca otoki, w celu rozbudowania Entity Framework z pamięcią podręczną dla wyników pobranych z bazy danych, znanej również jako buforowanie drugiego poziomu.
+Oprócz pamięci podręcznej, które EF zapewnia po wyjęciu z pudełka, specjalny rodzaj dostawcy danych ADO.NET znany jako dostawca zawijania może również służyć do rozszerzenia entity framework z pamięci podręcznej dla wyników pobranych z bazy danych, znany również jako buforowania drugiego poziomu.
 
-### <a name="31-object-caching"></a>Buforowanie obiektów 3,1
+### <a name="31-object-caching"></a>3.1 Buforowanie obiektów
 
-Domyślnie, gdy jednostka jest zwracana w wynikach zapytania, tuż przed Dr materializuje, obiekt ObjectContext sprawdzi, czy jednostka z tym samym kluczem została już załadowana do jego obiektu ObjectStateManager. Jeśli jednostka z tymi samymi kluczami już istnieje, będzie uwzględniać ją w wynikach zapytania. Mimo że Dr nadal będzie wysyłać zapytanie względem bazy danych, takie zachowanie może ominąć wiele kosztów materializacji jednostki.
+Domyślnie, gdy jednostka jest zwracana w wynikach kwerendy, tuż przed EF materializes go ObjectContext sprawdzi, czy jednostka z tym samym kluczem została już załadowana do objectStateManager. Jeśli jednostka z tymi samymi kluczami jest już obecny EF będzie zawierać go w wynikach kwerendy. Mimo że EF będzie nadal wystawiać kwerendę do bazy danych, to zachowanie można pominąć wiele kosztów materializacji jednostki wiele razy.
 
-#### <a name="311-getting-entities-from-the-object-cache-using-dbcontext-find"></a>3.1.1 pobieranie jednostek z pamięci podręcznej obiektów przy użyciu funkcji DbContext Find
+#### <a name="311-getting-entities-from-the-object-cache-using-dbcontext-find"></a>3.1.1 Pozyskiwanie jednostek z pamięci podręcznej obiektów przy użyciu funkcji DbContext Find
 
-W przeciwieństwie do zwykłego zapytania, Metoda Find w Nieogólnymi (interfejsy API dołączone po raz pierwszy w EF 4,1) przeprowadzi wyszukiwanie w pamięci przed nawet wygenerowaniem zapytania względem bazy danych. Należy pamiętać, że dwa różne wystąpienia obiektu ObjectContext będą miały dwa różne wystąpienia obiektu ObjectStateManager, co oznacza, że mają osobne pamięci podręczne obiektów.
+W przeciwieństwie do zwykłej kwerendy Find metody w DbSet (interfejsy API zawarte po raz pierwszy w EF 4.1) wykona wyszukiwanie w pamięci przed nawet wydawania kwerendy w bazie danych. Należy pamiętać, że dwa różne ObjectContext wystąpień będzie miał dwa różne ObjectStateManager wystąpień, co oznacza, że mają oddzielne pamięci podręczne obiektów.
 
-Znajdź używa wartości klucza podstawowego, aby spróbować znaleźć jednostkę śledzoną przez kontekst. Jeśli jednostka nie znajduje się w kontekście, zapytanie zostanie wykonane i ocenione względem bazy danych, a wartość null jest zwracana, jeśli jednostka nie zostanie znaleziona w kontekście lub w bazie danych. Należy zauważyć, że funkcja Find zwraca również jednostki, które zostały dodane do kontekstu, ale nie zostały jeszcze zapisane w bazie danych.
+Funkcja Znajdź używa wartości klucza podstawowego do znalezienia jednostki śledzonej przez kontekst. Jeśli jednostka nie znajduje się w kontekście, kwerenda zostanie wykonana i oceniona względem bazy danych, a wartość null zostanie zwrócona, jeśli jednostka nie zostanie znaleziona w kontekście lub w bazie danych. Należy zauważyć, że funkcja Znajdź zwraca również jednostki, które zostały dodane do kontekstu, ale nie zostały jeszcze zapisane w bazie danych.
 
-W przypadku korzystania z funkcji Znajdź należy wziąć pod uwagę wydajność. Wywołania tej metody domyślnie wyzwalają weryfikację pamięci podręcznej obiektów w celu wykrycia zmian, które nadal oczekują na zatwierdzenie w bazie danych. Ten proces może być bardzo kosztowny, jeśli istnieje bardzo duża liczba obiektów w pamięci podręcznej obiektów lub wykres dużego obiektu dodawany do pamięci podręcznej obiektów, ale można go również wyłączyć. W niektórych przypadkach można postrzegać kolejność o wielkości różnicy w wywołaniu metody Find po wyłączeniu zmian autowykrywania. Jeszcze drugi porządek wielkości jest postrzegany, gdy obiekt rzeczywiście znajduje się w pamięci podręcznej, a kiedy obiekt musi zostać pobrany z bazy danych. Oto przykładowy wykres z miarami wykonywanymi przy użyciu niektórych mikrotestów porównawczych wyrażonych w milisekundach, z obciążeniem jednostek 5000:
+Podczas korzystania z funkcji Znajdź należy wziąć pod uwagę wydajność. Wywołania tej metody domyślnie wyzwoli sprawdzanie poprawności pamięci podręcznej obiektów w celu wykrycia zmian, które są nadal oczekujące zatwierdzić do bazy danych. Ten proces może być bardzo kosztowne, jeśli istnieje bardzo duża liczba obiektów w pamięci podręcznej obiektów lub na wykresie dużych obiektów dodawanych do pamięci podręcznej obiektów, ale można go również wyłączyć. W niektórych przypadkach można dostrzec ponad rząd wielkości różnicy w wywoływaniu Find metody po wyłączeniu automatycznego wykrywania zmian. Jednak drugi rząd wielkości jest postrzegany, gdy obiekt faktycznie znajduje się w pamięci podręcznej, a gdy obiekt musi zostać pobrany z bazy danych. Oto przykładowy wykres z pomiarami wykonanymi przy użyciu niektórych naszych mikrobenchmarków, wyrażonych w milisekundach, z obciążeniem 5000 jednostek:
 
-![Skala logarytmiczna programu .NET 4,5](~/ef6/media/net45logscale.png ".NET 4,5 — Skala logarytmiczna")
+![.NET 4.5 skala logarytmiczna](~/ef6/media/net45logscale.png ".NET 4.5 - skala logarytmiczna")
 
-Przykład wyszukiwania z wyłączonymi zmianami autowykrywania:
+Przykład funkcji Znajdź z wyłączonymi automatycznymi wykrywaniami:
 
 ``` csharp
     context.Configuration.AutoDetectChangesEnabled = false;
@@ -186,30 +186,30 @@ Przykład wyszukiwania z wyłączonymi zmianami autowykrywania:
     ...
 ```
 
-Co należy wziąć pod uwagę podczas korzystania z metody Find:
+Co należy wziąć pod uwagę podczas korzystania z Find metody jest:
 
-1.  Jeśli obiekt nie znajduje się w pamięci podręcznej, korzyści z znalezienia są negacji, ale składnia jest nadal łatwiejsza niż kwerenda według klucza.
-2.  Jeśli funkcja autowykrywania zmian jest włączona, koszt metody Find może wzrosnąć o jeden porządek wielkości lub nawet więcej w zależności od złożoności modelu i liczby jednostek w pamięci podręcznej obiektów.
+1.  Jeśli obiekt nie znajduje się w pamięci podręcznej korzyści find są negowane, ale składnia jest nadal prostsza niż kwerenda według klucza.
+2.  Jeśli automatyczne wykrywanie zmian jest włączone koszt Find metody może wzrosnąć o jeden rząd wielkości lub nawet więcej w zależności od złożoności modelu i ilość jednostek w pamięci podręcznej obiektów.
 
-Należy również pamiętać, że funkcja Znajdź zwraca tylko jednostkę, której szukasz, i nie ładuje jej automatycznie, jeśli nie znajdują się jeszcze w pamięci podręcznej obiektów. Jeśli musisz pobrać skojarzone jednostki, możesz użyć zapytania przez klucz z ładowaniem eager. Aby uzyskać więcej informacji, zobacz **8,1 ładowania opóźnionego a ładowanie eager**.
+Należy również pamiętać, że funkcja Znajdź zwraca tylko jednostkę, której szukasz, i nie ładuje automatycznie skojarzonych z nią jednostek, jeśli nie znajdują się one jeszcze w pamięci podręcznej obiektów. Jeśli chcesz pobrać skojarzone jednostki, można użyć kwerendy według klucza z wczytywaniem. Aby uzyskać więcej informacji, zobacz **8.1 Lazy Loading vs. Eager Loading**.
 
-#### <a name="312-performance-issues-when-the-object-cache-has-many-entities"></a>3.1.2 problemy z wydajnością, gdy pamięć podręczna obiektów ma wiele jednostek
+#### <a name="312-performance-issues-when-the-object-cache-has-many-entities"></a>3.1.2 Problemy z wydajnością, gdy pamięć podręczna obiektów ma wiele jednostek
 
-Pamięć podręczna obiektów ułatwia zwiększenie ogólnej reakcji Entity Framework. Jednak w przypadku, gdy pamięć podręczna obiektów ma załadowane bardzo duże ilości jednostek, może mieć wpływ na niektóre operacje, takie jak dodawanie, usuwanie, Znajdowanie, wprowadzanie, metody SaveChanges i inne. W szczególności operacje wyzwalające wywołanie DetectChanges będą mieć negatywny wpływ na bardzo duże pamięci podręczne obiektów. DetectChanges synchronizuje Graf obiektów z menedżerem stanu obiektów, a jego wydajność zostanie określona bezpośrednio przez rozmiar grafu obiektów. Aby uzyskać więcej informacji na temat DetectChanges, zobacz [śledzenie zmian w jednostkach poco](https://msdn.microsoft.com/library/dd456848.aspx).
+Pamięć podręczna obiektów pomaga zwiększyć ogólną responsywność entity framework. Jednak gdy pamięć podręczna obiektów ma bardzo dużą ilość jednostek załadowanych może mieć wpływ na niektóre operacje, takie jak Dodaj, Usuń, Znajdź, Wpis, SaveChanges i więcej. W szczególności operacje, które wyzwalają wywołanie DetectChanges będą miały negatywny wpływ na bardzo dużych pamięci podręcznych obiektów. DetectChanges synchronizuje wykres obiektu z menedżerem stanu obiektu, a jego wydajność zależy bezpośrednio od rozmiaru wykresu obiektu. Aby uzyskać więcej informacji na temat wykrywania zmian, zobacz [Śledzenie zmian w jednostkach POCO](https://msdn.microsoft.com/library/dd456848.aspx).
 
-W przypadku korzystania z Entity Framework 6 deweloperzy mogą wywołać metodę AddRange i RemoveRange bezpośrednio w Nieogólnymi, a nie iterację w kolekcji i wywołać Dodawanie raz dla każdego wystąpienia. Zaletą korzystania z metod Range jest to, że koszt usługi DetectChanges jest płatny tylko raz dla całego zestawu jednostek, a nie raz na każdą dodaną jednostkę.
+Podczas korzystania z entity framework 6, deweloperzy są w stanie wywołać AddRange i RemoveRange bezpośrednio na DbSet, zamiast iteracji w kolekcji i wywołanie Dodaj raz na wystąpienie. Zaletą korzystania z metod zakresu jest to, że koszt DetectChanges jest wypłacany tylko raz dla całego zestawu jednostek, w przeciwieństwie do raz na każdą dodaną jednostkę.
 
-### <a name="32-query-plan-caching"></a>Buforowanie planu zapytania 3,2
+### <a name="32-query-plan-caching"></a>3.2 Buforowanie planu zapytań
 
-Gdy zapytanie jest wykonywane po raz pierwszy, przechodzi przez kompilator wewnętrznego planu, aby przetłumaczyć zapytanie koncepcyjne na polecenie magazynu (na przykład T-SQL, który jest wykonywany w przypadku uruchomienia względem SQL Server).  Jeśli buforowanie planu zapytania jest włączone, przy następnym wykonywaniu zapytania polecenie magazynu jest pobierane bezpośrednio z pamięci podręcznej planu zapytania na potrzeby wykonywania, pomijając kompilator planu.
+Przy pierwszym wykonaniu kwerendy przechodzi przez kompilator planu wewnętrznego, aby przetłumaczyć zapytanie koncepcyjne do polecenia magazynu (na przykład T-SQL, który jest wykonywany podczas uruchamiania z programem SQL Server).Jeśli buforowanie planu kwerend jest włączone, przy następnym wykonaniu kwerendy polecenie magazynu jest pobierane bezpośrednio z pamięci podręcznej planu kwerendy do wykonania, pomijając kompilator planu.
 
-Pamięć podręczna planu zapytania jest współdzielona przez wystąpienia obiektu ObjectContext w ramach tego samego elementu AppDomain. Nie trzeba przytrzymać wystąpienia obiektu ObjectContext, aby można było korzystać z buforowania planu zapytania.
+Pamięć podręczna planu kwerend jest współużytkowana przez wystąpienia ObjectContext w ramach tej samej biblioteki appdomain. Nie trzeba trzymać na ObjectContext wystąpienia, aby korzystać z buforowania planu kwerendy.
 
-#### <a name="321-some-notes-about-query-plan-caching"></a>3.2.1 niektóre uwagi dotyczące buforowania planu zapytania
+#### <a name="321-some-notes-about-query-plan-caching"></a>3.2.1 Niektóre uwagi dotyczące buforowania planu zapytań
 
--   Pamięć podręczna planu zapytania jest udostępniana dla wszystkich typów zapytań: Entity SQL, LINQ to Entities i obiektów CompiledQuery.
--   Domyślnie buforowanie planu zapytania jest włączone dla zapytań Entity SQL, niezależnie od tego, czy są wykonywane za pomocą EntityCommand, czy ObjectQuery. Jest on również domyślnie włączony dla zapytań LINQ to Entities w Entity Framework na platformie .NET 4,5 i w Entity Framework 6.
-    -   Buforowanie planu zapytania można wyłączyć, ustawiając właściwość EnablePlanCaching (w EntityCommand lub ObjectQuery) na wartość false. Na przykład:
+-   Pamięć podręczna planu kwerend jest współużytkowana dla wszystkich typów zapytań: Entity SQL, LINQ do jednostek i CompiledQuery obiektów.
+-   Domyślnie buforowanie planu kwerend jest włączone dla zapytań SQL encji, niezależnie od tego, czy są wykonywane za pośrednictwem narzędzia EntityCommand, czy za pośrednictwem zapytania objectQuery. Jest również domyślnie włączona dla LINQ do zapytań jednostek w ramach encji w programie .NET 4.5 i entity Framework 6
+    -   Buforowanie planu kwerend można wyłączyć, ustawiając właściwość EnablePlanCaching (na EntityCommand lub ObjectQuery) na false. Przykład:
 ``` csharp
                     var query = from customer in context.Customer
                                 where customer.CustomerId == id
@@ -221,56 +221,56 @@ Pamięć podręczna planu zapytania jest współdzielona przez wystąpienia obie
                     ObjectQuery oQuery = query as ObjectQuery;
                     oQuery.EnablePlanCaching = false;
 ```
--   W przypadku zapytań parametrycznych zmiana wartości parametru będzie nadal trafiać na zbuforowane zapytanie. Ale zmiana aspektów parametru (na przykład size, Precision lub Scale) spowoduje, że zostanie osiągnięty inny wpis w pamięci podręcznej.
--   W przypadku korzystania z Entity SQL ciąg zapytania jest częścią klucza. Zmiana zapytania w ogóle spowoduje powstanie różnych wpisów w pamięci podręcznej, nawet jeśli zapytania są funkcjonalnie równoważne. Obejmuje to zmiany wielkości liter lub białych znaków.
--   W przypadku korzystania z LINQ zapytanie jest przetwarzane w celu wygenerowania części klucza. Zmiana wyrażenia LINQ spowoduje wygenerowanie innego klucza.
--   Mogą być stosowane inne ograniczenia techniczne; Zobacz autokompilowane zapytania, aby uzyskać więcej szczegółów.
+-   W przypadku zapytań sparametryzowanych zmiana wartości parametru będzie nadal uderzać w kwerendę buforowaną. Ale zmiana aspektów parametru (na przykład rozmiar, precyzja lub skala) spowoduje przejście innego wpisu w pamięci podręcznej.
+-   Podczas korzystania z encji SQL ciąg zapytania jest częścią klucza. Zmiana kwerendy w ogóle spowoduje różne wpisy pamięci podręcznej, nawet jeśli kwerendy są funkcjonalnie równoważne. Obejmuje to zmiany w wielkości liter lub odstępach.
+-   Podczas korzystania z LINQ kwerenda jest przetwarzana w celu wygenerowania części klucza. Zmiana wyrażenia LINQ spowoduje wygenerować inny klucz.
+-   Mogą obowiązywać inne ograniczenia techniczne; Aby uzyskać więcej informacji, zobacz Kwerendy z automatyczną kompilacją.
 
-#### <a name="322-cache-eviction-algorithm"></a>3.2.2 algorytm wykluczenia pamięci podręcznej
+#### <a name="322-cache-eviction-algorithm"></a>3.2.2 Algorytm eksmisji pamięci podręcznej
 
-Zrozumienie, jak działa wewnętrzny algorytm pomoże Ci ustalić, kiedy należy włączyć lub wyłączyć buforowanie planu zapytania. Algorytm oczyszczania jest następujący:
+Zrozumienie, jak działa wewnętrzny algorytm pomoże Ci dowiedzieć się, kiedy włączyć lub wyłączyć buforowanie planu kwerend. Algorytm oczyszczania jest następujący:
 
-1.  Gdy pamięć podręczna zawiera określoną liczbę wpisów (800), uruchamiamy czasomierz, który okresowo (raz na minutę) czyść pamięć podręczną.
-2.  Podczas czyszczenia pamięci podręcznej wpisy są usuwane z pamięci podręcznej na LFRU (ostatnio używane). Ten algorytm pobiera zarówno liczbę trafień, jak i wiek do konta podczas wybierania wpisów, które zostały wysunięte.
-3.  Po zakończeniu każdego odchylenia pamięci podręcznej pamięć podręczna zawiera 800 wpisów.
+1.  Gdy pamięć podręczna zawiera określoną liczbę wpisów (800), uruchamiamy czasomierz, który okresowo (raz na minutę) przeciera pamięć podręczną.
+2.  Podczas przeciągów pamięci podręcznej wpisy są usuwane z pamięci podręcznej na podstawie LFRU (najmniej często — ostatnio używane). Algorytm ten bierze pod uwagę zarówno liczbę trafień, jak i wiek przy podejmowaniu decyzji, które wpisy są wyrzucane.
+3.  Na końcu każdego wyciągnięcia po ścieżce pamięci podręcznej pamięć podręczna ponownie zawiera 800 wpisów.
 
-Wszystkie wpisy pamięci podręcznej są traktowane równomiernie podczas określania wpisów do wykluczenia. Oznacza to, że polecenie magazynu dla CompiledQuery ma tę samą szansę wykluczenia jako polecenie magazynu dla zapytania Entity SQL.
+Wszystkie wpisy pamięci podręcznej są traktowane jednakowo podczas określania, które wpisy do eksmisji. Oznacza to, że polecenie magazynu dla CompiledQuery ma taką samą szansę eksmisji jak polecenie magazynu dla kwerendy SQL jednostki.
 
-Należy zauważyć, że czasomierz wykluczenia pamięci podręcznej jest uruchamiany, gdy w pamięci podręcznej znajdują się 800 jednostek, ale pamięć podręczna jest uruchamiana dopiero po upływie 60 sekund od momentu uruchomienia tego czasomierza. Oznacza to, że przez maksymalnie 60 sekund pamięć podręczna może być coraz większa.
+Należy zauważyć, że czasomierz eksmisji pamięci podręcznej jest uruchamiany, gdy w pamięci podręcznej znajduje się 800 jednostek, ale pamięć podręczna jest przeciągnięta tylko 60 sekund po uruchomieniu tego czasomierza. Oznacza to, że przez maksymalnie 60 sekund pamięć podręczna może rosnąć do dość dużej.
 
-#### <a name="323-test-metrics-demonstrating-query-plan-caching-performance"></a>3.2.3 metryki testów ukazujące wydajność buforowania planu zapytania
+#### <a name="323-test-metrics-demonstrating-query-plan-caching-performance"></a>3.2.3 Dane testowe demonstrujące wydajność buforowania planu kwerend
 
-Aby zademonstrować efekt buforowania planu zapytania względem wydajności aplikacji, przeprowadzono test, w którym wykonano kilka Entity SQL zapytań względem modelu systemu Navision. Zapoznaj się z załącznikiem opis modelu systemu Navision i typy zapytań, które zostały wykonane. W tym teście najpierw wykonujemy iterację na liście zapytań i wykonują każdy raz raz, aby dodać je do pamięci podręcznej (Jeśli buforowanie jest włączone). Ten krok jest niepełny. Następnie uśpienie głównego wątku przez ponad 60 sekund, aby umożliwić czyszczenie pamięci podręcznej; na koniec wykonujemy iterację na liście po raz drugi, aby wykonać buforowane zapytania. Ponadto pamięć podręczna planu SQL Server jest opróżniana przed wykonaniem każdego zestawu zapytań, dzięki czemu czasy uzyskiwane dokładnie odzwierciedlają korzyść przydaną przez pamięć podręczną planu zapytania.
+Aby zademonstrować wpływ buforowania planu kwerend na wydajność aplikacji, przeprowadziliśmy test, w którym wykonaliśmy wiele zapytań sql jednostki względem modelu systemu Navision. Zobacz dodatek opis modelu systemu Navision i typów zapytań, które zostały wykonane. W tym teście najpierw iterować za pośrednictwem listy zapytań i wykonać każdy z nich raz, aby dodać je do pamięci podręcznej (jeśli buforowanie jest włączone). Ten krok jest nierozerwiony. Następnie śpimy w głównym wątku przez ponad 60 sekund, aby umożliwić zamiatanie pamięci podręcznej; na koniec iterujemy listę po raz drugi, aby wykonać zapytania w pamięci podręcznej. Ponadto pamięć podręczna planu programu SQL Server jest opróżniana przed wykonaniem każdego zestawu zapytań, tak aby czasy, które uzyskujemy, dokładnie odzwierciedlały korzyści wynikające z pamięci podręcznej planu kwerend.
 
-##### <a name="3231-test-results"></a>3.2.3.1 Wyniki testów
+##### <a name="3231-test-results"></a>3.2.3.1 Wyniki badań
 
-| Testowanie                                                                   | EF5 Brak pamięci podręcznej | EF5 w pamięci podręcznej | EF6 Brak pamięci podręcznej | EF6 w pamięci podręcznej |
+| Testowanie                                                                   | EF5 brak pamięci podręcznej | EF5 w pamięci podręcznej | EF6 brak pamięci podręcznej | EF6 w pamięci podręcznej |
 |:-----------------------------------------------------------------------|:-------------|:-----------|:-------------|:-----------|
-| Wyliczanie wszystkich zapytań 18723                                          | 124          | 125,4      | 124,3        | 125,3      |
-| Unikanie odchylenia (tylko pierwsze zapytania 800, niezależnie od złożoności)  | 41,7         | 5.5        | 40.5         | 5.4        |
-| Tylko zapytania AggregatingSubtotals (łącznie 178), które unikają wycierania | 39,5         | 4.5        | 38,1         | 4.6        |
+| Wyliczanie wszystkich zapytań 18723                                          | 124          | 125.4      | 124.3        | 125.3      |
+| Unikanie zamiatania (tylko pierwsze 800 zapytań, niezależnie od złożoności)  | 41.7         | 5.5        | 40.5         | 5.4        |
+| Tylko zapytania AggregatingSubtotals (łącznie 178 — co pozwala uniknąć wyciągnięcia po ścieżce) | 39.5         | 4.5        | 38.1         | 4.6        |
 
 *Wszystkie czasy w sekundach.*
 
-Dobry — podczas wykonywania wielu odrębnych zapytań (na przykład dynamicznie tworzonych zapytań) buforowanie nie jest pomocne, a wynikiem operacji opróżniania pamięci podręcznej może być zachowanie zapytań, które byłyby korzystne dla najwyższego użycia planu.
+Moral — podczas wykonywania wielu różnych zapytań (na przykład dynamicznie tworzone kwerendy), buforowanie nie pomaga, a wynikowe opróżnianie pamięci podręcznej może zachować zapytania, które najbardziej skorzystają z buforowania planu z faktycznie go używać.
 
-Zapytania AggregatingSubtotals są najbardziej skomplikowane dla zapytań, które przetestowały. Zgodnie z oczekiwaniami, bardziej skomplikowane jest zapytanie, tym więcej korzyści będzie można znaleźć w temacie buforowanie planu zapytania.
+Zapytania AggregatingSubtotals są najbardziej złożone z zapytań, które testowane z. Zgodnie z oczekiwaniami, im bardziej złożona jest kwerenda, tym więcej korzyści zobaczysz z buforowania planu kwerend.
 
-Ponieważ CompiledQuery jest naprawdę zapytania LINQ z buforowanym planem, porównanie CompiledQuery i równoważnej kwerendy Entity SQL powinna mieć podobne wyniki. W rzeczywistości, jeśli aplikacja ma wiele zapytań Entity SQL dynamicznych, wypełnianie pamięci podręcznej przy użyciu zapytań spowoduje również skuteczną CompiledQueries "dekompilowanie" po opróżnieniu z pamięci podręcznej. W tym scenariuszu wydajność można ulepszyć, wyłączając buforowanie w zapytaniach dynamicznych w celu określenia priorytetów CompiledQueries. Jeszcze lepszym rozwiązaniem jest ponowne napisanie aplikacji w celu używania zapytań parametrycznych zamiast zapytań dynamicznych.
+Ponieważ CompiledQuery jest naprawdę linq kwerendy z jego planu w pamięci podręcznej, porównanie CompiledQuery w porównaniu do równoważnej jednostki kwerendy SQL powinny mieć podobne wyniki. W rzeczywistości jeśli aplikacja ma wiele dynamicznych zapytań SQL jednostki, wypełnianie pamięci podręcznej z kwerendami będzie również skutecznie powodować CompiledQueries do "dekompilowania", gdy są one opróżniane z pamięci podręcznej. W tym scenariuszu wydajność może zostać zwiększona przez wyłączenie buforowania w zapytaniach dynamicznych, aby nadać priorytet CompiledQueries. Jeszcze lepiej, oczywiście, byłoby przepisać aplikację do korzystania z sparametryzowanych zapytań zamiast zapytań dynamicznych.
 
-### <a name="33-using-compiledquery-to-improve-performance-with-linq-queries"></a>3,3 przy użyciu CompiledQuery, aby zwiększyć wydajność przy użyciu zapytań LINQ
+### <a name="33-using-compiledquery-to-improve-performance-with-linq-queries"></a>3.3 Korzystanie z CompiledQuery w celu zwiększenia wydajności za pomocą zapytań LINQ
 
-Nasze testy wskazują, że korzystanie z usługi CompiledQuery może przynieść do 7% przez skompilowane przez siebie zapytania LINQ. oznacza to, że poświęcimy 7% mniej czasu na wykonanie kodu ze stosu Entity Frameworkowego; nie oznacza to, że aplikacja będzie o 7% szybsza. Ogólnie mówiąc, koszt pisania i konserwacji obiektów CompiledQuery w EF 5,0 może nie być cenny w porównaniu z korzyściami. Przebieg może się różnić, dlatego należy skorzystać z tej opcji, jeśli projekt wymaga dodatkowej wypychania. Należy zauważyć, że CompiledQueries są zgodne tylko z modelami pochodnymi ObjectContext i nie są zgodne z modelami pochodnymi DbContext.
+Nasze testy wskazują, że za pomocą CompiledQuery może przynieść korzyści 7% w stosunku do automatycznie kompilowanych zapytań LINQ; oznacza to, że spędzisz 7% mniej czasu na wykonywaniu kodu ze stosu Entity Framework; nie oznacza to, że twoja aplikacja będzie o 7% szybsza. Ogólnie rzecz biorąc, koszt pisania i utrzymywania CompiledQuery obiektów w EF 5.0 nie może być warte kłopotów w porównaniu do korzyści. Przebieg może się różnić, więc wystają ci, jeśli projekt wymaga dodatkowego naciśnięcia. Należy zauważyć, że CompiledQueries są zgodne tylko z modelami pochodzącymi objectContext i nie są zgodne z modelami pochodnymi DbContext.
 
-Aby uzyskać więcej informacji na temat tworzenia i wywoływania CompiledQuery, zobacz [skompilowane zapytania (LINQ to Entities)](https://msdn.microsoft.com/library/bb896297.aspx).
+Aby uzyskać więcej informacji na temat tworzenia i wywoływania CompiledQuery, zobacz [Skompilowane zapytania (LINQ do jednostek)](https://msdn.microsoft.com/library/bb896297.aspx).
 
-W przypadku korzystania z CompiledQuery należy wziąć pod uwagę dwa kwestie, a mianowicie wymagania dotyczące korzystania z wystąpień statycznych i problemów z możliwością redagowania. Poniżej znajduje się szczegółowy opis tych dwóch zagadnień.
+Istnieją dwie kwestie, które należy podjąć podczas korzystania z CompiledQuery, a mianowicie wymóg używania wystąpień statycznych i problemy, które mają z możliwością komponowania. Poniżej przedstawiono szczegółowe wyjaśnienie tych dwóch rozważań.
 
-#### <a name="331-use-static-compiledquery-instances"></a>3.3.1 użycie statycznych wystąpień CompiledQuery
+#### <a name="331-use-static-compiledquery-instances"></a>3.3.1 Używanie statycznych wystąpień CompiledQuery
 
-Ponieważ Kompilowanie zapytania LINQ jest czasochłonnym procesem, nie chcemy go wykonywać za każdym razem, gdy będziemy musieli pobrać dane z bazy danych. Wystąpienia CompiledQuery umożliwiają kompilowanie i uruchamianie wielu razy, ale należy zachować ostrożność i zadawać, aby ponownie używać tego samego wystąpienia CompiledQuery za każdym razem, zamiast kompilować go w trybie failover i ponownie. Użycie statycznych elementów członkowskich do przechowywania wystąpień CompiledQuery będzie konieczne; w przeciwnym razie nie zobaczysz żadnej korzyści.
+Ponieważ kompilowanie zapytania LINQ jest procesem czasochłonnym, nie chcemy tego robić za każdym razem, gdy musimy pobrać dane z bazy danych. CompiledQuery wystąpień pozwalają skompilować raz i uruchomić wiele razy, ale trzeba być ostrożnym i zaopatrywać się ponownie użyć tego samego wystąpienia CompiledQuery za każdym razem zamiast kompilować go w kółko. Użycie statycznych elementów członkowskich do przechowywania CompiledQuery wystąpień staje się konieczne; w przeciwnym razie nie zobaczysz żadnych korzyści.
 
-Załóżmy na przykład, że strona ma następującą treść metody, aby obsłużyć wyświetlanie produktów dla wybranej kategorii:
+Załóżmy na przykład, że strona ma następującą treść metody do obsługi wyświetlania produktów dla wybranej kategorii:
 
 ``` csharp
     // Warning: this is the wrong way of using CompiledQuery
@@ -290,9 +290,9 @@ Załóżmy na przykład, że strona ma następującą treść metody, aby obsłu
     this.productsGrid.Visible = true;
 ```
 
-W takim przypadku na bieżąco utworzysz nowe wystąpienie CompiledQuery przy każdym wywołaniu metody. Zamiast wyświetlać zalety wydajności przez pobranie polecenia Zapisz z pamięci podręcznej planu zapytania, CompiledQuery przejdzie przez kompilator planu za każdym razem, gdy tworzone jest nowe wystąpienie. W rzeczywistości będzie to zanieczyszczenie pamięci podręcznej planu zapytania przy użyciu nowego wpisu CompiledQuery przy każdym wywołaniu metody.
+W takim przypadku utworzysz nowe wystąpienie CompiledQuery na bieżąco za każdym razem, gdy metoda jest wywoływana. Zamiast widzieć korzyści wydajności, pobierając polecenie magazynu z pamięci podręcznej planu kwerend, CompiledQuery przejdzie przez kompilator planu za każdym razem, gdy zostanie utworzone nowe wystąpienie. W rzeczywistości będzie zanieczyszczanie pamięci podręcznej planu kwerendy z nowym compiledquery wpis za każdym razem, gdy metoda jest wywoływana.
 
-Zamiast tego należy utworzyć wystąpienie statyczne skompilowanego zapytania, aby można było wywołać to samo skompilowane zapytanie za każdym razem, gdy wywoływana jest metoda. Jednym ze sposobów jest dodanie wystąpienia CompiledQuery jako elementu członkowskiego kontekstu obiektu.  Następnie można zwiększyć czytelność, uzyskując dostęp do CompiledQuery za pomocą metody pomocnika:
+Zamiast tego chcesz utworzyć statyczne wystąpienie skompilowanego zapytania, więc wywołujesz tę samą skompilowaną kwerendę za każdym razem, gdy metoda jest wywoływana. Jednym ze sposobów, aby tak jest dodanie CompiledQuery wystąpienie jako element członkowski kontekstu obiektu.Następnie można zrobić rzeczy trochę czystsze, uzyskując dostęp do CompiledQuery za pomocą metody pomocnika:
 
 ``` csharp
     public partial class NorthwindEntities : ObjectContext
@@ -308,19 +308,19 @@ Zamiast tego należy utworzyć wystąpienie statyczne skompilowanego zapytania, 
         }
 ```
 
-Ta metoda pomocnika zostałaby wywołana w następujący sposób:
+Ta metoda pomocnika będzie wywoływana w następujący sposób:
 
 ``` csharp
     this.productsGrid.DataSource = context.GetProductsForCategory(selectedCategory);
 ```
 
-#### <a name="332-composing-over-a-compiledquery"></a>3.3.2 redagowanie w CompiledQuery
+#### <a name="332-composing-over-a-compiledquery"></a>3.3.2 Komponowanie na CompiledQuery
 
-Możliwość tworzenia wszystkich zapytań LINQ jest niezwykle przydatna. w tym celu po prostu wywołaj metodę po interfejsie IQueryable, takim jak *Skip ()* lub *Count ()* . Jednak zasadniczo zwraca nowy obiekt IQueryable. Nie ma nic, aby nie było możliwe, aby nie zatrzymywać od firmy CompiledQuery, że spowoduje to wygenerowanie nowego obiektu IQueryable, który wymaga ponownego przekazania kompilatora planu.
+Możliwość komponowania nad dowolnym zapytaniem LINQ jest niezwykle przydatna; aby to zrobić, wystarczy wywołać metodę po IQueryable, takich jak *Skip()* lub *Count()*. Jednak w ten sposób zasadniczo zwraca nowy IQueryable obiektu. Chociaż nie ma nic, aby powstrzymać cię technicznie od komponowania przez CompiledQuery, spowoduje to generowanie nowego obiektu IQueryable, który wymaga ponownego przejścia przez kompilator planu.
 
-Niektóre składniki będą używały złożonych obiektów IQueryable do włączenia zaawansowanych funkcji. Na przykład ASP. Widok GridView sieci może być powiązany z danymi z obiektem IQueryable za pośrednictwem właściwości SelectMethod. W widoku GridView utworzysz ten obiekt IQueryable, aby umożliwić sortowanie i stronicowanie w modelu danych. Jak widać, użycie CompiledQuery dla widoku GridView nie spowoduje pojawienia się skompilowanego zapytania, ale spowoduje wygenerowanie nowej autokompilowanego zapytania.
+Niektóre składniki będą korzystać z składanych obiektów IQueryable, aby włączyć zaawansowane funkcje. Na przykład ASP. Net GridView może być powiązany z danymi do obiektu IQueryable za pośrednictwem SelectMethod właściwości. GridView będzie następnie komponować nad tym IQueryable obiektu, aby umożliwić sortowanie i stronicowanie za pomocą modelu danych. Jak widać, za pomocą CompiledQuery dla GridView nie trafi skompilowane zapytanie, ale wygeneruje nowe zapytanie autokompilowane.
 
-Jedno miejsce, w którym można w tym celu wykonać w przypadku dodawania filtrów progresywnych do zapytania. Załóżmy na przykład, że masz stronę klienci z kilkoma listami rozwijanymi dla filtrów opcjonalnych (na przykład Country i OrdersCount). Te filtry można redagować na podstawie wyników CompiledQuery, ale to spowoduje, że nowe zapytanie przejdzie przez kompilator planu przy każdym jego wykonaniu.
+Jednym z miejsc, w których można napotkać to podczas dodawania filtrów progresywnych do kwerendy. Załóżmy na przykład, że masz stronę Klienci z kilkoma listami rozwijaną dla filtrów opcjonalnych (na przykład Kraj i Liczba zamówień). Można skomponować te filtry za pośrednictwem IQueryable wyniki CompiledQuery, ale spowoduje to nowe zapytanie przechodzi przez kompilator planu za każdym razem, gdy go wykonać.
 
 ``` csharp
     using (NorthwindEntities context = new NorthwindEntities())
@@ -343,7 +343,7 @@ Jedno miejsce, w którym można w tym celu wykonać w przypadku dodawania filtr�
     }
 ```
 
- Aby uniknąć tej ponownej kompilacji, możesz ponownie napisać CompiledQuery, aby uwzględnić możliwe filtry:
+ Aby uniknąć tej ponownej kompilacji, można przepisać CompiledQuery wziąć pod uwagę możliwe filtry:
 
 ``` csharp
     private static readonly Func<NorthwindEntities, int, int?, string, IQueryable<Customer>> customersForEmployeeWithFiltersCQ = CompiledQuery.Compile(
@@ -354,7 +354,7 @@ Jedno miejsce, w którym można w tym celu wykonać w przypadku dodawania filtr�
         );
 ```
 
-Które zostałyby wywołane w interfejsie użytkownika, np.:
+Który byłby wywoływany w interfejsie użytkownika, takich jak:
 
 ``` csharp
     using (NorthwindEntities context = new NorthwindEntities())
@@ -375,65 +375,65 @@ Które zostałyby wywołane w interfejsie użytkownika, np.:
     }
 ```
 
- W tym miejscu jest to polecenie wygenerowany magazyn, które będzie miało zawsze filtry z sprawdzeniami null, ale te wartości powinny być dość proste, aby serwer bazy danych mógł zoptymalizować:
+ Kompromisem w tym miejscu jest wygenerowane polecenie magazynu zawsze będzie miał filtry z kontroli null, ale powinny one być dość proste dla serwera bazy danych do optymalizacji:
 
 ``` SQL
 ...
 WHERE ((0 = (CASE WHEN (@p__linq__1 IS NOT NULL) THEN cast(1 as bit) WHEN (@p__linq__1 IS NULL) THEN cast(0 as bit) END)) OR ([Project3].[C2] > @p__linq__2)) AND (@p__linq__3 IS NULL OR [Project3].[Country] = @p__linq__4)
 ```
 
-### <a name="34-metadata-caching"></a>buforowanie metadanych 3,4
+### <a name="34-metadata-caching"></a>3.4 Buforowanie metadanych
 
-Entity Framework obsługuje również buforowanie metadanych. Jest to zasadniczo buforowanie informacji o typie i informacje mapowania typu "na typ do bazy danych" między różnymi połączeniami z tym samym modelem. Pamięć podręczna metadanych jest unikatowa dla domeny aplikacji.
+Entity Framework obsługuje również buforowanie metadanych. Jest to zasadniczo buforowanie informacji o typie i informacji mapowania typu do bazy danych w różnych połączeniach z tym samym modelem. Pamięć podręczna metadanych jest unikatowa dla domen aplikacji.
 
-#### <a name="341-metadata-caching-algorithm"></a>w algorytmie buforowania metadanych
+#### <a name="341-metadata-caching-algorithm"></a>3.4.1 Algorytm buforowania metadanych
 
-1.  Informacje o metadanych dla modelu są przechowywane w obiekt ItemCollection dla każdego EntityConnectionu.
-    -   Jako notatka boczna istnieją różne obiekty obiekt ItemCollection dla różnych części modelu. Na przykład StoreItemCollections zawiera informacje o modelu bazy danych; ObjectItemCollection zawiera informacje o modelu danych; EdmItemCollection zawiera informacje o modelu koncepcyjnym.
+1.  Informacje o metadanych dla modelu są przechowywane w ItemCollection dla każdego entityconnection.
+    -   Na marginesie istnieją różne ItemCollection obiektów dla różnych części modelu. Na przykład StoreItemCollections zawiera informacje o modelu bazy danych; ObjectItemCollection zawiera informacje o modelu danych; EdmItemCollection zawiera informacje o modelu koncepcyjnym.
 
-2.  Jeśli dwa połączenia używają tych samych parametrów połączenia, będą współużytkować to samo wystąpienie obiekt ItemCollection.
-3.  Funkcja równoważna funkcjonalnie, ale różne ciągi połączenia mogą powodować różne metadane. Tokenize ciągi połączeń, więc po prostu zmiana kolejności tokenów powinna spowodować, że metadane udostępnione. Ale dwa parametry połączenia, które wydaje się funkcjonalnie takie same, mogą nie być oceniane jako identyczne po tokenizacji.
-4.  Obiekt ItemCollection jest okresowo sprawdzana pod kątem użycia. Jeśli okaże się, że nie uzyskano ostatnio dostępu do obszaru roboczego, zostanie on oznaczony do oczyszczenia przy następnym wyczyszczeniu pamięci podręcznej.
-5.  Tylko utworzenie EntityConnection spowoduje utworzenie pamięci podręcznej metadanych (mimo że kolekcje elementów w niej nie zostaną zainicjowane do momentu otwarcia połączenia). Ten obszar roboczy pozostanie w pamięci do momentu, aż algorytm buforowania ustali, że nie jest używany.
+2.  Jeśli dwa połączenia używają tego samego ciągu połączenia, będą współużytkować to samo wystąpienie ItemCollection.
+3.  Funkcjonalnie równoważne, ale tekstowo różne parametry połączenia może spowodować różne pamięci podręczne metadanych. Robimy tokenizacji ciągów połączeń, więc po prostu zmiana kolejności tokenów powinna spowodować udostępnione metadane. Ale dwa parametry połączenia, które wydają się funkcjonalnie takie same nie mogą być oceniane jako identyczne po tokenizacji.
+4.  ItemCollection jest okresowo sprawdzany pod kątem użycia. Jeśli zostanie ustalone, że obszar roboczy nie został ostatnio osiągnięty, zostanie oznaczony do czyszczenia podczas następnego wyciągnięcia po ścieżce pamięci podręcznej.
+5.  Samo utworzenie entityconnection spowoduje pamięć podręczną metadanych do utworzenia (chociaż kolekcje elementów w nim nie zostaną zainicjowane, dopóki połączenie nie zostanie otwarte). Ten obszar roboczy pozostanie w pamięci, dopóki algorytm buforowania nie stwierdzi, że nie jest "w użyciu".
 
-Zespół Doradczy klientów zapisał wpis w blogu, który opisuje przechowywanie odniesienia do obiekt ItemCollection w celu uniknięcia "wycofania" podczas korzystania z dużych modeli: \<http://blogs.msdn.com/b/appfabriccat/archive/2010/10/22/metadataworkspace-reference-in-wcf-services.aspx>.
+Zespół Doradztwa Klienta napisał wpis w blogu, który opisuje trzymanie odwołania do ItemCollection w celu \< https://docs.microsoft.com/archive/blogs/appfabriccat/holding-a-reference-to-the-ef-metadataworkspace-for-wcf-services>uniknięcia "deprecation" podczas korzystania z dużych modeli: .
 
-#### <a name="342-the-relationship-between-metadata-caching-and-query-plan-caching"></a>3.4.2 relację między buforowaniem metadanych a buforowaniem planu zapytania
+#### <a name="342-the-relationship-between-metadata-caching-and-query-plan-caching"></a>3.4.2 Relacja między buforowaniem metadanych a buforem planu zapytań
 
-Wystąpienie pamięci podręcznej planu zapytania jest przechowywane w obiekt ItemCollection obiektu MetadataWorkspace. Oznacza to, że polecenia magazynu w pamięci podręcznej będą używane do wykonywania zapytań dotyczących kontekstu wystąpienia przy użyciu danego obiektu MetadataWorkspace. Oznacza to również, że jeśli istnieją dwa parametry połączeń, które są nieco inne i nie pasują po tokenizowanie, będą dostępne różne wystąpienia pamięci podręcznej planu zapytania.
+Wystąpienie pamięci podręcznej planu kwerendy znajduje się w itemcollection metadataWorkspace typów magazynu. Oznacza to, że polecenia magazynu w pamięci podręcznej będą używane dla zapytań względem dowolnego kontekstu wystąpienia przy użyciu danego obszaru MetadataWorkspace. Oznacza to również, że jeśli masz dwa połączenia ciągi, które są nieco inne i nie pasują do siebie po tokenizacji, będziesz miał różne wystąpienia pamięci podręcznej planu kwerendy.
 
-### <a name="35-results-caching"></a>Buforowanie wyników 3,5
+### <a name="35-results-caching"></a>3.5 Buforowanie wyników
 
-Dzięki buforowaniu wyników (nazywanej także "buforowaniem drugiego poziomu") można zachować wyniki zapytań w lokalnej pamięci podręcznej. Podczas wykonywania zapytania należy najpierw sprawdzić, czy wyniki są dostępne lokalnie przed wykonaniem zapytania względem magazynu. Podczas gdy buforowanie wyników nie jest bezpośrednio obsługiwane przez Entity Framework, można dodać pamięć podręczną drugiego poziomu przy użyciu dostawcy otoki. Przykładem dostawcy zawijania z pamięci podręcznej drugiego poziomu jest [Entity Framework Alachisofta pamięć podręczna drugiego poziomu oparta na NCache](https://www.alachisoft.com/ncache/entity-framework.html).
+Za pomocą buforowania wyników (znanego również jako "buforowanie drugiego poziomu) wyniki zapytań są przechowywane w lokalnej pamięci podręcznej. Podczas wystawiania kwerendy, najpierw sprawdzić, czy wyniki są dostępne lokalnie przed kwerendą w sklepie. Podczas buforowania wyników nie jest bezpośrednio obsługiwane przez entity framework, jest możliwe, aby dodać pamięć podręczną drugiego poziomu przy użyciu dostawcy zawijania. Przykładowym dostawcą zawijania z pamięcią podręczną drugiego poziomu jest [pamięć podręczna drugiego poziomu Alachisoft Entity Framework oparta na NCache.](https://www.alachisoft.com/ncache/entity-framework.html)
 
-Ta implementacja buforowania drugiego poziomu jest funkcją wstrzykiwaną, która ma miejsce po obliczeniu wyrażenia LINQ (i funcletized), a plan wykonywania zapytania jest obliczany lub pobierany z pamięci podręcznej pierwszego poziomu. Pamięć podręczna drugiego poziomu będzie następnie przechowywać tylko wyniki nieprzetworzonej bazy danych, więc potok materializację nadal zostanie wykonany.
+Ta implementacja buforowania drugiego poziomu jest funkcją wstrzyknięte, która ma miejsce po linq wyrażenie zostało ocenione (i funcletized) i plan wykonywania kwerendy jest obliczana lub pobierana z pamięci podręcznej pierwszego poziomu. Pamięć podręczna drugiego poziomu będzie następnie przechowywać tylko wyniki nieprzetworzonej bazy danych, więc potok materializacji nadal jest wykonywany później.
 
-#### <a name="351-additional-references-for-results-caching-with-the-wrapping-provider"></a>3.5.1 dodatkowe informacje dotyczące buforowania wyników w ramach dostawcy zawijania
+#### <a name="351-additional-references-for-results-caching-with-the-wrapping-provider"></a>3.5.1 Dodatkowe referencje dotyczące buforowania wyników z dostawcą opakowań jednostkowych
 
--   Julie Lerman zapisał "pamięć podręczną drugiego poziomu w Entity Framework i Windows Azure" w witrynie MSDN, która obejmuje jak zaktualizować przykładowego dostawcę otoki do korzystania z buforowania systemu Windows Server AppFabric: [https://msdn.microsoft.com/magazine/hh394143.aspx](https://msdn.microsoft.com/magazine/hh394143.aspx)
--   W przypadku pracy z Entity Framework 5 Blog zespołu zawiera wpis, który opisuje, jak uzyskać działanie z dostawcą pamięci podręcznej dla Entity Framework 5: \<http://blogs.msdn.com/b/adonet/archive/2010/09/13/ef-caching-with-jarek-kowalski-s-provider.aspx>. Zawiera również szablon T4, który pomaga zautomatyzować Dodawanie buforowania drugiego poziomu do projektu.
+-   Julie Lerman napisała artykuł MSDN "Drugi poziom buforowania w ramach jednostki i systemu Windows Azure", który zawiera sposób aktualizowania przykładowego dostawcy zawijania w celu korzystania z buforowania aplikacji Windows Server AppFabric:[https://msdn.microsoft.com/magazine/hh394143.aspx](https://msdn.microsoft.com/magazine/hh394143.aspx)
+-   Jeśli pracujesz z Entity Framework 5, blog zespołu zawiera wpis, który opisuje, jak uzyskać działanie \< https://docs.microsoft.com/archive/blogs/adonet/ef-caching-with-jarek-kowalskis-provider>rzeczy z dostawcą buforowania dla entity framework 5: . Zawiera również szablon T4, który ułatwia dodawanie buforowania drugiego poziomu do projektu.
 
-## <a name="4-autocompiled-queries"></a>4 autokompilowane zapytania
+## <a name="4-autocompiled-queries"></a>4 Kwerendy z automatyczną kompilacją
 
-Gdy zapytanie jest wydawane dla bazy danych przy użyciu Entity Framework, musi przejść przez serię kroków, zanim rzeczywiście materializacji wyniki; jednym z tych kroków jest kompilacja zapytania. Wiadomo, że Entity SQL zapytania mają dobrą wydajność, ponieważ są one automatycznie buforowane, więc drugi lub trzeci czas wykonywania tego samego zapytania może pominąć kompilator planu i zamiast tego użyć buforowanego planu.
+Gdy kwerenda jest wystawiana w bazie danych przy użyciu entity framework, musi przejść przez szereg kroków przed faktycznie materializacji wyników; jednym z takich kroków jest kompilacja zapytań. Zapytania SQL jednostki były znane mają dobrą wydajność, ponieważ są one automatycznie buforowane, więc po raz drugi lub trzeci wykonać tę samą kwerendę można pominąć kompilator planu i zamiast tego użyć buforowanego planu.
 
-Entity Framework 5 wprowadzono również automatyczne buforowanie dla zapytań LINQ to Entities. W poprzednich wersjach Entity Framework tworzenia CompiledQuery w celu przyspieszenia działania była powszechną gwarancją, ponieważ spowodowałoby to przeprowadzenie LINQ to Entities zapytania w pamięci podręcznej. Ponieważ buforowanie jest teraz wykonywane automatycznie bez użycia CompiledQuery, wywoływana jest funkcja "autokompilowane zapytania". Aby uzyskać więcej informacji na temat pamięci podręcznej planu zapytania i jej Mechanics, zobacz buforowanie planu zapytania.
+Entity Framework 5 wprowadzono automatyczne buforowanie linq do jednostek kwerend, jak również. W poprzednich wersjach Entity Framework tworzenia CompiledQuery, aby przyspieszyć wydajność była powszechną praktyką, ponieważ to sprawi, że LINQ do jednostek kwerendy cacheable. Ponieważ buforowanie odbywa się teraz automatycznie bez użycia CompiledQuery, nazywamy tę funkcję "zapytaniami autokompilowanymi". Aby uzyskać więcej informacji na temat pamięci podręcznej planu kwerend i jej mechaniki, zobacz Buforowanie planu kwerend.
 
-Entity Framework wykrywa, kiedy zapytanie wymaga ponownej kompilacji, i robi to, gdy zapytanie jest wywoływane, nawet jeśli zostało skompilowane wcześniej. Typowe warunki, które powodują ponowną kompilację zapytania, to:
+Entity Framework wykrywa, gdy kwerenda wymaga ponownej kompilacji i robi to, gdy kwerenda jest wywoływana, nawet jeśli została skompilowana wcześniej. Typowe warunki, które powodują ponowne skompilowane zapytanie, to:
 
--   Zmiana MergeOption skojarzonego z zapytaniem. Zapytanie buforowane nie zostanie użyte, a następnie kompilator planu zostanie uruchomiony ponownie, a nowo utworzony plan zostanie zapisany w pamięci podręcznej.
--   Zmiana wartości ContextOptions. UseCSharpNullComparisonBehavior. Ten sam efekt jest taki sam jak zmiana MergeOption.
+-   Zmiana opcji scalania skojarzonej z kwerendą. Kwerenda buforowana nie będzie używana, zamiast tego kompilator planu zostanie uruchomiony ponownie, a nowo utworzony plan zostanie buforowany.
+-   Zmiana wartości ContextOptions.UseCSharpNullComparisonBehavior. Otrzymujesz taki sam efekt jak zmiana opcji Scalania.
 
-Inne warunki mogą uniemożliwić korzystanie z pamięci podręcznej przez zapytanie. Typowe przykłady:
+Inne warunki mogą uniemożliwić kwerendy przy użyciu pamięci podręcznej. Typowe przykłady:
 
--   Używanie interfejsu IEnumerable&lt;T&gt;. Zawiera &gt;&lt;(wartość T).
+-   Korzystanie z IEnumerable&lt;T&gt;. Zawiera&lt;&gt;(wartość T).
 -   Korzystanie z funkcji, które generują zapytania ze stałymi.
--   Używanie właściwości niemapowanego obiektu.
--   Łączenie zapytania z innym zapytaniem, które wymaga ponownej kompilacji.
+-   Korzystanie z właściwości obiektu niezamapowane.
+-   Łączenie kwerendy z inną kwerendą, która wymaga ponownej kompilacji.
 
-### <a name="41-using-ienumerablelttgtcontainslttgtt-value"></a>4,1 przy użyciu interfejsu IEnumerable&lt;T&gt;. Zawiera&lt;T&gt;(T wartość)
+### <a name="41-using-ienumerablelttgtcontainslttgtt-value"></a>4.1 Korzystanie z IEnumerable&lt;T&gt;. Zawiera&lt;&gt;wartość T (wartość T)
 
-Entity Framework nie buforuje zapytań, które wywołują interfejs IEnumerable&lt;T&gt;. Zawiera&lt;T&gt;(wartość T) względem kolekcji w pamięci, ponieważ wartości kolekcji są uznawane za nietrwałe. Następujące przykładowe zapytanie nie zostanie zapisane w pamięci podręcznej, więc będzie zawsze przetwarzane przez kompilator planu:
+Entity Framework nie buforuje zapytań, które&lt;wywołują IEnumerable T&gt;. Zawiera&lt;&gt;T (T wartość) względem kolekcji w pamięci, ponieważ wartości kolekcji są uważane za volatile. Następująca przykładowa kwerenda nie będzie buforowana, więc zawsze będzie przetwarzana przez kompilator planu:
 
 ``` csharp
 int[] ids = new int[10000];
@@ -448,13 +448,13 @@ using (var context = new MyContext())
 }
 ```
 
-Należy zauważyć, że rozmiar interfejsu IEnumerable, z którym jest wykonywane, określa, jak szybko lub jak wolno kompilować zapytanie. Wydajność może znacznie pogorszyć się podczas korzystania z dużych kolekcji, takich jak pokazane w powyższym przykładzie.
+Należy zauważyć, że rozmiar IEnumerable względem którego zawiera jest wykonywany określa, jak szybko lub jak wolno kwerendy jest kompilowany. Wydajność może znacznie ucierpieć podczas korzystania z dużych kolekcji, takich jak pokazano w powyższym przykładzie.
 
-Entity Framework 6 zawiera optymalizacje w sposób, w jaki interfejs IEnumerable&lt;T&gt;. Zawiera&lt;T&gt;(wartość T) działa, gdy zapytania są wykonywane. Wygenerowany kod SQL jest znacznie szybszy do tworzenia i bardziej czytelny, a w większości przypadków jest również wykonywany szybciej na serwerze.
+Entity Framework 6 zawiera optymalizacje sposobu IEnumerable&lt;T&gt;. Zawiera&lt;&gt;wartość T (T) działa podczas wykonywania kwerend. Kod SQL, który jest generowany jest znacznie szybsze do produkcji i bardziej czytelny, a w większości przypadków również wykonuje szybciej na serwerze.
 
-### <a name="42-using-functions-that-produce-queries-with-constants"></a>4,2 użycie funkcji generujących zapytania ze stałymi
+### <a name="42-using-functions-that-produce-queries-with-constants"></a>4.2 Korzystanie z funkcji, które generują zapytania ze stałymi
 
-Operatory Skip (), Take (), Contains () i DefautIfEmpty () LINQ nie generują zapytań SQL z parametrami, ale zamiast tego przechodzą wartości do nich jako stałe. Z tego powodu zapytania, które mogłyby w przeciwnym razie być takie same, kończą się zanieczyszczeniem pamięci podręcznej planu zapytania, zarówno na stosie EF, jak i na serwerze bazy danych, i nie są ponownie wykorzystywane, chyba że te same stałe są używane w kolejnym wykonaniu zapytania. Na przykład:
+Operatory SKIP(), Take(), Contains() i DefautIfEmpty() LINQ nie generują zapytań SQL z parametrami, lecz umieszczają wartości przekazywane do nich jako stałe. Z tego powodu kwerendy, które w przeciwnym razie mogą być identyczne, zanieczyszczają pamięć podręczną planu kwerend, zarówno na stosie EF, jak i na serwerze bazy danych i nie są ponownie przyliczane, chyba że te same stałe są używane w kolejnym wykonaniu kwerendy. Przykład:
 
 ``` csharp
 var id = 10;
@@ -468,11 +468,11 @@ using (var context = new MyContext())
 }
 ```
 
-W tym przykładzie, za każdym razem, gdy to zapytanie jest wykonywane z inną wartością dla identyfikatora, zapytanie zostanie skompilowane do nowego planu.
+W tym przykładzie za każdym razem, gdy ta kwerenda jest wykonywana z inną wartością dla identyfikatora, kwerenda zostanie skompilowana do nowego planu.
 
-W szczególności należy zwrócić uwagę na użycie pomijania i podjąć podczas wykonywania stronicowania. W EF6 te metody mają Przeciążenie lambda, które efektywnie czynią buforowanym planem zapytań, ponieważ program EF może przechwytywać zmienne przesłane do tych metod i przetłumaczać je na parametry SqlParameters. Pozwala to również zachować oczyszczarkę pamięci podręcznej, ponieważ w przeciwnym razie każde zapytanie o inną stałą dla pozycji Pomiń i zrób spowoduje uzyskanie własnego wpisu pamięci podręcznej planu zapytania.
+W szczególności należy zwrócić uwagę na korzystanie z Skip i Take podczas wykonywania stronicowania. W EF6 te metody mają przeciążenie lambda, które skutecznie sprawia, że buforowany plan kwerendy wielokrotnego pożytek, ponieważ EF można przechwycić zmienne przekazywane do tych metod i przetłumaczyć je do SQLparameters. Pomaga to również zachować czystsze pamięci podręcznej, ponieważ w przeciwnym razie każde zapytanie z inną stałą dla Skip i Take otrzyma własny wpis pamięci podręcznej planu kwerend.
 
-Rozważmy poniższy kod, który jest optymalny, ale jest przeznaczony tylko do exemplify tej klasy zapytań:
+Należy wziąć pod uwagę następujący kod, który jest nieoptymalny, ale jest przeznaczony tylko do przykładu tej klasy zapytań:
 
 ``` csharp
 var customers = context.Customers.OrderBy(c => c.LastName);
@@ -483,7 +483,7 @@ for (var i = 0; i < count; ++i)
 }
 ```
 
-Szybsza wersja tego samego kodu będzie wymagała wywołania pominięcia z wyrażeniem lambda:
+Szybsza wersja tego samego kodu wymagałaby wywołania Skip z lambda:
 
 ``` csharp
 var customers = context.Customers.OrderBy(c => c.LastName);
@@ -494,7 +494,7 @@ for (var i = 0; i < count; ++i)
 }
 ```
 
-Drugi fragment kodu może działać do 11% szybciej, ponieważ ten sam plan zapytania jest używany przy każdym uruchomieniu zapytania, co oszczędza czas procesora i zapobiega zanieczyszczaniu pamięci podręcznej zapytań. Ponadto, ponieważ parametr do pominięcia znajduje się w zamknięciu, kod może wyglądać następująco:
+Drugi fragment kodu może działać do 11% szybciej, ponieważ ten sam plan kwerendy jest używany za każdym razem, gdy kwerenda jest uruchamiana, co oszczędza czas procesora CPU i pozwala uniknąć zanieczyszczania pamięci podręcznej zapytań. Ponadto, ponieważ parametr skip znajduje się w zamknięciu kod może równie dobrze wyglądać teraz:
 
 ``` csharp
 var i = 0;
@@ -506,9 +506,9 @@ for (; i < count; ++i)
 }
 ```
 
-### <a name="43-using-the-properties-of-a-non-mapped-object"></a>4,3 przy użyciu właściwości niemapowanego obiektu
+### <a name="43-using-the-properties-of-a-non-mapped-object"></a>4.3 Korzystanie z właściwości obiektu niezamapowanego
 
-Gdy zapytanie używa właściwości niemapowanego typu obiektu jako parametru, zapytanie nie zostanie zapisane w pamięci podręcznej. Na przykład:
+Gdy kwerenda używa właściwości typu obiektu niemapowanego jako parametru, kwerenda nie zostanie buforowana. Przykład:
 
 ``` csharp
 using (var context = new MyContext())
@@ -524,7 +524,7 @@ using (var context = new MyContext())
 }
 ```
 
-W tym przykładzie Załóżmy, że Klasa unzamapowanytype nie jest częścią modelu Entity. To zapytanie można łatwo zmienić, aby nie używało niemapowanego typu, a zamiast tego użyć zmiennej lokalnej jako parametru do zapytania:
+W tym przykładzie załóżmy, że klasa NonMappedType nie jest częścią modelu jednostki. Tę kwerendę można łatwo zmienić, aby nie używać typu niemapowane i zamiast tego użyć zmiennej lokalnej jako parametru do kwerendy:
 
 ``` csharp
 using (var context = new MyContext())
@@ -540,11 +540,11 @@ using (var context = new MyContext())
 }
 ```
 
-W takim przypadku zapytanie będzie mogło być dostępne w pamięci podręcznej i będzie korzystać z pamięci podręcznej planu zapytania.
+W takim przypadku kwerenda będzie mogła uzyskać buforowane i będzie korzystać z pamięci podręcznej planu kwerendy.
 
-### <a name="44-linking-to-queries-that-require-recompiling"></a>4,4 Łączenie z zapytaniami wymagającymi ponownego kompilowania
+### <a name="44-linking-to-queries-that-require-recompiling"></a>4.4 Łączenie z zapytaniami wymagającymi ponownego komppilowania
 
-Zgodnie z powyższym przykładem, jeśli masz drugie zapytanie, które opiera się na zapytaniu, które musi zostać ponownie skompilowane, całe drugie zapytanie zostanie również ponownie skompilowane. Oto przykład ilustrujący ten scenariusz:
+Zgodnie z tym samym przykładem, jak powyżej, jeśli masz drugie zapytanie, które opiera się na kwerendzie, która musi zostać ponownie skompilowana, całe drugie zapytanie również zostanie ponownie skompilowane. Oto przykład ilustrowania tego scenariusza:
 
 ``` csharp
 int[] ids = new int[10000];
@@ -564,21 +564,21 @@ using (var context = new MyContext())
 }
 ```
 
-Przykładem jest ogólny, ale ilustruje to, jak łączenie z firstQuery powoduje, że secondQuery nie można uzyskać pamięci podręcznej. Jeśli firstQuery nie był zapytaniem wymagającym ponownej kompilacji, secondQuery zostałyby zapisane w pamięci podręcznej.
+Przykład jest ogólny, ale ilustruje, jak łączenie z firstQuery powoduje secondQuery nie być w stanie uzyskać buforowane. Jeśli firstQuery nie było kwerendą, która wymaga ponownego kompelowania, następnie secondQuery byłby buforowany.
 
-## <a name="5-notracking-queries"></a>5 zapytań NoTracking
+## <a name="5-notracking-queries"></a>5 Zapytania notracking
 
-### <a name="51-disabling-change-tracking-to-reduce-state-management-overhead"></a>5,1 wyłączanie śledzenia zmian w celu ograniczenia kosztów zarządzania stanem
+### <a name="51-disabling-change-tracking-to-reduce-state-management-overhead"></a>5.1 Wyłączenie śledzenia zmian w celu zmniejszenia kosztów zarządzania stanem
 
-Jeśli jesteś w scenariuszu tylko do odczytu i chcesz uniknąć narzutów ładowania obiektów do obiektu ObjectStateManager, możesz wydać zapytania "Brak śledzenia".  Śledzenie zmian można wyłączyć na poziomie zapytania.
+Jeśli jesteś w scenariuszu tylko do odczytu i chcesz uniknąć narzutu ładowania obiektów do ObjectStateManager, można wystawić kwerendy "Brak śledzenia".Śledzenie zmian można wyłączyć na poziomie zapytania.
 
-Należy pamiętać, że wyłączenie śledzenia zmian pozwala skutecznie wyłączyć pamięć podręczną obiektów. Podczas wykonywania zapytania o jednostkę nie można pominąć materializację przez ściąganie poprzednio wykorzystanych wyników zapytania z obiektu ObjectStateManager. Jeśli wykonujesz wielokrotnie zapytania dotyczące tych samych jednostek w tym samym kontekście, możesz ostatecznie zobaczyć korzyść wydajności z włączenia śledzenia zmian.
+Należy jednak pamiętać, że wyłączając śledzenie zmian skutecznie wyłączasz pamięć podręczną obiektów. Podczas kwerendy dla jednostki, nie możemy pominąć materializacji, pobierając wcześniej zmaterializowane wyniki kwerendy z ObjectStateManager. Jeśli są wielokrotnie kwerendy dla tych samych jednostek w tym samym kontekście, może rzeczywiście zobaczyć korzyści wydajności z włączania śledzenia zmian.
 
-Podczas wykonywania zapytań za pomocą wystąpień obiektu ObjectContext, ObjectQuery i ObjectSet zapamiętają MergeOption po jej ustawieniu, a zapytania, które są tworzone na nich, będą dziedziczyć efektywną MergeOption zapytania nadrzędnego. W przypadku korzystania z DbContext śledzenia można wyłączyć, wywołując modyfikator AsNoTracking () na Nieogólnymi.
+Podczas wykonywania zapytań przy użyciu ObjectContext, ObjectQuery i ObjectSet wystąpień zapamięta MergeOption raz jest ustawiony, a kwerendy, które są na nich składa odziedziczy skuteczne MergeOption kwerendy nadrzędnej. Podczas korzystania z DbContext, śledzenie można wyłączyć, wywołując AsNoTracking() modyfikator na DbSet.
 
-#### <a name="511-disabling-change-tracking-for-a-query-when-using-dbcontext"></a>5.1.1 wyłączenie śledzenia zmian dla zapytania podczas korzystania z DbContext
+#### <a name="511-disabling-change-tracking-for-a-query-when-using-dbcontext"></a>5.1.1 Wyłączanie śledzenia zmian dla kwerendy podczas korzystania z DbContext
 
-Można przełączyć tryb zapytania na NoTracking poprzez łańcuch wywołania metody AsNoTracking () w zapytaniu. W przeciwieństwie do ObjectQuery, klasy Nieogólnymi i DBQuery w interfejsie API DbContext nie mają właściwości mutable dla MergeOption.
+Tryb kwerendy można przełączyć na NoTracking, łącząc wywołanie metody AsNoTracking() w kwerendzie. W przeciwieństwie do ObjectQuery DbSet i DbQuery klasy w interfejsie API DbContext nie mają właściwości modyfikowalne dla MergeOption.
 
 ``` csharp
     var productsForCategory = from p in context.Products.AsNoTracking()
@@ -588,7 +588,7 @@ Można przełączyć tryb zapytania na NoTracking poprzez łańcuch wywołania m
 
 ```
 
-#### <a name="512-disabling-change-tracking-at-the-query-level-using-objectcontext"></a>5.1.2 Wyłączenie śledzenia zmian na poziomie zapytania przy użyciu obiektu ObjectContext
+#### <a name="512-disabling-change-tracking-at-the-query-level-using-objectcontext"></a>5.1.2 Wyłączanie śledzenia zmian na poziomie zapytania przy użyciu objectcontext
 
 ``` csharp
     var productsForCategory = from p in context.Products
@@ -598,7 +598,7 @@ Można przełączyć tryb zapytania na NoTracking poprzez łańcuch wywołania m
     ((ObjectQuery)productsForCategory).MergeOption = MergeOption.NoTracking;
 ```
 
-#### <a name="513-disabling-change-tracking-for-an-entire-entity-set-using-objectcontext"></a>5.1.3 wyłączenie śledzenia zmian dla całego zestawu jednostek przy użyciu obiektu ObjectContext
+#### <a name="513-disabling-change-tracking-for-an-entire-entity-set-using-objectcontext"></a>5.1.3 Wyłączanie śledzenia zmian dla całego zestawu jednostek przy użyciu objectcontext
 
 ``` csharp
     context.Products.MergeOption = MergeOption.NoTracking;
@@ -608,40 +608,40 @@ Można przełączyć tryb zapytania na NoTracking poprzez łańcuch wywołania m
                                 select p;
 ```
 
-### <a name="52test-metrics-demonstrating-the-performance-benefit-of-notracking-queries"></a>5,2 metryki testów ukazujące korzyść wydajności dla zapytań NoTracking
+### <a name="52test-metrics-demonstrating-the-performance-benefit-of-notracking-queries"></a>5.2 Metryki testów demonstrujące korzyści z wydajności zapytań NoTracking
 
-W tym teście Przyjrzyjmy się kosztowi wypełniania obiektu ObjectStateManager, porównując śledzenie z zapytaniami NoTracking model systemu Navision. Zapoznaj się z załącznikiem opis modelu systemu Navision i typy zapytań, które zostały wykonane. W tym teście wykonujemy iterację na liście zapytań i wykonują każde jeden raz. Uruchomiono dwie odmiany testu, raz z zapytania NoTracking i raz z domyślną opcją scalania "AppendOnly". Każda zmiana została uruchomiona 3 razy i ma wartość średnia dla przebiegów. Między testami czyścimy pamięć podręczną zapytań na SQL Server i zmniejszamy bazę danych tempdb, uruchamiając następujące polecenia:
+W tym teście przyjrzymy się kosztowi wypełnienia ObjectStateManager, porównując śledzenie do zapytań NoTracking dla modelu Systemu Navision. Zobacz dodatek opis modelu systemu Navision i typów zapytań, które zostały wykonane. W tym teście możemy iterować za pośrednictwem listy zapytań i wykonać każdy z nich raz. Uruchomiliśmy dwie odmiany testu, raz z zapytaniami NoTracking i raz z domyślną opcją scalania "AppendOnly". Uruchomiliśmy każdą odmianę 3 razy i przyjmujemy średnią wartość przebiegów. Między testami czyścimy pamięć podręczną zapytań na serwerze SQL Server i zmniejszamy tempdb, uruchamiając następujące polecenia:
 
-1.  POLECENIE DBCC DROPCLEANBUFFERS
-2.  POLECENIE DBCC FREEPROCCACHE
+1.  DBCC DROPCLEANBUFFERS
+2.  DBCC FREEPROCCACHE
 3.  DBCC SHRINKDATABASE (tempdb, 0)
 
-Wyniki testów, mediana nad 3 uruchomieniami:
+Wyniki badań, mediana ponad 3 przebiegów:
 
-|                        | BRAK ŚLEDZENIA — ZESTAW ROBOCZY | BEZ ŚLEDZENIA — CZAS | TYLKO DOŁĄCZANIE — ZESTAW ROBOCZY | TYLKO DOŁĄCZ — CZAS |
+|                        | BRAK ŚLEDZENIA – ZESTAW ROBOCZY | BRAK ŚLEDZENIA – CZAS | TYLKO DOŁĄCZ — ZESTAW ROBOCZY | TYLKO DOŁĄCZ — CZAS |
 |:-----------------------|:--------------------------|:-------------------|:--------------------------|:-------------------|
-| **Entity Framework 5** | 460361728                 | 1163536 MS         | 596545536                 | 1273042 MS         |
-| **Entity Framework 6** | 647127040                 | 190228 MS          | 832798720                 | 195521 MS          |
+| **Struktura jednostek 5** | 460361728                 | 1163536 ms         | 596545536                 | 1273042 ms         |
+| **Entity Framework 6** | 647127040                 | 190228 ms          | 832798720                 | 195521 ms          |
 
-Program Entity Framework 5 będzie miał mniejsze ilości pamięci na końcu uruchomienia niż Entity Framework 6. Dodatkowa pamięć używana przez Entity Framework 6 to wynik dodatkowych struktur pamięci i kodu, który umożliwia korzystanie z nowych funkcji i lepszą wydajność.
+Entity Framework 5 będzie miał mniejszy rozmiar pamięci na końcu przebiegu niż Entity Framework 6 nie. Dodatkowa pamięć zużywana przez entity framework 6 jest wynikiem dodatkowych struktur pamięci i kodu, które umożliwiają nowe funkcje i lepszą wydajność.
 
-W przypadku korzystania z obiektu ObjectStateManager istnieje również wyraźna różnica w pamięci. Entity Framework 5 zwiększono swoje rozmiary o 30% podczas śledzenia wszystkich jednostek, z których korzystamy z bazy danych. Entity Framework 6 zwiększono jego rozmiary o 28% w tym czasie.
+Istnieje również wyraźna różnica w pamięci footprint podczas korzystania ObjectStateManager. Entity Framework 5 zwiększył swój ślad o 30% podczas śledzenia wszystkich jednostek, które zmaterializowaliśmy się z bazy danych. Entity Framework 6 zwiększyła swój ślad o 28% w tym celu.
 
-W czasie Entity Framework 6 przeprowadzi Entity Framework 5 w tym teście o duży margines. Entity Framework 6 zakończył test w około 16% czasu zużyty przez Entity Framework 5. Ponadto Entity Framework 5 trwa o 9% więcej czasu, gdy obiekt ObjectStateManager jest używany. W porównaniu Entity Framework 6 jest używany przez 3% więcej czasu przy użyciu obiektu ObjectStateManager.
+Pod względem czasu entity framework 6 przewyższa entity framework 5 w tym teście przez duży margines. Entity Framework 6 zakończył test w około 16% czasu zużywanego przez entity framework 5. Ponadto Entity Framework 5 zajmuje 9% więcej czasu, aby zakończyć, gdy ObjectStateManager jest używany. Dla porównania Entity Framework 6 używa 3% więcej czasu podczas korzystania ObjectStateManager.
 
-## <a name="6-query-execution-options"></a>6 opcji wykonywania zapytania
+## <a name="6-query-execution-options"></a>6 Opcje wykonywania kwerend
 
-Entity Framework oferuje kilka różnych sposobów wykonywania zapytań. Zapoznaj się z następującymi opcjami, porównaj zalety i wady każdego z nich i sprawdź ich charakterystykę wydajności:
+Entity Framework oferuje kilka różnych sposobów wykonywania zapytań. Przyjrzymy się następującym opcjom, porównamy zalety i minusy każdego z nich i zbadamy ich charakterystykę wydajności:
 
--   LINQ to Entities.
--   Brak śledzenia LINQ to Entities.
--   Entity SQL w ObjectQuery.
--   Entity SQL w EntityCommand.
+-   LINQ do jednostek.
+-   Brak śledzenia LINQ do jednostek.
+-   Entity SQL przez ObjectQuery.
+-   Entity SQL za pośrednictwem entityCommand.
 -   ExecuteStoreQuery.
 -   SqlQuery.
 -   CompiledQuery.
 
-### <a name="61-linq-to-entities-queries"></a>6,1 zapytań LINQ to Entities
+### <a name="61-linq-to-entities-queries"></a>6.1 LINQ do jednostek kwerendy
 
 ``` csharp
 var q = context.Products.Where(p => p.Category.CategoryName == "Beverages");
@@ -649,27 +649,27 @@ var q = context.Products.Where(p => p.Category.CategoryName == "Beverages");
 
 **Zalety**
 
--   Odpowiednie dla operacji CUD.
--   W pełni materiałowe obiekty.
--   Najprostszym sposobem pisać składnią wbudowaną w język programowania.
+-   Nadaje się do operacji CUD.
+-   W pełni zmaterializowane obiekty.
+-   Najprostsze do zapisu ze składnią wbudowaną w język programowania.
 -   Dobra wydajność.
 
 **Wady**
 
--   Niektóre ograniczenia techniczne, takie jak:
-    -   Wzorce używające DefaultIfEmpty dla zapytań SPRZĘŻENIa zewnętrznego powodują bardziej skomplikowane zapytania niż proste instrukcje zewnętrznego SPRZĘŻENIa w Entity SQL.
-    -   Nadal nie można używać takich jak z ogólnym dopasowaniem do wzorca.
+-   Pewne ograniczenia techniczne, takie jak:
+    -   Wzorce przy użyciu DefaultIfEmpty dla kwerend SPRZĘŻENIA ZEWNĘTRZNEGO spowodować bardziej złożone kwerendy niż proste zewnętrzne join instrukcji w entity SQL.
+    -   Nadal nie można używać LIKE z ogólnego dopasowania wzorca.
 
-### <a name="62-no-tracking-linq-to-entities-queries"></a>6,2 Brak śledzenia zapytań LINQ to Entities
+### <a name="62-no-tracking-linq-to-entities-queries"></a>6.2 Brak śledzenia LINQ do zapytań jednostek
 
-Gdy kontekst dziedziczy:
+Gdy kontekst wywodzi ObjectContext:
 
 ``` csharp
 context.Products.MergeOption = MergeOption.NoTracking;
 var q = context.Products.Where(p => p.Category.CategoryName == "Beverages");
 ```
 
-Gdy kontekst dziedziczy DbContext:
+Gdy kontekst wywodzi DbContext:
 
 ``` csharp
 var q = context.Products.AsNoTracking()
@@ -678,26 +678,26 @@ var q = context.Products.AsNoTracking()
 
 **Zalety**
 
--   Zwiększona wydajność przez zwykłe zapytania LINQ.
--   W pełni materiałowe obiekty.
--   Najprostszym sposobem pisać składnią wbudowaną w język programowania.
+-   Zwiększona wydajność w stosunku do zwykłych zapytań LINQ.
+-   W pełni zmaterializowane obiekty.
+-   Najprostsze do zapisu ze składnią wbudowaną w język programowania.
 
 **Wady**
 
--   Nieodpowiednie dla operacji CUD.
--   Niektóre ograniczenia techniczne, takie jak:
-    -   Wzorce używające DefaultIfEmpty dla zapytań SPRZĘŻENIa zewnętrznego powodują bardziej skomplikowane zapytania niż proste instrukcje zewnętrznego SPRZĘŻENIa w Entity SQL.
-    -   Nadal nie można używać takich jak z ogólnym dopasowaniem do wzorca.
+-   Nie nadaje się do operacji CUD.
+-   Pewne ograniczenia techniczne, takie jak:
+    -   Wzorce przy użyciu DefaultIfEmpty dla kwerend SPRZĘŻENIA ZEWNĘTRZNEGO spowodować bardziej złożone kwerendy niż proste zewnętrzne join instrukcji w entity SQL.
+    -   Nadal nie można używać LIKE z ogólnego dopasowania wzorca.
 
-Należy zauważyć, że zapytania, które właściwości skalarne projektu nie są śledzone, nawet jeśli nie jest określone NoTracking. Na przykład:
+Należy zauważyć, że kwerendy, które projekt właściwości skalarne nie są śledzone, nawet jeśli NoTracking nie jest określony. Przykład:
 
 ``` csharp
 var q = context.Products.Where(p => p.Category.CategoryName == "Beverages").Select(p => new { p.ProductName });
 ```
 
-To konkretne zapytanie nie określa jawnie elementu NoTracking, ale ponieważ nie materializacji typu, który jest znany przez menedżera stanu obiektów, wówczas materiałowy wynik nie jest śledzony.
+Ta określona kwerenda nie jawnie określić, że NoTracking, ale ponieważ nie materializing typu, który jest znany menedżerowi stanu obiektu następnie zmaterializowany wynik nie jest śledzony.
 
-### <a name="63-entity-sql-over-an-objectquery"></a>6,3 Entity SQL w ObjectQuery
+### <a name="63-entity-sql-over-an-objectquery"></a>6.3 Entity SQL za pośrednictwem zapytania obiektów
 
 ``` csharp
 ObjectQuery<Product> products = context.Products.Where("it.Category.CategoryName = 'Beverages'");
@@ -705,15 +705,15 @@ ObjectQuery<Product> products = context.Products.Where("it.Category.CategoryName
 
 **Zalety**
 
--   Odpowiednie dla operacji CUD.
--   W pełni materiałowe obiekty.
--   Obsługuje buforowanie planu zapytania.
+-   Nadaje się do operacji CUD.
+-   W pełni zmaterializowane obiekty.
+-   Obsługuje buforowanie planu kwerend.
 
 **Wady**
 
--   Obejmuje ciągi kwerend tekstowych, które są bardziej podatne na błędy użytkownika niż konstrukcje zapytań wbudowane w język.
+-   Obejmuje tekstowych ciągów zapytań, które są bardziej podatne na błąd użytkownika niż konstrukcje zapytań wbudowane w język.
 
-### <a name="64-entity-sql-over-an-entity-command"></a>6,4 Entity SQL za pomocą polecenia Entity
+### <a name="64-entity-sql-over-an-entity-command"></a>6.4 Sql jednostki za pośrednictwem polecenia jednostki
 
 ``` csharp
 EntityCommand cmd = eConn.CreateCommand();
@@ -730,15 +730,15 @@ using (EntityDataReader reader = cmd.ExecuteReader(CommandBehavior.SequentialAcc
 
 **Zalety**
 
--   Obsługuje buforowanie planu zapytania w programie .NET 4,0 (buforowanie planu jest obsługiwane przez wszystkie inne typy zapytań w programie .NET 4,5).
+-   Obsługuje buforowanie planu kwerend w programie .NET 4.0 (buforowanie planu jest obsługiwane przez wszystkie inne typy zapytań w programie .NET 4.5).
 
 **Wady**
 
--   Obejmuje ciągi kwerend tekstowych, które są bardziej podatne na błędy użytkownika niż konstrukcje zapytań wbudowane w język.
--   Nieodpowiednie dla operacji CUD.
--   Wyniki nie są automatycznie materiałowe i muszą zostać odczytane z czytnika danych.
+-   Obejmuje tekstowych ciągów zapytań, które są bardziej podatne na błąd użytkownika niż konstrukcje zapytań wbudowane w język.
+-   Nie nadaje się do operacji CUD.
+-   Wyniki nie są automatycznie materializowane i muszą być odczytywane z czytnika danych.
 
-### <a name="65-sqlquery-and-executestorequery"></a>6,5 sqlQuery i ExecuteStoreQuery
+### <a name="65-sqlquery-and-executestorequery"></a>6.5 Zapytania sqlquery i executestorequery
 
 SqlQuery w bazie danych:
 
@@ -747,7 +747,7 @@ SqlQuery w bazie danych:
 var q1 = context.Database.SqlQuery<Product>("select * from products");
 ```
 
-SqlQuery w Nieogólnymi:
+SqlQuery na DbSet:
 
 ``` csharp
 // use this to obtain entities and have them tracked
@@ -766,17 +766,17 @@ var beverages = context.ExecuteStoreQuery<Product>(
 
 **Zalety**
 
--   Zazwyczaj najszybszą wydajność, ponieważ kompilator planu jest pomijany.
--   W pełni materiałowe obiekty.
--   Odpowiednie dla operacji CUD, gdy są używane z Nieogólnymi.
+-   Ogólnie najszybsza wydajność, ponieważ kompilator planu jest pomijany.
+-   W pełni zmaterializowane obiekty.
+-   Nadaje się do operacji CUD, gdy jest używany z zestawu DbSet.
 
 **Wady**
 
 -   Zapytanie jest tekstowe i podatne na błędy.
--   Zapytanie jest powiązane z określonym zapleczem przy użyciu semantyki magazynu zamiast semantyki koncepcyjnej.
--   Gdy jest obecny dziedziczenie, zapytanie Handcrafted musi uwzględnić warunki mapowania dla żądanego typu.
+-   Kwerenda jest powiązana z określonym zapleczem przy użyciu semantyki magazynu zamiast semantyki koncepcyjnej.
+-   Gdy dziedziczenie jest obecny, ręcznie kwerendy musi uwzględnić warunki mapowania dla żądanego typu.
 
-### <a name="66-compiledquery"></a>6,6 CompiledQuery
+### <a name="66-compiledquery"></a>6.6 CompiledQuery
 
 ``` csharp
 private static readonly Func<NorthwindEntities, string, IQueryable<Product>> productsForCategoryCQ = CompiledQuery.Compile(
@@ -789,159 +789,159 @@ var q = context.InvokeProductsForCategoryCQ("Beverages");
 
 **Zalety**
 
--   Zapewnia wzrost wydajności do 7% w porównaniu do zwykłych zapytań LINQ.
--   W pełni materiałowe obiekty.
--   Odpowiednie dla operacji CUD.
+-   Zapewnia do 7% poprawę wydajności w porównaniu do zwykłych zapytań LINQ.
+-   W pełni zmaterializowane obiekty.
+-   Nadaje się do operacji CUD.
 
 **Wady**
 
--   Zwiększona złożoność i narzuty związane z programowaniem.
--   Zwiększenie wydajności jest tracone podczas redagowania na skompilowanym zapytaniu.
+-   Zwiększona złożoność i obciążenie programistyczne.
+-   Poprawa wydajności jest tracona podczas tworzenia na szczycie skompilowanego zapytania.
 -   Niektóre zapytania LINQ nie mogą być zapisywane jako CompiledQuery — na przykład projekcje typów anonimowych.
 
-### <a name="67-performance-comparison-of-different-query-options"></a>Porównanie wydajności 6,7 różnych opcji zapytania
+### <a name="67-performance-comparison-of-different-query-options"></a>6.7 Porównanie wydajności różnych opcji zapytań
 
-Proste mikrotesty, w których nie upłynął limit czasu tworzenia kontekstu, zostały wprowadzone do testu. Mierzy zapytania o 5000 razy dla zestawu niebuforowanych jednostek w środowisku kontrolowanym. Te liczby mają być pobierane z ostrzeżeniem: nie odzwierciedlają rzeczywistej liczby wyprodukowanej przez aplikację, ale zamiast tego są bardzo precyzyjne pomiary, jaka jest różnica wydajności, gdy porównywane są różne opcje zapytania jabłka do jabłek, z wyłączeniem kosztów tworzenia nowego kontekstu.
+Proste mikrobenchmarki, w których tworzenie kontekstu nie zostało wystawione, zostały wystawione na próbę. Zmierzyliśmy kwerendy 5000 razy dla zestawu jednostek nie buforowanych w kontrolowanym środowisku. Liczby te należy traktować z ostrzeżeniem: nie odzwierciedlają rzeczywistych liczb produkowanych przez aplikację, ale zamiast tego są bardzo dokładnym pomiarem, ile różnicy w wydajności występuje, gdy różne opcje zapytań są porównywane z jabłkami do jabłek, z wyłączeniem kosztów utworzenia nowego kontekstu.
 
-| BIEŻĄCO  | Testowanie                                 | Czas (MS) | Memory (Pamięć)   |
+| Ef  | Testowanie                                 | Czas (ms) | Memory (Pamięć)   |
 |:----|:-------------------------------------|:----------|:---------|
-| EF5 | Obiekt ObjectContext ESQL                   | 2414      | 38801408 |
-| EF5 | Zapytanie ObjectContext LINQ             | 2692      | 38277120 |
-| EF5 | Brak śledzenia zapytania DbContext LINQ     | 2818      | 41840640 |
-| EF5 | Zapytanie DbContext LINQ                 | 2930      | 41771008 |
-| EF5 | Zapytanie ObjectContext LINQ bez śledzenia | 3013      | 38412288 |
+| EF5 | ObiektContext ESQL                   | 2414      | 38801408 |
+| EF5 | Zapytanie Linq ocontexta obiektu             | 2692      | 38277120 |
+| EF5 | DbContext Linq Kwerenda nie śledzenie     | 2818      | 41840640 |
+| EF5 | Kwerenda Linq DbContext                 | 2930      | 41771008 |
+| EF5 | ObjectContext Linq Kwerenda bez śledzenia | 3013      | 38412288 |
 |     |                                      |           |          |
-| EF6 | Obiekt ObjectContext ESQL                   | 2059      | 46039040 |
-| EF6 | Zapytanie ObjectContext LINQ             | 3074      | 45248512 |
-| EF6 | Brak śledzenia zapytania DbContext LINQ     | 3125      | 47575040 |
-| EF6 | Zapytanie DbContext LINQ                 | 3420      | 47652864 |
-| EF6 | Zapytanie ObjectContext LINQ bez śledzenia | 3593      | 45260800 |
+| EF6 | ObiektContext ESQL                   | 2059      | 46039040 |
+| EF6 | Zapytanie Linq ocontexta obiektu             | 3074      | 45248512 |
+| EF6 | DbContext Linq Kwerenda nie śledzenie     | 3125      | 47575040 |
+| EF6 | Kwerenda Linq DbContext                 | 3420      | 47652864 |
+| EF6 | ObjectContext Linq Kwerenda bez śledzenia | 3593      | 45260800 |
 
-![EF5 mikroporównawcze, 5000 iteracji](~/ef6/media/ef5micro5000warm.png)
+![Mikroprocesory EF5, 5000 ciepłych iteracji](~/ef6/media/ef5micro5000warm.png)
 
-![EF6 mikroporównawcze, 5000 iteracji](~/ef6/media/ef6micro5000warm.png)
+![Mikroprocesory EF6, 5000 ciepłych iteracji](~/ef6/media/ef6micro5000warm.png)
 
-Mikrotesty są bardzo poufne dla małych zmian w kodzie. W takim przypadku różnica między kosztami Entity Framework 5 i Entity Framework 6 jest spowodowana dodaniem [przechwycenia](~/ef6/fundamentals/logging-and-interception.md) i zmian [transakcyjnych](~/ef6/saving/transactions.md). Te mikrotestowe numery, jednak stanowią wzmocną wizję do bardzo małego fragmentu Entity Framework. Rzeczywiste scenariusze zapytań ciepłej nie powinny mieć zastosowania regresji wydajności podczas uaktualniania z Entity Framework 5 do Entity Framework 6.
+Microbenchmarks są bardzo wrażliwe na małe zmiany w kodzie. W tym przypadku różnica między kosztami entity Framework 5 i Entity Framework 6 wynika z dodania [przechwycenia](~/ef6/fundamentals/logging-and-interception.md) i [ulepszeń transakcyjnych.](~/ef6/saving/transactions.md) Te liczby microbenchmarks, jednak są wzmocnione wizji w bardzo mały fragment tego, co Entity Framework nie. Rzeczywistych scenariuszy ciepłych zapytań nie powinny widzieć regresji wydajności podczas uaktualniania z entity framework 5 do entity framework 6.
 
-Aby porównać rzeczywistą wydajność różnych opcji zapytania, utworzyliśmy 5 oddzielnych odmian testowych, w których używamy innej opcji zapytania, aby wybrać wszystkie produkty, których nazwa kategorii to "napoje". Każda iteracja obejmuje koszt tworzenia kontekstu, a koszt materializacji wszystkich zwracanych jednostek. 10 iteracji jest wykonywanych przed upływem sumy 1000 iteracji czasowych. Wyświetlane wyniki to mediana, wykonywana z 5 przebiegów każdego testu. Aby uzyskać więcej informacji, zobacz dodatek B, który zawiera kod dla testu.
+Aby porównać rzeczywistą wydajność różnych opcji zapytań, utworzyliśmy 5 oddzielnych odmian testowych, w których używamy innej opcji zapytania, aby wybrać wszystkie produkty, których nazwa kategorii to "Napoje". Każda iteracja zawiera koszt utworzenia kontekstu i koszt materializacji wszystkich zwróconych jednostek. 10 iteracji są uruchamiane bezterminowe przed podjęciem sumy 1000 iteracji czasowych. Przedstawione wyniki to mediana przebiegu pobrana z 5 przebiegów każdego testu. Aby uzyskać więcej informacji, zobacz dodatek B, który zawiera kod testu.
 
-| BIEŻĄCO  | Testowanie                                        | Czas (MS) | Memory (Pamięć)   |
+| Ef  | Testowanie                                        | Czas (ms) | Memory (Pamięć)   |
 |:----|:--------------------------------------------|:----------|:---------|
-| EF5 | ObjectContext Entity — polecenie                | 621       | 39350272 |
-| EF5 | Zapytanie SQL DbContext w bazie danych             | 825       | 37519360 |
+| EF5 | Polecenie Encja ObjectContext                | 621       | 39350272 |
+| EF5 | DbContext Sql Query w bazie danych             | 825       | 37519360 |
 | EF5 | Zapytanie magazynu ObjectContext                   | 878       | 39460864 |
-| EF5 | Zapytanie ObjectContext LINQ bez śledzenia        | 969       | 38293504 |
-| EF5 | Zapytanie jednostki obiektu ObjectContext programu SQL using | 1089      | 38981632 |
-| EF5 | Zapytanie skompilowane obiektu ObjectContext                | 1099      | 38682624 |
-| EF5 | Zapytanie ObjectContext LINQ                    | 1152      | 38178816 |
-| EF5 | Brak śledzenia zapytania DbContext LINQ            | 1208      | 41803776 |
-| EF5 | Zapytanie SQL DbContext dotyczące Nieogólnymi                | 1414      | 37982208 |
-| EF5 | Zapytanie DbContext LINQ                        | 1574      | 41738240 |
+| EF5 | ObjectContext Linq Kwerenda bez śledzenia        | 969       | 38293504 |
+| EF5 | ObjectContext Entity Sql przy użyciu kwerendy obiektu | 1089      | 38981632 |
+| EF5 | Zapytanie skompilowane w programie ObjectContext                | 1099      | 38682624 |
+| EF5 | Zapytanie Linq ocontexta obiektu                    | 1152      | 38178816 |
+| EF5 | DbContext Linq Kwerenda nie śledzenie            | 1208      | 41803776 |
+| EF5 | DbContext Sql Query na dbset                | 1414      | 37982208 |
+| EF5 | Kwerenda Linq DbContext                        | 1574      | 41738240 |
 |     |                                             |           |          |
-| EF6 | ObjectContext Entity — polecenie                | 480       | 47247360 |
+| EF6 | Polecenie Encja ObjectContext                | 480       | 47247360 |
 | EF6 | Zapytanie magazynu ObjectContext                   | 493       | 46739456 |
-| EF6 | Zapytanie SQL DbContext w bazie danych             | 614       | 41607168 |
-| EF6 | Zapytanie ObjectContext LINQ bez śledzenia        | 684       | 46333952 |
-| EF6 | Zapytanie jednostki obiektu ObjectContext programu SQL using | 767       | 48865280 |
-| EF6 | Zapytanie skompilowane obiektu ObjectContext                | 788       | 48467968 |
-| EF6 | Brak śledzenia zapytania DbContext LINQ            | 878       | 47554560 |
-| EF6 | Zapytanie ObjectContext LINQ                    | 953       | 47632384 |
-| EF6 | Zapytanie SQL DbContext dotyczące Nieogólnymi                | 1023      | 41992192 |
-| EF6 | Zapytanie DbContext LINQ                        | 1290      | 47529984 |
+| EF6 | DbContext Sql Query w bazie danych             | 614       | 41607168 |
+| EF6 | ObjectContext Linq Kwerenda bez śledzenia        | 684       | 46333952 |
+| EF6 | ObjectContext Entity Sql przy użyciu kwerendy obiektu | 767       | 48865280 |
+| EF6 | Zapytanie skompilowane w programie ObjectContext                | 788       | 48467968 |
+| EF6 | DbContext Linq Kwerenda nie śledzenie            | 878       | 47554560 |
+| EF6 | Zapytanie Linq ocontexta obiektu                    | 953       | 47632384 |
+| EF6 | DbContext Sql Query na dbset                | 1023      | 41992192 |
+| EF6 | Kwerenda Linq DbContext                        | 1290      | 47529984 |
 
 
-![Iteracje EF5 ciepłych zapytań 1000](~/ef6/media/ef5warmquery1000.png)
+![EF5 ciepłe zapytanie 1000 iteracji](~/ef6/media/ef5warmquery1000.png)
 
-![Iteracje EF6 ciepłych zapytań 1000](~/ef6/media/ef6warmquery1000.png)
+![EF6 ciepłe zapytanie 1000 iteracji](~/ef6/media/ef6warmquery1000.png)
 
 > [!NOTE]
-> W celu zapewnienia kompletności dodaliśmymy odmianę, w której wykonujemy Entity SQL zapytanie na EntityCommand. Jednak ze względu na to, że wyniki nie są istotne dla takich zapytań, porównanie nie jest koniecznie jabłek do jabłek. Test obejmuje bliskie przybliżenie do materializacji, aby spróbować uzyskać bardziej atrakcyjny wynik porównania.
+> Aby uzyskać kompletność, uwzględniliśmy odmianę, w której wykonujemy kwerendę SQL jednostki na entityCommand. Jednak ponieważ wyniki nie są zmaterializowane dla takich zapytań, porównanie nie jest koniecznie jabłka do jabłek. Test zawiera bliskie przybliżenie do materializacji, aby spróbować uczynić porównanie bardziej sprawiedliwym.
 
-W tym kompleksowym przypadku Entity Framework 6 przeprowadzi Entity Framework 5 z powodu ulepszeń wydajności dla kilku części stosu, takich jak znacznie jaśniejsze inicjalizacje DbContext i szybsze wyszukiwanie w usłudze sqldatacollection&lt;T&gt;.
+W tym przypadku end-to-end Entity Framework 6 przewyższa Entity Framework 5 ze względu na poprawę wydajności na kilka części stosu, w&lt;&gt; tym znacznie lżejsze inicjowanie DbContext i szybsze wyszukiwania MetadataCollection T.
 
-## <a name="7-design-time-performance-considerations"></a>7 zagadnienia dotyczące wydajności w czasie projektowania
+## <a name="7-design-time-performance-considerations"></a>7 Zagadnienia dotyczące wydajności czasu projektowania
 
-### <a name="71-inheritance-strategies"></a>7,1 strategie dziedziczenia
+### <a name="71-inheritance-strategies"></a>7.1 Strategie dziedziczenia
 
-W przypadku korzystania z Entity Framework jest stosowana strategia dziedziczenia. Entity Framework obsługuje 3 podstawowe typy dziedziczenia i ich kombinacje:
+Inną kwestią wydajności podczas korzystania z entity framework jest strategia dziedziczenia, którego używasz. Entity Framework obsługuje 3 podstawowe typy dziedziczenia i ich kombinacje:
 
--   Tabela na hierarchię (TPH) — gdzie poszczególne ustawienia dziedziczenia są mapowane na tabelę z kolumną rozróżniacza, aby wskazać, który konkretny typ w hierarchii jest reprezentowany w wierszu.
--   Tabela na typ (TPT) — gdzie każdy typ ma własną tabelę w bazie danych; tabele podrzędne definiują tylko kolumny, które nie zawierają tabeli nadrzędnej.
--   Tabela na klasę (TPC) — gdzie każdy typ ma własną pełną tabelę w bazie danych; tabele podrzędne definiują wszystkie pola, włącznie z tymi zdefiniowanymi w typach nadrzędnych.
+-   Tabela według hierarchii (TPH) — gdzie każdy zestaw dziedziczenia jest mapowany do tabeli z kolumną dyskryminującą, aby wskazać, który typ w hierarchii jest reprezentowany w wierszu.
+-   Tabela na typ (TPT) — gdzie każdy typ ma własną tabelę w bazie danych; tabele podrzędne definiują tylko kolumny, których tabela nadrzędna nie zawiera.
+-   Tabela na klasę (TPC) — gdzie każdy typ ma własną pełną tabelę w bazie danych; tabele podrzędne definiują wszystkie ich pola, w tym te zdefiniowane w typach nadrzędnych.
 
-Jeśli model używa dziedziczenia TPT, generowane zapytania będą bardziej skomplikowane niż te, które są generowane z innymi strategiami dziedziczenia, co może spowodować dłuższe czasy wykonywania w sklepie.  Zazwyczaj generowanie zapytań w modelu TPT i zmaterializowania obiektów powstających zajmuje więcej czasu.
+Jeśli model używa dziedziczenia TPT, kwerendy, które są generowane będą bardziej złożone niż te, które są generowane z innymi strategiami dziedziczenia, co może spowodować dłuższe czasy wykonywania w magazynie.Zazwyczaj trwa dłużej, aby wygenerować zapytania za w modelu TPT i zmaterializować wynikowe obiekty.
 
-Zapoznaj się z tematem dziedziczenie "zagadnienia dotyczące wydajności Entity Framework w przypadku korzystania z TPT (tabela na typ)" w blogu MSDN: \<http://blogs.msdn.com/b/adonet/archive/2010/08/17/performance-considerations-when-using-tpt-table-per-type-inheritance-in-the-entity-framework.aspx>.
+Zobacz wpis w blogu \< https://docs.microsoft.com/archive/blogs/adonet/performance-considerations-when-using-tpt-table-per-type-inheritance-in-the-entity-framework>MSDN "Zagadnienia dotyczące wydajności podczas korzystania z dziedziczenia TPT (tabela na typ) w ramach encji: .
 
-#### <a name="711-avoiding-tpt-in-model-first-or-code-first-applications"></a>7.1.1 unikanie TPT w aplikacjach Model First lub Code First
+#### <a name="711-avoiding-tpt-in-model-first-or-code-first-applications"></a>7.1.1 Unikanie TPT w aplikacjach Model First lub Code First
 
-Gdy tworzysz model dla istniejącej bazy danych, która ma schemat TPT, nie masz wielu opcji. Ale podczas tworzenia aplikacji przy użyciu Model First lub Code First należy unikać dziedziczenia TPT w przypadku problemów z wydajnością.
+Podczas tworzenia modelu za cie za ną bazę danych, która ma schemat TPT, nie masz wielu opcji. Ale podczas tworzenia aplikacji przy użyciu modelu pierwszy lub code first, należy unikać dziedziczenia TPT dla problemów z wydajnością.
 
-W przypadku korzystania z Model First w Kreatorze Entity Designer zostanie TPT do dowolnego dziedziczenia w modelu. Jeśli chcesz przełączyć się na strategię dziedziczenia TPH z Model First, możesz użyć opcji "Entity Designer Database Generation Pack" dostępnej w galerii programu Visual Studio (\<http://visualstudiogallery.msdn.microsoft.com/df3541c3-d833-4b65-b942-989e7ec74c87/>).
+Korzystając z modelu najpierw w Kreatorze projektanta jednostek, otrzymasz TPT dla każdego dziedziczenia w modelu. Jeśli chcesz przełączyć się na strategię dziedziczenia TPH za pomocą modelu First, możesz użyć dodatku Power Pack "Power Pack generowania bazy danych projektanta jednostek" dostępnego w galerii programu Visual Studio ( \< http://visualstudiogallery.msdn.microsoft.com/df3541c3-d833-4b65-b942-989e7ec74c87/>).
 
-Przy użyciu Code First do konfigurowania mapowania modelu z dziedziczeniem, EF domyślnie będzie używać TPH, dlatego wszystkie jednostki w hierarchii dziedziczenia zostaną zmapowane do tej samej tabeli. Aby uzyskać więcej informacji, zobacz sekcję "mapowanie za pomocą interfejsu API Fluent" w artykule "Code First In Entity Framework 4.1" w witrynie MSDN Magazine ( [http://msdn.microsoft.com/magazine/hh126815.aspx](https://msdn.microsoft.com/magazine/hh126815.aspx)).
+Podczas korzystania z code first skonfigurować mapowanie modelu z dziedziczenia, EF będzie używać TPH domyślnie, w związku z tym wszystkie jednostki w hierarchii dziedziczenia będą mapowane do tej samej tabeli. Zobacz sekcję "Mapowanie za pomocą interfejsu API Fluent" w artykule "Code First [http://msdn.microsoft.com/magazine/hh126815.aspx](https://msdn.microsoft.com/magazine/hh126815.aspx)in Entity Framework4.1" w MSDN Magazine ( ) aby uzyskać więcej informacji.
 
-### <a name="72-upgrading-from-ef4-to-improve-model-generation-time"></a>7,2 uaktualnienie z EF4 w celu poprawienia czasu generowania modelu
+### <a name="72-upgrading-from-ef4-to-improve-model-generation-time"></a>7.2 Aktualizacja z EF4 w celu skrócenia czasu generowania modelu
 
-Specyficzna dla SQL Server poprawa algorytmu, który generuje warstwę magazynu (SSDL) modelu, jest dostępna w Entity Framework 5 i 6 oraz jako aktualizacja Entity Framework 4, gdy jest zainstalowany program Visual Studio 2010 SP1. Poniższe wyniki testów przedstawiają poprawę podczas generowania bardzo dużego modelu, w tym przypadku modelu systemu Navision. Aby uzyskać szczegółowe informacje na ten temat, zobacz Dodatek C.
+Ulepszenie specyficzne dla programu SQL Server do algorytmu, który generuje warstwę magazynu (SSDL) modelu jest dostępny w entity framework 5 i 6 i jako aktualizacja do entity framework 4 po zainstalowaniu programu Visual Studio 2010 SP1. Poniższe wyniki testów pokazują poprawę podczas generowania bardzo dużego modelu, w tym przypadku modelu systemu Navision. Zobacz dodatek C, aby uzyskać więcej informacji na ten temat.
 
 Model zawiera 1005 zestawów jednostek i 4227 zestawów skojarzeń.
 
-| Konfiguracja                              | Podział zużytego czasu                                                                                                                                               |
+| Konfigurowanie                              | Podział czasochłonnego                                                                                                                                               |
 |:-------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Visual Studio 2010, Entity Framework 4     | Generowanie SSDL: 2 godz. 27 min <br/> Generowanie mapowania: 1 sekunda <br/> Generowanie CSDL: 1 sekundę <br/> Generacja ObjectLayer: 1 sekunda <br/> Generowanie widoku: 2 godz. 14 min |
-| Visual Studio 2010 z dodatkiem SP1, Entity Framework 4 | Generowanie SSDL: 1 sekundę <br/> Generowanie mapowania: 1 sekunda <br/> Generowanie CSDL: 1 sekundę <br/> Generacja ObjectLayer: 1 sekunda <br/> Generowanie widoku: 1 HR 53 min   |
-| Visual Studio 2013, Entity Framework 5     | Generowanie SSDL: 1 sekundę <br/> Generowanie mapowania: 1 sekunda <br/> Generowanie CSDL: 1 sekundę <br/> Generacja ObjectLayer: 1 sekunda <br/> Generowanie widoku: 65 minut    |
-| Visual Studio 2013, Entity Framework 6     | Generowanie SSDL: 1 sekundę <br/> Generowanie mapowania: 1 sekunda <br/> Generowanie CSDL: 1 sekundę <br/> Generacja ObjectLayer: 1 sekunda <br/> Generowanie widoku: 28 sekund.   |
+| Visual Studio 2010, entity Framework 4     | Generacja SSDL: 2 godz. <br/> Generowanie mapowania: 1 sekunda <br/> Generowanie CSDL: 1 sekunda <br/> Generowanie warstwy obiektu: 1 sekunda <br/> Wyświetl generację: 2 h 14 min |
+| Visual Studio 2010 z dodatkem SP1, entity Framework 4 | Generacja SSDL: 1 sekunda <br/> Generowanie mapowania: 1 sekunda <br/> Generowanie CSDL: 1 sekunda <br/> Generowanie warstwy obiektu: 1 sekunda <br/> Wyświetl generację: 1 godz.   |
+| Visual Studio 2013, entity Framework 5     | Generacja SSDL: 1 sekunda <br/> Generowanie mapowania: 1 sekunda <br/> Generowanie CSDL: 1 sekunda <br/> Generowanie warstwy obiektu: 1 sekunda <br/> Wyświetl generację: 65 minut    |
+| Visual Studio 2013, entity Framework 6     | Generacja SSDL: 1 sekunda <br/> Generowanie mapowania: 1 sekunda <br/> Generowanie CSDL: 1 sekunda <br/> Generowanie warstwy obiektu: 1 sekunda <br/> Wyświetl generację: 28 sekund.   |
 
 
-Należy zauważyć, że podczas generowania SSDL, obciążenie jest niemal całkowicie wykorzystane na SQL Server, podczas gdy komputer deweloperski klienta oczekuje na wyniki z serwera. Przetwarzający powinny szczególnie poprawić te ulepszenia. Warto również zauważyć, że zasadniczo cały koszt generowania modelu odbywa się teraz.
+Warto zauważyć, że podczas generowania SSDL, obciążenie jest prawie w całości wydane na SQL Server, podczas gdy komputer deweloperujący klienta czeka bezczynnie na wyniki wrócić z serwera. PbA powinny szczególnie docenić tę poprawę. Warto również zauważyć, że zasadniczo cały koszt generowania modelu odbywa się teraz w View Generation.
 
-### <a name="73-splitting-large-models-with-database-first-and-model-first"></a>7,3 dzielenie dużych modeli przy użyciu Database First i Model First
+### <a name="73-splitting-large-models-with-database-first-and-model-first"></a>7.3 Dzielenie dużych modeli z bazą danych i pierwszym modelem
 
-W miarę wzrostu rozmiaru modelu powierzchnia projektanta zostaje zapełniony i trudno używać. Zazwyczaj rozważamy model z ponad 300 jednostkami, które są zbyt duże, aby efektywnie korzystać z projektanta. W poniższym wpisie w blogu opisano kilka opcji dzielenia dużych modeli: \<http://blogs.msdn.com/b/adonet/archive/2008/11/25/working-with-large-models-in-entity-framework-part-2.aspx>.
+Wraz ze wzrostem rozmiaru modelu powierzchnia projektanta staje się zaśmiecona i trudna w użyciu. Zazwyczaj uważamy, że model z więcej niż 300 jednostek jest zbyt duży, aby skutecznie używać projektanta. W poniższym wpisie w blogu opisano \< https://docs.microsoft.com/archive/blogs/adonet/working-with-large-models-in-entity-framework-part-2>kilka opcji dzielenia dużych modeli: .
 
-Wpis został zapisany dla pierwszej wersji Entity Framework, ale kroki nadal mają zastosowanie.
+Post został napisany dla pierwszej wersji entity framework, ale kroki nadal mają zastosowanie.
 
-### <a name="74-performance-considerations-with-the-entity-data-source-control"></a>7,4 zagadnienia dotyczące wydajności związane z kontrolą źródła danych jednostki
+### <a name="74-performance-considerations-with-the-entity-data-source-control"></a>7.4 Zagadnienia dotyczące wydajności związane z kontrolą źródła danych jednostki
 
-Widzimy przypadki w przypadku wielowątkowych testów wydajnościowych i obciążeniowych, w których wydajność aplikacji sieci Web przy użyciu formantu EntityDataSource pogorszy się. Podstawową przyczyną jest to, że obiekt EntityDataSource wielokrotnie wywołuje obiekt MetadataWorkspace. LoadFromAssembly na zestawach, do których odwołuje się aplikacja sieci Web, aby odnaleźć typy, które mają być używane jako jednostki.
+Widzieliśmy przypadki w wielowątkowych testów wydajności i warunków skrajnych, w których wydajność aplikacji sieci web przy użyciu EntityDataSource Control znacznie się pogarsza. Podstawową przyczyną jest to, że EntityDataSource wielokrotnie wywołuje MetadataWorkspace.LoadFromAssembly w zestawach, do których odwołuje się aplikacja sieci Web, aby odnajdować typy, które mają być używane jako jednostki.
 
-Rozwiązaniem jest ustawienie ContextTypeName obiektu EntityDataSource do nazwy typu klasy pochodnej ObjectContext. Powoduje to wyłączenie mechanizmu, który skanuje wszystkie przywoływane zestawy dla typów jednostek.
+Rozwiązaniem jest ustawienie ContextTypeName entityDataSource na nazwę typu pochodnej ObjectContext klasy. Spowoduje to wyłączenie mechanizmu, który skanuje wszystkie zestawy, do których istnieje odwołanie, w poszukiwaniu typów encji.
 
-Ustawienie pola ContextTypeName uniemożliwia również wystąpienie problemu funkcjonalnego, w którym obiekt EntityDataSource w programie .NET 4,0 zgłasza ReflectionTypeLoadException, gdy nie może załadować typu z zestawu za pomocą odbicia. Ten problem został rozwiązany w programie .NET 4,5.
+Ustawienie ContextTypeName pole zapobiega również problem funkcjonalny, gdzie EntityDataSource w .NET 4.0 zgłasza ReflectionTypeLoadException, gdy nie można załadować typu z zestawu za pomocą odbicia. Ten problem został rozwiązany w .NET 4.5.
 
-### <a name="75-poco-entities-and-change-tracking-proxies"></a>7,5 jednostek POCO i serwerów proxy śledzenia zmian
+### <a name="75-poco-entities-and-change-tracking-proxies"></a>7.5 Podmioty POCO i serwery proxy śledzenia zmian
 
-Entity Framework umożliwia korzystanie z niestandardowych klas danych razem z modelem danych bez wprowadzania jakichkolwiek modyfikacji klas danych. Oznacza to, że można użyć "zwykłych" obiektów CLR (POCO), takich jak istniejące obiekty domeny, z modelem danych. Te klasy danych POCO (nazywane również obiektami trwałości-ignorujących), które są mapowane na jednostki, które są zdefiniowane w modelu danych, obsługują większość tych samych zachowań zapytania, INSERT, Update i DELETE jako typy jednostek, które są generowane przez narzędzia Entity Data Model.
+Entity Framework umożliwia korzystanie z niestandardowych klas danych wraz z modelu danych bez wprowadzania żadnych zmian do samych klas danych. Oznacza to, że można użyć "zwykły stary" obiektów CLR (POCO), takich jak istniejące obiekty domeny, z modelu danych. Te klasy danych POCO (znane również jako obiekty ignorujące trwałość), które są mapowane na jednostki zdefiniowane w modelu danych, obsługują większość tych samych zachowań kwerendy, wstawiania, aktualizacji i usuwania jako typy jednostek, które są generowane przez narzędzia modelu danych jednostki.
 
-Entity Framework może również tworzyć klasy proxy pochodzące z typów POCO, które są używane do włączania funkcji, takich jak ładowanie z opóźnieniem i automatyczne śledzenie zmian w jednostkach POCO. Klasy POCO muszą spełniać pewne wymagania, aby zezwalać Entity Framework na korzystanie z serwerów proxy, zgodnie z opisem w tym miejscu: [http://msdn.microsoft.com/library/dd468057.aspx](https://msdn.microsoft.com/library/dd468057.aspx).
+Entity Framework można również utworzyć klasy proxy pochodzące z typów POCO, które są używane, gdy chcesz włączyć funkcje, takie jak ładowanie z opóźnieniem i automatyczne śledzenie zmian na jednostkach POCO. Klasy POCO muszą spełniać określone wymagania, aby umożliwić platformie Entity [http://msdn.microsoft.com/library/dd468057.aspx](https://msdn.microsoft.com/library/dd468057.aspx)Framework używanie serwerów proxy, zgodnie z opisem w tym miejscu: .
 
-Serwery proxy śledzenia szansy powiadomień będą powiadamiać menedżera stanu obiektów za każdym razem, gdy jego wartość zostanie zmieniona, więc Entity Framework wie o rzeczywistym stanie jednostek przez cały czas. Jest to realizowane przez dodanie zdarzeń powiadomień do treści metod metody ustawiającej właściwości i posiadanie przetwarzania takich zdarzeń przez menedżera stanu obiektów. Należy pamiętać, że utworzenie jednostki proxy będzie zazwyczaj droższe niż utworzenie jednostki POCO innej niż proxy z powodu dodanego zestawu zdarzeń utworzonych przez Entity Framework.
+Serwery proxy śledzenia szansy powiadomi menedżera stanu obiektu za każdym razem, gdy jakakolwiek z właściwości jednostek ma swoją wartość zmienioną, więc entity framework zna rzeczywisty stan jednostek przez cały czas. Odbywa się to przez dodanie zdarzeń powiadomień do treści metody ustawiacza właściwości i o menedżera stanu obiektu przetwarzania takich zdarzeń. Należy zauważyć, że tworzenie jednostki serwera proxy będzie zazwyczaj droższe niż tworzenie jednostki POCO bez serwera proxy ze względu na dodatkowy zestaw zdarzeń utworzonych przez entity framework.
 
-Gdy jednostka POCO nie ma serwera proxy śledzenia zmian, można znaleźć zmiany, porównując zawartość jednostek z kopią poprzedniego zapisanego stanu. To głębokie porównanie będzie długotrwałym procesem, gdy istnieje wiele jednostek w Twoim kontekście lub gdy jednostki mają bardzo dużą ilość właściwości, nawet jeśli żadna z nich nie zmieniła się od czasu ostatniego porównania.
+Gdy jednostka POCO nie ma serwera proxy śledzenia zmian, zmiany są znajdowanie przez porównanie zawartości encji z kopią poprzedniego zapisanego stanu. To głębokie porównanie stanie się procesem długotrwałym, gdy masz wiele jednostek w kontekście lub gdy jednostki mają bardzo dużą ilość właściwości, nawet jeśli żadna z nich nie zmieniła się od czasu ostatniego porównania.
 
-Podsumowanie: podczas tworzenia serwera proxy śledzenia zmian zostanie wypłacona wydajność, ale śledzenie zmian pomoże przyspieszyć proces wykrywania zmian, gdy jednostki będą mieć wiele właściwości lub jeśli w modelu istnieje wiele jednostek. W przypadku jednostek z małą liczbą właściwości, w których ilość jednostek nie rośnie zbyt wiele, posiadanie serwerów proxy śledzenia zmian może nie być dużo korzystne.
+Podsumowując: zapłacisz za trafienie wydajności podczas tworzenia serwera proxy śledzenia zmian, ale śledzenie zmian pomoże przyspieszyć proces wykrywania zmian, gdy jednostki mają wiele właściwości lub gdy masz wiele jednostek w modelu. Dla jednostek z niewielką liczbą właściwości, gdzie ilość jednostek nie rośnie zbyt wiele, o zmiany śledzenia serwerów proxy może nie być bardzo korzystne.
 
-## <a name="8-loading-related-entities"></a>8\. ładowanie powiązanych jednostek
+## <a name="8-loading-related-entities"></a>8 Ładowanie powiązanych jednostek
 
-### <a name="81-lazy-loading-vs-eager-loading"></a>8,1 ładowania opóźnionego a ładowanie eager
+### <a name="81-lazy-loading-vs-eager-loading"></a>8.1 Z opóźnieniem ładowanie vs. Zagosc.
 
-Entity Framework oferuje kilka różnych sposobów ładowania jednostek, które są powiązane z jednostką docelową. Na przykład podczas wykonywania zapytania dotyczącego produktów istnieją różne sposoby ładowania powiązanych zamówień do menedżera stanu obiektów. Z punktu widzenia wydajności największe pytanie, które należy wziąć pod uwagę podczas ładowania powiązanych jednostek, będzie używać ładowania z opóźnieniem lub ładowania eager.
+Entity Framework oferuje kilka różnych sposobów ładowania jednostek, które są powiązane z jednostką docelową. Na przykład podczas kwerendy dla produktów, istnieją różne sposoby, że powiązane zamówienia zostaną załadowane do Menedżera stanu obiektu. Z punktu widzenia wydajności największym pytaniem do rozważenia podczas ładowania powiązanych jednostek będzie użycie ładowania z opóźnieniem lub ładowanie chętni.
 
-Podczas ładowania eager powiązane jednostki są ładowane wraz z zestawem jednostek docelowych. Używasz instrukcji include w zapytaniu, aby wskazać, które powiązane jednostki mają zostać umieszczone.
+Podczas korzystania z funkcji Wczytywanie eager, powiązane jednostki są ładowane wraz z zestawem encji docelowej. Instrukcja Include w kwerendzie służy do wskazywania powiązanych encji, które chcesz wprowadzić.
 
-W przypadku używania ładowania z opóźnieniem początkowe zapytanie jest tylko w docelowym zestawie jednostek. Jednak za każdym razem, gdy uzyskujesz dostęp do właściwości nawigacji, w sklepie zostanie wystawione inne zapytanie w celu załadowania jednostki powiązanej.
+Podczas korzystania z opóźnieniem ładowania, początkowe zapytanie przynosi tylko w zestawie jednostek docelowych. Ale za każdym razem, gdy uzyskujesz dostęp do właściwości nawigacji, inna kwerenda jest wystawiana dla magazynu, aby załadować jednostkę pokrewną.
 
-Po załadowaniu jednostki wszelkie dalsze zapytania dotyczące jednostki będą ładować je bezpośrednio z menedżera stanu obiektów, niezależnie od tego, czy używasz ładowania z opóźnieniem, czy ładowania eager.
+Po załadowaniu jednostki wszelkie dalsze zapytania dla jednostki załadują ją bezpośrednio z Menedżera stanu obiektu, niezależnie od tego, czy używasz ładowania z opóźnieniem, czy też jest to wczesne ładowanie.
 
-### <a name="82-how-to-choose-between-lazy-loading-and-eager-loading"></a>8,2 jak wybrać między ładowaniem z opóźnieniem i ładowaniem eager
+### <a name="82-how-to-choose-between-lazy-loading-and-eager-loading"></a>8.2 Jak wybrać między leniwym ładowaniem a załadunkiem
 
-Ważne jest, aby zrozumieć różnicę między ładowaniem z opóźnieniem i ładowaniem eager, dzięki czemu można wybrać właściwy wybór dla aplikacji. Pomoże to w ocenie kompromisu między wieloma żądaniami w bazie danych a pojedynczym żądaniem, które może zawierać duży ładunek. Może być konieczne użycie eager ładowania w niektórych częściach aplikacji i załadowanie z opóźnieniem w innych częściach.
+Ważną rzeczą jest to, że rozumiesz różnicę między ładowaniem z opóźnieniem i zapałem ładowania, dzięki czemu można dokonać właściwego wyboru dla aplikacji. Pomoże to ocenić kompromis między wieloma żądaniami w bazie danych w porównaniu z pojedynczym żądaniem, które może zawierać duży ładunek. Może być właściwe użycie zapału ładowania w niektórych częściach aplikacji i powolne ładowanie w innych częściach.
 
-Przykładem tego, co dzieje się na wystawie, Załóżmy, że chcesz wysyłać zapytania dotyczące klientów, którzy mieszkają w Wielkiej Brytanii i ich liczbie zamówień.
+Jako przykład tego, co dzieje się pod maską, załóżmy, że chcesz zapytać klientów, którzy mieszkają w Wielkiej Brytanii i ich liczba zamówień.
 
-**Używanie ładowania eager**
+**Korzystanie z zaaskliwajnia**
 
 ``` csharp
 using (NorthwindEntities context = new NorthwindEntities())
@@ -952,7 +952,7 @@ using (NorthwindEntities context = new NorthwindEntities())
 }
 ```
 
-**Używanie ładowania z opóźnieniem**
+**Korzystanie z z opóźnieniem ładowania**
 
 ``` csharp
 using (NorthwindEntities context = new NorthwindEntities())
@@ -967,7 +967,7 @@ using (NorthwindEntities context = new NorthwindEntities())
 }
 ```
 
-Podczas ładowania eager należy wydać pojedyncze zapytanie zwracające wszystkich klientów i wszystkie zamówienia. Polecenie Store wygląda następująco:
+Podczas korzystania z wczytywania z dużym zadowoleniem, wystawisz pojedynczą kwerendę, która zwraca wszystkich klientów i wszystkie zamówienia. Polecenie sklepu wygląda następująco:
 
 ``` SQL
 SELECT
@@ -1033,7 +1033,7 @@ FROM ( SELECT
 ORDER BY [Project1].[CustomerID] ASC, [Project1].[C2] ASC
 ```
 
-W przypadku korzystania z ładowania z opóźnieniem należy początkowo wydać następujące zapytanie:
+Podczas korzystania z ładowania z opóźnieniem, najpierw wydasz następującą kwerendę:
 
 ``` SQL
 SELECT
@@ -1052,7 +1052,7 @@ FROM [dbo].[Customers] AS [Extent1]
 WHERE N'UK' = [Extent1].[Country]
 ```
 
-Za każdym razem, gdy użytkownik uzyskuje dostęp do właściwości nawigacji Orders klienta, w sklepie zostanie wystawione inne zapytanie, takie jak następujące:
+I za każdym razem, gdy uzyskujesz dostęp do właściwości nawigacji Zamówienia klienta, w sklepie jest wydawane kolejne zapytanie, podobne do następujących czynności:
 
 ``` SQL
 exec sp_executesql N'SELECT
@@ -1076,26 +1076,26 @@ WHERE [Extent1].[CustomerID] = @EntityKeyValue1',N'@EntityKeyValue1 nchar(5)',@E
 
 Aby uzyskać więcej informacji, zobacz [ładowanie powiązanych obiektów](https://msdn.microsoft.com/library/bb896272.aspx).
 
-#### <a name="821-lazy-loading-versus-eager-loading-cheat-sheet"></a>8.2.1 ładowanie z opóźnieniem a eager ładowanie Ściągawka arkusza
+#### <a name="821-lazy-loading-versus-eager-loading-cheat-sheet"></a>8.2.1 Lazy Loading kontra Eager Loading ściągawki
 
-Nie ma takiego znaczenia, aby można było wybrać eager ładowanie i ładowanie z opóźnieniem. Spróbuj najpierw zrozumieć różnice między obiema strategiami, aby można było dobrze uzyskać świadomą decyzję; należy również rozważyć, czy kod pasuje do żadnego z następujących scenariuszy:
+Nie ma czegoś takiego jak jeden rozmiar dla wszystkich do wyboru gorliwy ładowania w porównaniu do ładowania leniwy. Spróbuj najpierw zrozumieć różnice między obiema strategiami, dzięki czemu można zrobić dobrze świadomą decyzję; należy również rozważyć, czy kod pasuje do dowolnego z następujących scenariuszy:
 
 | Scenariusz                                                                    | Nasza sugestia                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 |:----------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Czy musisz uzyskać dostęp do wielu właściwości nawigacji z pobranych jednostek? | **Nie** — obie opcje będą prawdopodobnie. Jeśli jednak ładunek nie jest zbyt duży, mogą wystąpić korzyści z wydajności przy użyciu ładowania eager, ponieważ wymaga to mniejszej liczby podróży sieciowych w celu zmaterializowania obiektów. <br/> <br/> **Tak** — Jeśli chcesz uzyskać dostęp do wielu właściwości nawigacji z jednostek, możesz to zrobić za pomocą wielu instrukcji include w zapytaniu z eager ładowaniem. Im więcej jednostek zostanie uwzględnionych, tym większy ładunek zostanie zwrócony przez zapytanie. Po dołączeniu trzech lub większej liczby jednostek do zapytania Rozważ przełączenie na ładowanie z opóźnieniem. |
-| Czy wiesz dokładnie, jakie dane będą potrzebne w czasie wykonywania?                   | Pobieranie z opóźnieniem będzie lepszym rozwiązaniem. W przeciwnym razie możesz zakończyć wykonywanie zapytań dotyczących danych, które nie są potrzebne. <br/> <br/> **Tak** — ładowanie eager jest prawdopodobnie najlepszym trafieniem; ułatwi to szybsze ładowanie całych zestawów. Jeśli zapytanie wymaga pobrania bardzo dużej ilości danych i będzie zbyt wolne, spróbuj wykonać ładowanie z opóźnieniem.                                                                                                                                                                                                                                                       |
-| Czy kod wykonywany jest daleko od bazy danych? (zwiększone opóźnienie sieci)  | **Nie** — gdy opóźnienie sieci nie jest problemem, użycie ładowania z opóźnieniem może uprościć kod. Należy pamiętać, że topologia aplikacji może się zmieniać, dlatego nie należy podejmować żadnych bliskości bazy danych. <br/> <br/> **Tak** — w przypadku problemu z siecią możesz zdecydować, co lepiej pasuje do danego scenariusza. Zwykle ładowanie eager będzie lepszym rozwiązaniem, ponieważ wymaga mniejszej liczby rejsów.                                                                                                                                                                                                      |
+| Czy trzeba uzyskać dostęp do wielu właściwości nawigacji z pobranych jednostek? | **Nie** - Obie opcje prawdopodobnie zrobią. Jednak jeśli ładunek kwerendy przynosi nie jest zbyt duży, może wystąpić korzyści wydajności przy użyciu eager ładowania, ponieważ będzie wymagać mniej sieci rund, aby zmaterializować swoje obiekty. <br/> <br/> **Tak** — Jeśli chcesz uzyskać dostęp do wielu właściwości nawigacji z jednostek, można to zrobić przy użyciu wielu instrukcji include w zapytaniu z wczytywanie eager. Im więcej jednostek zostanie uwzględnione, tym większa ładunek, który zwróci zapytanie. Po dołączeniu trzech lub więcej jednostek do kwerendy, należy rozważyć przełączenie do ładowania z opóźnieniem. |
+| Czy wiesz dokładnie, jakie dane będą potrzebne w czasie wykonywania?                   | **Nie** - Leniwy ładowanie będzie dla Ciebie lepsze. W przeciwnym razie może skończyć się kwerendy dla danych, które nie będą potrzebne. <br/> <br/> **Tak** - Chętne ładowanie jest chyba najlepszym rozwiązaniem ; pomoże to szybciej ładować całe zestawy. Jeśli zapytanie wymaga pobierania bardzo dużej ilości danych, a to staje się zbyt powolne, spróbuj leniwe ładowanie zamiast tego.                                                                                                                                                                                                                                                       |
+| Czy kod jest wykonywany z dala od bazy danych? (zwiększone opóźnienie sieci)  | **Nie** — gdy opóźnienie sieci nie jest problemem, przy użyciu ładowania z opóźnieniem może uprościć kod. Należy pamiętać, że topologia aplikacji może ulec zmianie, więc nie należy przyjmować bliskości bazy danych za pewnik. <br/> <br/> **Tak** — gdy sieć jest problemem, tylko ty możesz zdecydować, co pasuje lepiej do twojego scenariusza. Zazwyczaj wczesne ładowanie będzie lepsze, ponieważ wymaga mniejszej liczby rund.                                                                                                                                                                                                      |
 
 
-#### <a name="822-performance-concerns-with-multiple-includes"></a>8.2.2 problemy z wydajnością wielu obejmuje
+#### <a name="822-performance-concerns-with-multiple-includes"></a>8.2.2 Problemy z wydajnością z wieloma
 
-Gdy będziemy słyszeć pytania dotyczące wydajności, które obejmują problemy związane z czasem odpowiedzi serwera, źródłem problemu często są zapytania z wieloma instrukcjami INCLUDE. Chociaż w tym obiekty pokrewne w zapytaniu są zaawansowane, ważne jest, aby zrozumieć, co się dzieje w ramach okładek.
+Gdy słyszymy pytania dotyczące wydajności, które dotyczą problemów z czasem odpowiedzi serwera, źródłem problemu są często zapytania z wieloma instrukcjami Include. Chociaż włączenie powiązanych jednostek w kwerendzie jest zaawansowane, ważne jest, aby zrozumieć, co dzieje się w ramach okładek.
 
-Wykonywanie zapytania z wieloma instrukcjami include w tym czasie zajmuje stosunkowo dużo czasu, aby przejść przez nasz kompilator wewnętrznego planu, aby utworzyć polecenie magazynu. Większość tego czasu poświęca próbę optymalizacji wyniku zapytania. Polecenie wygenerowany magazyn będzie zawierać sprzężenie zewnętrzne lub Unię dla każdej z nich, w zależności od mapowania. Takie zapytania spowodują, że w ramach jednego ładunku są nawiązane duże połączone wykresy, które będą acerbate wszelkie problemy z przepustowością, zwłaszcza gdy istnieje wiele nadmiarowości w ładunku (na przykład gdy na przechodzenie jest używanych wielu poziomów dołączania) skojarzenia w kierunku "jeden do wielu").
+Zajmuje stosunkowo dużo czasu dla kwerendy z wielu Include instrukcji w nim, aby przejść przez nasz kompilator planu wewnętrznego do produkcji polecenia magazynu. Większość tego czasu spędzana próbuje zoptymalizować wynikowe zapytanie. Wygenerowane polecenie magazynu będzie zawierać sprzężenie zewnętrzne lub Union dla każdego Include, w zależności od mapowania. Zapytania takie jak ten przyniesie w dużych połączonych wykresów z bazy danych w jednym ładunku, który będzie acerbate wszelkie problemy z przepustowością, zwłaszcza, gdy istnieje wiele nadmiarowości w ładunku (na przykład, gdy wiele poziomów Include są używane do przechodzenia skojarzeń w kierunku jeden do wielu).
 
-Można sprawdzić przypadki, w których zapytania zwracają nadmiernie duże ładunki, uzyskując dostęp do bazowego TSQL zapytania przy użyciu ToTraceString i wykonując polecenie Store w SQL Server Management Studio, aby zobaczyć rozmiar ładunku. W takich przypadkach można spróbować zmniejszyć liczbę instrukcji include w zapytaniu, aby po prostu wprowadzić potrzebne dane. Lub może być możliwe przerwanie zapytania w krótszej sekwencji podzapytań, na przykład:
+Można sprawdzić przypadki, w których kwerendy zwracają zbyt duże ładunki, uzyskując dostęp do podstawowej tsql dla kwerendy za pomocą ToTraceString i wykonywania polecenia magazynu w programie SQL Server Management Studio, aby zobaczyć rozmiar ładunku. W takich przypadkach można spróbować zmniejszyć liczbę Include instrukcji w zapytaniu, aby po prostu przynieść w danych, których potrzebujesz. Lub może być w stanie podzielić zapytanie na mniejszą sekwencję podquerii, na przykład:
 
-**Przed usunięciem zapytania:**
+**Przed przerwaniem kwerendy:**
 
 ``` csharp
 using (NorthwindEntities context = new NorthwindEntities())
@@ -1111,7 +1111,7 @@ using (NorthwindEntities context = new NorthwindEntities())
 }
 ```
 
-**Po przeprowadzeniu przerwania zapytania:**
+**Po zerwaniu kwerendy:**
 
 ``` csharp
 using (NorthwindEntities context = new NorthwindEntities())
@@ -1133,21 +1133,21 @@ using (NorthwindEntities context = new NorthwindEntities())
 }
 ```
 
-Ta funkcja będzie działać tylko na śledzonych zapytaniach, ponieważ korzystamy z możliwości automatycznego wykonywania rozpoznawania tożsamości i naprawiania skojarzenia.
+Będzie to działać tylko w przypadku śledzonych zapytań, ponieważ korzystamy z możliwości, którą kontekst musi automatycznie wykonywać rozpoznawanie tożsamości i rozwiązywanie skojarzeń.
 
-Podobnie jak w przypadku ładowania z opóźnieniem, kompromis będzie więcej zapytań dla mniejszych ładunków. Można również użyć projekcji poszczególnych właściwości, aby jawnie wybierać tylko potrzebne dane z poszczególnych jednostek, ale nie będzie można ładować jednostek w tym przypadku, a aktualizacje nie będą obsługiwane.
+Podobnie jak w przypadku ładowania z opóźnieniem, kompromis będzie więcej zapytań dla mniejszych ładunków. Można również użyć projekcji poszczególnych właściwości, aby jawnie wybrać tylko dane potrzebne z każdej jednostki, ale nie będzie ładowanie jednostek w tym przypadku i aktualizacje nie będą obsługiwane.
 
-#### <a name="823-workaround-to-get-lazy-loading-of-properties"></a>8.2.3 obejście, aby uzyskać pobieranie z opóźnieniem właściwości
+#### <a name="823-workaround-to-get-lazy-loading-of-properties"></a>8.2.3 Obejście, aby uzyskać leniwe ładowanie właściwości
 
-Entity Framework obecnie nie obsługuje ładowania z opóźnieniem właściwości skalarnych lub złożonych. Jednak w przypadkach, gdy istnieje tabela zawierająca duży obiekt, taki jak obiekt BLOB, można użyć podziału tabeli, aby oddzielić duże właściwości do osobnej jednostki. Załóżmy na przykład, że masz tabelę produktów, która zawiera kolumnę zdjęć varbinary. Jeśli nie ma często potrzeby uzyskiwania dostępu do tej właściwości w zapytaniach, można użyć podziału tabeli, aby przenieść tylko te części jednostki, która jest zwykle potrzebna. Jednostka reprezentująca zdjęcie produktu zostanie załadowana tylko wtedy, gdy jest to konieczne.
+Entity Framework obecnie nie obsługuje powolne ładowanie właściwości skalarnych lub złożonych. Jednak w przypadkach, gdy masz tabelę, która zawiera duży obiekt, taki jak blob, można użyć podziału tabeli, aby oddzielić duże właściwości na oddzielną jednostkę. Załóżmy na przykład, że masz tabelę Produkt, która zawiera kolumnę zdjęć varbinary. Jeśli nie często trzeba uzyskać dostęp do tej właściwości w kwerendach, można użyć dzielenia tabel, aby przynieść tylko części jednostki, które zwykle potrzebne. Encja reprezentująca zdjęcie produktu zostanie załadowana tylko wtedy, gdy jest wyraźnie potrzebna.
 
-Dobrym zasobem, który pokazuje, jak włączyć dzielenie tabeli, jest Gil Fink "dzielenie tabeli w Entity Framework": \<http://blogs.microsoft.co.il/blogs/gilf/archive/2009/10/13/table-splitting-in-entity-framework.aspx>.
+Dobrym zasobem, który pokazuje, jak włączyć dzielenie tabeli jest gil Fink \< http://blogs.microsoft.co.il/blogs/gilf/archive/2009/10/13/table-splitting-in-entity-framework.aspx>"Dzielenie tabel w entity framework" blogu: .
 
-## <a name="9-other-considerations"></a>9 inne zagadnienia
+## <a name="9-other-considerations"></a>9 Inne rozważania
 
-### <a name="91-server-garbage-collection"></a>Odzyskiwanie pamięci serwera 9,1
+### <a name="91-server-garbage-collection"></a>9.1 Wyrzucanie elementów bezużytecznych serwera
 
-Niektórzy użytkownicy mogą napotkać rywalizacje o zasoby, które ograniczają równoległość, której oczekuje, gdy moduł wyrzucania elementów bezużytecznych nie jest prawidłowo skonfigurowany. Za każdym razem, gdy program EF jest używany w scenariuszu wielowątkowym lub w dowolnej aplikacji, która jest podobna do systemu po stronie serwera, upewnij się, że włączono odzyskiwanie pamięci serwera. Jest to realizowane za pomocą prostego ustawienia w pliku konfiguracyjnym aplikacji:
+Niektórzy użytkownicy mogą wystąpić rywalizacji zasobów, która ogranicza równoległości oczekują, gdy moduł zbierający elementy bezużyteczne nie jest poprawnie skonfigurowany. Ilekroć EF jest używany w scenariuszu wielowątkowym lub w dowolnej aplikacji, która przypomina system po stronie serwera, upewnij się, aby włączyć wyrzucanie elementów bezużytecznych serwera. Odbywa się to za pomocą prostego ustawienia w pliku konfiguracyjnym aplikacji:
 
 ``` xml
 <?xmlversion="1.0" encoding="utf-8" ?>
@@ -1158,13 +1158,13 @@ Niektórzy użytkownicy mogą napotkać rywalizacje o zasoby, które ograniczaj�
 </configuration>
 ```
 
-Powinno to zmniejszyć rywalizację o wątki i zwiększyć przepływność nawet o 30% w scenariuszach zapełnionych przez procesor CPU. Ogólnie rzecz biorąc, należy zawsze testować sposób działania aplikacji przy użyciu klasycznego wyrzucania elementów bezużytecznych (który jest lepiej dostosowany do scenariuszy interfejsu użytkownika i klienta), a także do wyrzucania elementów bezużytecznych serwera.
+Powinno to zmniejszyć rywalizację wątku i zwiększyć przepływność nawet o 30% w scenariuszach nasyconych procesorem CPU. Ogólnie rzecz biorąc należy zawsze przetestować, jak aplikacja zachowuje się przy użyciu klasycznego wyrzucania elementów bezużytecznych (który jest lepiej dostrojony dla scenariuszy po stronie interfejsu użytkownika i klienta), a także wyrzucania elementów bezużytecznych serwera.
 
-### <a name="92-autodetectchanges"></a>9,2 AutoDetectChanges
+### <a name="92-autodetectchanges"></a>9.2 Zmiany autodetectchanges
 
-Jak wspomniano wcześniej, Entity Framework mogą pokazać problemy z wydajnością, gdy pamięć podręczna obiektów ma wiele jednostek. Niektóre operacje, takie jak dodawanie, usuwanie, Znajdowanie, wprowadzanie i metody SaveChanges, wyzwalają wywołania do DetectChanges, które mogą zużywać dużą ilość czasu procesora w zależności od rozmiaru pamięci podręcznej obiektów. Przyczyną takiego działania jest fakt, że pamięć podręczna obiektów i Menedżer stanu obiektów próbują zachować się jak najszybciej w przypadku każdej operacji wykonywanej do kontekstu, aby wygenerowane dane były poprawne w ramach szerokiej gamy scenariuszy.
+Jak wspomniano wcześniej, Entity Framework może pokazać problemy z wydajnością, gdy pamięć podręczna obiektów ma wiele jednostek. Niektóre operacje, takie jak Dodaj, Usuń, Znajdź, Wpis i SaveChanges, wyzwalają wywołania DetectChanges, które mogą zużywać dużą ilość procesora CPU na podstawie tego, jak duża stała się pamięć podręczna obiektów. Powodem tego jest, że pamięć podręczna obiektów i menedżer stanu obiektu starają się pozostać jak najbardziej zsynchronizowane w każdej operacji wykonywanej w kontekście, tak aby dane produkowane są gwarantowane być poprawne w szerokiej tablicy scenariuszy.
 
-Ogólnie rzecz biorąc, dobrym sposobem jest pozostawienie Entity Framework automatycznego wykrywania zmian w całym cyklu życia aplikacji. Jeśli Twój Scenariusz ma negatywny wpływ na duże użycie procesora CPU, a Twoje profile wskazują, że przyczyna jest wywołaniem DetectChanges, rozważ tymczasowe wyłączenie AutoDetectChanges w poufnej części kodu:
+Ogólnie jest dobrą praktyką, aby pozostawić automatyczne wykrywanie zmian entity framework włączone przez cały okres użytkowania aplikacji. Jeśli scenariusz jest negatywnie wpływa na wysokie użycie procesora CPU i profile wskazują, że winowajcą jest wywołanie DetectChanges, należy rozważyć tymczasowe wyłączenie AutoDetectChanges w poufnej części kodu:
 
 ``` csharp
 try
@@ -1179,15 +1179,15 @@ finally
 }
 ```
 
-Przed wyłączeniem AutoDetectChanges warto zrozumieć, że może to spowodować utratę możliwości śledzenia pewnych informacji o zmianach wprowadzonych w jednostkach przez Entity Framework. Jeśli są obsługiwane nieprawidłowo, może to spowodować niespójność danych w aplikacji. Aby uzyskać więcej informacji na temat wyłączania AutoDetectChanges, przeczytaj http://blog.oneunicorn.com/2012/03/12/secrets-of-detectchanges-part-3-switching-off-automatic-detectchanges/>\<.
+Przed wyłączeniem AutoDetectChanges, dobrze jest zrozumieć, że może to spowodować entity framework utracić zdolność do śledzenia niektórych informacji o zmianach, które mają miejsce w jednostkach. Jeśli obsługiwane niepoprawnie, może to spowodować niespójność danych w aplikacji. Aby uzyskać więcej informacji na temat wyłączania \< http://blog.oneunicorn.com/2012/03/12/secrets-of-detectchanges-part-3-switching-off-automatic-detectchanges/>automatycznych zmian w programie AutoDetectChanges, przeczytaj .
 
-### <a name="93-context-per-request"></a>kontekst 9,3 na żądanie
+### <a name="93-context-per-request"></a>9.3 Kontekst na żądanie
 
-Konteksty Entity Framework są przeznaczone do użycia jako wystąpienia krótkoterminowe w celu zapewnienia optymalnej wydajności. Należy oczekiwać, że konteksty są krótkie i odrzucane, a jako takie zostały zaimplementowane jako bardzo lekkie i w miarę możliwości wykorzystują metadane. W scenariuszach sieci Web ważne jest, aby mieć to na uwadze i nie mieć kontekstu dłużej niż czas trwania pojedynczego żądania. Podobnie w przypadku scenariuszy innych niż sieci Web kontekst powinien zostać odrzucony w oparciu o zrozumienie różnych poziomów buforowania w Entity Framework. Ogólnie mówiąc, jeden z nich powinien unikać wystąpienia kontekstu w całym cyklu życia aplikacji, a także kontekstów dla wątków i kontekstów statycznych.
+Konteksty entity framework są przeznaczone do użycia jako wystąpienia krótkotrwałe w celu zapewnienia najbardziej optymalne środowisko wydajności. Oczekuje się, że konteksty będą krótkotrwałe i odrzucone, a jako takie zostały zaimplementowane jako bardzo lekkie i ponownie przystosowują metadane, gdy tylko jest to możliwe. W scenariuszach sieci web ważne jest, aby mieć to na uwadze i nie mają kontekstu dla więcej niż czas trwania pojedynczego żądania. Podobnie w scenariuszach innych niż web kontekst powinien zostać odrzucony na podstawie zrozumienia różnych poziomów buforowania w ramach encji. Ogólnie rzecz biorąc, należy unikać wystąpienia kontekstu przez cały okres użytkowania aplikacji, a także kontekstów na wątek i kontekstów statycznych.
 
-### <a name="94-database-null-semantics"></a>Semantyka null bazy danych 9,4
+### <a name="94-database-null-semantics"></a>9.4 Semantyka null bazy danych
 
-Entity Framework domyślnie generuje kod SQL, który ma semantykę porównania C\# o wartości null. Rozważmy następujące przykładowe zapytanie:
+Entity Framework domyślnie wygeneruje\# kod SQL, który ma semantyka porównania c null. Należy wziąć pod uwagę następującą przykładowa kwerenda:
 
 ``` csharp
             int? categoryId = 7;
@@ -1210,60 +1210,60 @@ Entity Framework domyślnie generuje kod SQL, który ma semantykę porównania C
             var r = q.ToList();
 ```
 
-W tym przykładzie porównamy wiele zmiennych wartości null z właściwościami dopuszczanymi do wartości null w jednostce, takich jak IDDostawcy i CenaJednostkowa. Wygenerowane dane SQL dla tego zapytania spowodują, że wartość parametru jest taka sama jak wartość kolumny, lub jeśli oba parametry i kolumny mają wartość null. Spowoduje to ukrycie sposobu, w jaki serwer bazy danych obsługuje wartości null i zapewni spójną\#ową wartość null dla różnych dostawców baz danych. Z drugiej strony wygenerowany kod jest bitowym zawiłe i może nie działać prawidłowo, gdy ilość porównań w instrukcji WHERE zapytania rośnie do dużej liczby.
+W tym przykładzie porównujemy liczbę zmiennych powodujących wartość nullable z właściwościami powodującymi anulowanie w jednostce, takimi jak SupplierID i UnitPrice. Wygenerowany SQL dla tej kwerendy zapyta, czy wartość parametru jest taka sama jak wartość kolumny lub jeśli zarówno parametr, jak i wartości kolumny mają wartość null. Spowoduje to ukrycie sposobu, w jaki serwer bazy\# danych obsługuje wartości null i zapewni spójne środowisko c null w różnych dostawcach bazy danych. Z drugiej strony wygenerowany kod jest nieco zawiłe i może nie działać dobrze, gdy ilość porównań w where instrukcji kwerendy rośnie do dużej liczby.
 
-Jednym ze sposobów postępowania z tą sytuacją jest użycie semantyki bazy danych o wartości null. Należy pamiętać, że może to być nieznacznie zachowywać się inaczej w przypadku semantyki o wartości null\#, ponieważ teraz Entity Framework generuje prostszy kod SQL, który uwidacznia sposób, w jaki aparat bazy danych będzie obsługiwał wartości null. Semantyki o wartości null bazy danych można aktywować dla kontekstu z jednym wierszem konfiguracji z konfiguracją kontekstu:
+Jednym ze sposobów radzenia sobie z tą sytuacją jest przy użyciu bazy danych null semantyki. Należy zauważyć, że może to\# potencjalnie zachowywać się inaczej niż semantyka null C, ponieważ teraz Entity Framework wygeneruje prostszy SQL, który udostępnia sposób aparat bazy danych obsługuje wartości null. Semantyka null bazy danych może być aktywowana na kontekst za pomocą jednej linii konfiguracji względem konfiguracji kontekstu:
 
 ``` csharp
                 context.Configuration.UseDatabaseNullSemantics = true;
 ```
 
-W przypadku zapytań o małe i średnie rozmiary nie będą wyświetlane zauważalne ulepszenia wydajności podczas korzystania z semantyki o wartości null bazy danych, ale różnica będzie bardziej zauważalna w przypadku zapytań z dużą liczbą potencjalnych porównań o wartości null.
+Małe i średnie zapytania nie będą wyświetlać zauważalną poprawę wydajności podczas korzystania z semantyki null bazy danych, ale różnica stanie się bardziej zauważalna w kwerendach z dużą liczbą potencjalnych porównań null.
 
-W przykładzie powyższego zapytania różnica wydajności była mniejsza niż 2% w przypadku mikrotestu działającego w środowisku kontrolowanym.
+W powyższej kwerendzie przykładowej różnica w wydajności była mniejsza niż 2% w mikrobenchmarku działającym w kontrolowanym środowisku.
 
-### <a name="95-async"></a>9,5 Async
+### <a name="95-async"></a>9.5 Asynchronik
 
-Entity Framework 6 wprowadzono obsługę operacji asynchronicznych w przypadku uruchamiania programu .NET 4,5 lub nowszego. W większości przypadków aplikacje, które mają rywalizację dotyczącą we/wy, będą korzystać z funkcji asynchronicznego wykonywania zapytań i zapisywania. Jeśli aplikacja nie pogorszy się z rywalizacją we/wy, Użycie Async będzie w najlepszym przypadku wykonywane synchronicznie i zwracać wynik w tym samym czasie co w przypadku wywołania synchronicznego lub w najgorszym przypadku, po prostu Opóźnij wykonywanie do zadania asynchronicznego i Dodaj dodatkowe Tim e do ukończenia Twojego scenariusza.
+Entity Framework 6 wprowadzono obsługę operacji asynchroniowych podczas uruchamiania w programie .NET 4.5 lub nowszym. W przeważającej części aplikacje, które mają rywalizacji związane z we/wy skorzystają najbardziej z używania asynchronicznej kwerendy i zapisać operacje. Jeśli aplikacja nie cierpi z powodu rywalizacji we/wy, użycie asynchronicznego będzie w najlepszych przypadkach działać synchronicznie i zwracać wynik w takiej samej ilości czasu jak wywołanie synchroniczne lub w najgorszym przypadku, po prostu odroczyć wykonanie zadania asynchronicznego i dodać dodatkowy czas do zakończenia scenariusza.
 
-Aby uzyskać informacje na temat sposobu działania asynchronicznego programowania, który pomoże Ci w wyborze, czy Async poprawi wydajność aplikacji [http://msdn.microsoft.com/library/hh191443.aspx](https://msdn.microsoft.com/library/hh191443.aspx). Aby uzyskać więcej informacji na temat używania operacji asynchronicznych na Entity Framework, zobacz [wykonywanie zapytań asynchronicznych i zapisywanie](~/ef6/fundamentals/async.md
+Aby uzyskać informacje na temat pracy programowania asynchroniowego, które pomogą Ci [http://msdn.microsoft.com/library/hh191443.aspx](https://msdn.microsoft.com/library/hh191443.aspx)zdecydować, czy asynchiza poprawi wydajność twojej wizyty w aplikacji . Aby uzyskać więcej informacji na temat używania operacji asynchronizowych w entity framework, zobacz [Async Query i Save](~/ef6/fundamentals/async.md
 ).
 
-### <a name="96-ngen"></a>9,6 NGEN
+### <a name="96-ngen"></a>9.6 NGEN
 
-Entity Framework 6 nie jest domyślną instalacją programu .NET Framework. W związku z tym zestawy Entity Framework nie są domyślnie NGEN, co oznacza, że cały kod Entity Framework podlega tym samym kosztom JIT'ing, co każdy inny zestaw MSIL. Może to spowodować spadek wydajności podczas tworzenia i uruchamiania aplikacji w środowiskach produkcyjnych. Aby zmniejszyć koszty procesora CPU i pamięci JIT'ing, zaleca się, aby program NGEN Entity Framework obrazy odpowiednio do potrzeb. Aby uzyskać więcej informacji na temat ulepszania wydajności uruchamiania Entity Framework 6 z programem NGEN, zobacz [Poprawianie wydajności uruchamiania za pomocą narzędzia NGen](~/ef6/fundamentals/performance/ngen.md).
+Entity Framework 6 nie jest w domyślnej instalacji platformy .NET framework. W związku z tym zestawy framework jednostek nie są NGEN'd domyślnie, co oznacza, że cały kod entity framework podlega tym samym kosztom JIT'ing, jak każdy inny zestaw MSIL. Może to pogorszyć doświadczenie F5 podczas tworzenia, a także zimne uruchamianie aplikacji w środowiskach produkcyjnych. W celu zmniejszenia kosztów procesora i pamięci JIT'ing wskazane jest, aby NGEN entity framework obrazów, w stosownych przypadkach. Aby uzyskać więcej informacji na temat poprawy wydajności uruchamiania programu Entity Framework 6 za pomocą NGEN, zobacz [Poprawianie wydajności uruchamiania za pomocą NGen](~/ef6/fundamentals/performance/ngen.md).
 
-### <a name="97-code-first-versus-edmx"></a>9,7 Code First w porównaniu z EDMX
+### <a name="97-code-first-versus-edmx"></a>9.7 Code First w porównaniu z EDMX
 
-Entity Framework przyczyny niezgodności między programowaniem zorientowanym na obiekt i relacyjnymi bazami danych przez posiadanie reprezentacji w pamięci modelu koncepcyjnego (obiektów), schematu magazynu (bazy danych) i mapowania między tymi. Te metadane są nazywane Entity Data Model lub EDM jako krótkie. Z tego modelu EDM Entity Framework będą dziedziczyć widoki w celu przeprowadzenia komunikacji między danymi z obiektów znajdujących się w pamięci a bazą danych.
+Entity Framework przyczyny dotyczące problemu niezgodności impedancji między programowaniem obiektowym i relacyjnych baz danych, mając w pamięci reprezentacji modelu koncepcyjnego (obiektów), schemat magazynu (bazy danych) i mapowanie między nimi. Te metadane są nazywane modelem danych jednostki lub w skrócie EDM. Z tego EDM Entity Framework będzie pochodzić widoki do danych w obie strony z obiektów w pamięci do bazy danych i z powrotem.
 
-Gdy Entity Framework jest używany z plikiem EDMX, który formalnie Określa model koncepcyjny, schemat magazynu i mapowanie, wówczas etap ładowania modelu musi sprawdzić, czy model EDM jest poprawny (na przykład upewnić się, że nie ma żadnych mapowań), a następnie Wygeneruj widoki, a następnie sprawdź poprawność widoków i przygotuj te metadane do użycia. Tylko wtedy możliwe jest wykonanie zapytania lub zapisanie nowych danych w magazynie danych.
+Gdy entity framework jest używany z plikiem EDMX, który formalnie określa model koncepcyjny, schemat magazynu i mapowanie, a następnie etap ładowania modelu musi tylko sprawdzić, czy EDM jest poprawny (na przykład upewnij się, że nie brakuje mapowań), a następnie wygeneruj widoki, a następnie sprawdź poprawność widoków i przygotuj te metadane do użycia. Tylko wtedy można wykonać kwerendę lub zapisać nowe dane w magazynie danych.
 
-Code First podejście to, w swoim serca, zaawansowanego generatora Entity Data Model. Entity Framework musi utworzyć modelu EDM z dostarczonego kodu; robi to przez analizowanie klas objętych modelem, stosowanie Konwencji i Konfigurowanie modelu za pośrednictwem interfejsu API Fluent. Po skompilowaniu modelu EDM Entity Framework zasadniczo zachowuje się tak samo, jak w projekcie znajduje się plik EDMX. W ten sposób Kompilowanie modelu z Code First dodaje dodatkową złożoność, która tłumaczy na wolniejszy czas uruchamiania dla Entity Framework w porównaniu z EDMX. Koszt jest w pełni zależny od rozmiaru i złożoności tworzonego modelu.
+Podejście Code First jest w swoim sercu zaawansowanym generatorem danych jednostki. Entity Framework musi produkować EDM z dostarczonego kodu; robi to analizując klasy zaangażowane w modelu, stosując konwencje i konfigurując model za pośrednictwem interfejsu API Fluent. Po zbudowaniu EDM entity Framework zasadniczo zachowuje się tak samo, jak gdyby plik EDMX był obecny w projekcie. W związku z tym tworzenie modelu z Code First dodaje dodatkową złożoność, która przekłada się na wolniejszy czas uruchamiania dla entity framework w porównaniu do posiadania EDMX. Koszt jest całkowicie zależny od rozmiaru i złożoności budowanego modelu.
 
-W przypadku korzystania z EDMX i Code First należy pamiętać, że elastyczność wprowadzona przez Code First zwiększa koszt kompilowania modelu po raz pierwszy. Jeśli aplikacja może wytrzymać koszt tego obciążenia po raz pierwszy, zazwyczaj Code First będzie preferowanym sposobem przejścia.
+Decydując się na użycie EDMX versus Code First, należy wiedzieć, że elastyczność wprowadzona przez Code First zwiększa koszt tworzenia modelu po raz pierwszy. Jeśli aplikacja może wytrzymać koszt tego obciążenia po raz pierwszy, zazwyczaj Code First będzie preferowanym sposobem.
 
-## <a name="10-investigating-performance"></a>10 badanie wydajności
+## <a name="10-investigating-performance"></a>10 Badanie wydajności
 
-### <a name="101-using-the-visual-studio-profiler"></a>10,1 przy użyciu profilera programu Visual Studio
+### <a name="101-using-the-visual-studio-profiler"></a>10.1 Korzystanie z programu Visual Studio Profiler
 
-Jeśli masz problemy z wydajnością Entity Framework, możesz użyć profilera, takiego jak wbudowany w program Visual Studio, aby zobaczyć, gdzie Twoja aplikacja spędza swoją godzinę. Jest to narzędzie, które zostało użyte do wygenerowania wykresów kołowych w blogu "Eksplorowanie wydajności ADO.NET Entity Framework-część 1" (\<http://blogs.msdn.com/b/adonet/archive/2008/02/04/exploring-the-performance-of-the-ado-net-entity-framework-part-1.aspx>) wskazujący, gdzie Entity Framework poświęca czas na zimne i grzane zapytania.
+Jeśli masz problemy z wydajnością z entity framework, można użyć profilera, takiego jak ten wbudowany w programie Visual Studio, aby zobaczyć, gdzie aplikacja spędza swój czas. Jest to narzędzie, którego używaliśmy do generowania wykresów kołowych w blogu "Exploring the Performance \< https://docs.microsoft.com/archive/blogs/adonet/exploring-the-performance-of-the-ado-net-entity-framework-part-1>) of the ADO.NET Entity Framework - Part 1" (które pokazują, gdzie entity framework spędza swój czas podczas zimnych i ciepłych zapytań.
 
-Wpis "Entity Framework profilowania przy użyciu programu Visual Studio 2010 Profiler" został zapisany przez dane i modelowanie zespołu Doradczego ds. klienta pokazuje rzeczywisty przykład sposobu użycia profilera do zbadania problemu z wydajnością.  http://blogs.msdn.com/b/dmcat/archive/2010/04/30/profiling-entity-framework-using-the-visual-studio-2010-profiler.aspx>\<. Ten wpis został zapisany dla aplikacji systemu Windows. Jeśli zachodzi potrzeba profilowania aplikacji sieci Web, narzędzia Windows Performance Recorder (WP) i Windows Performance Analyzer (WPA) mogą działać lepiej niż w przypadku programu Visual Studio. Żądanie WP i WPA jest częścią zestawu narzędzi wydajności systemu Windows, który jest dostępny w zestawie do oceny i wdrażania systemu Windows ( [http://www.microsoft.com/download/details.aspx?id=39982](https://www.microsoft.com/download/details.aspx?id=39982)).
+Wpis w blogu "Profilowanie entity framework przy użyciu programu Visual Studio 2010 Profiler" napisany przez zespół doradczy ds.\<https://docs.microsoft.com/archive/blogs/dmcat/profiling-entity-framework-using-the-visual-studio-2010-profiler>. Ten post został napisany dla aplikacji systemu Windows. Jeśli chcesz profilować aplikację sieci web, narzędzia WPR (Performance Recorder) i Windows Performance Analyzer (WPA) mogą działać lepiej niż praca z programem Visual Studio. WPR i WPA są częścią zestawu narzędzi wydajności systemu Windows, który [http://www.microsoft.com/download/details.aspx?id=39982](https://www.microsoft.com/download/details.aspx?id=39982)jest dołączony do zestawu oceny i wdrażania systemu Windows ( ).
 
-### <a name="102-applicationdatabase-profiling"></a>10,2 Profilowanie aplikacji/bazy danych
+### <a name="102-applicationdatabase-profiling"></a>10.2 Profilowanie aplikacji/bazy danych
 
-Narzędzia, takie jak Profiler wbudowany w program Visual Studio, informują o tym, gdzie Twoja aplikacja jest w trakcie.  Dostępny jest inny typ profilera służący do przeprowadzania dynamicznej analizy uruchomionej aplikacji w środowisku produkcyjnym lub przedprodukcyjnym w zależności od potrzeb, a także wyszukuje typowe pułapek i antywzorce dostępu do bazy danych.
+Narzędzia, takie jak profiler wbudowany w programie Visual Studio, informują, gdzie aplikacja spędza czas.Dostępny jest inny typ profilera, który wykonuje dynamiczną analizę uruchomionej aplikacji w produkcji lub przedprodukcji w zależności od potrzeb i wyszukuje typowe pułapki i wzorce anty-wzorce dostępu do bazy danych.
 
-Dwa dostępne w celach komercyjnych narzędzia do tworzenia plików są Entity Framework profilerem (\<http://efprof.com>) i ORMProfiler (\<http://ormprofiler.com>).
+Dwa dostępne na rynku profilerzy to \< http://efprof.com>) Entity Framework Profiler \< http://ormprofiler.com>)( i ORMProfiler ( .
 
-Jeśli aplikacja jest aplikacją MVC używającą Code First, można użyć MiniProfiler StackExchange. Scott Hanselman zawiera opis tego narzędzia w blogu: \<http://www.hanselman.com/blog/NuGetPackageOfTheWeek9ASPNETMiniProfilerFromStackExchangeRocksYourWorld.aspx>.
+Jeśli aplikacja jest aplikacją MVC przy użyciu code first, można użyć MiniProfiler StackExchange.If your application is an MVC application using Code First, you can use StackExchange's MiniProfiler. Scott Hanselman opisuje to narzędzie \< http://www.hanselman.com/blog/NuGetPackageOfTheWeek9ASPNETMiniProfilerFromStackExchangeRocksYourWorld.aspx>w swoim blogu na: .
 
-Aby uzyskać więcej informacji na temat profilowania działania bazy danych aplikacji, zobacz artykuł dotyczący usługi Julie Lerman w witrynie MSDN Magazine zatytułowany [profilowanie działania bazy danych w Entity Framework](https://msdn.microsoft.com/magazine/gg490349.aspx).
+Aby uzyskać więcej informacji na temat profilowania aktywności aplikacji w bazie danych, zobacz artykuł MSDN Magazine Julie Lerman zatytułowany [Profilowanie aktywności bazy danych w ramach entity framework](https://msdn.microsoft.com/magazine/gg490349.aspx).
 
-### <a name="103-database-logger"></a>Rejestrator bazy danych 10,3
+### <a name="103-database-logger"></a>10.3 Rejestrator bazy danych
 
-W przypadku korzystania z programu Entity Framework 6 należy również rozważyć użycie wbudowanych funkcji rejestrowania. Właściwość baza danych kontekstu może być zainstruuja, aby rejestrować swoje działania za pomocą prostej konfiguracji jednowierszowej:
+Jeśli używasz Entity Framework 6 należy również rozważyć użycie wbudowanej funkcji rejestrowania. Właściwość bazy danych kontekstu może być poinstruowana, aby rejestrować jego działanie za pomocą prostej konfiguracji jednowierszowej:
 
 ``` csharp
     using (var context = newQueryComparison.DbC.NorthwindEntities())
@@ -1274,9 +1274,9 @@ W przypadku korzystania z programu Entity Framework 6 należy również rozważy
     }
 ```
 
-W tym przykładzie działanie bazy danych zostanie zarejestrowane w konsoli programu, ale właściwości dziennika można skonfigurować tak, aby wywoływać dowolną akcję&lt;ciągu&gt; delegata.
+W tym przykładzie działanie bazy danych będą rejestrowane w konsoli, ale Log&lt;właściwości&gt; można skonfigurować do wywołania dowolnego delegata ciągu akcji.
 
-Jeśli chcesz włączyć rejestrowanie bazy danych bez ponownego kompilowania i używasz Entity Framework 6,1 lub nowszej, możesz to zrobić przez dodanie interceptora w pliku Web. config lub App. config aplikacji.
+Jeśli chcesz włączyć rejestrowanie bazy danych bez ponownej kompilacji i używasz entity framework 6.1 lub nowszego, można to zrobić, dodając interceptor w pliku web.config lub app.config aplikacji.
 
 ``` xml
   <interceptors>
@@ -1288,48 +1288,48 @@ Jeśli chcesz włączyć rejestrowanie bazy danych bez ponownego kompilowania i 
   </interceptors>
 ```
 
-Aby uzyskać więcej informacji na temat dodawania rejestrowania bez ponownego kompilowania, przejdź do http://blog.oneunicorn.com/2014/02/09/ef-6-1-turning-on-logging-without-recompiling/>\<.
+Aby uzyskać więcej informacji na temat dodawania rejestrowania bez ponownego komppilowania, przejdź do \< http://blog.oneunicorn.com/2014/02/09/ef-6-1-turning-on-logging-without-recompiling/>pliku .
 
-## <a name="11-appendix"></a>11 dodatek
+## <a name="11-appendix"></a>11 Dodatek
 
-### <a name="111-a-test-environment"></a>Środowisko testowe 11,1 A.
+### <a name="111-a-test-environment"></a>11.1 A. Środowisko testowe
 
-W tym środowisku jest stosowana konfiguracja 2-maszynowa z bazą danych na oddzielnym komputerze od aplikacji klienckiej. Maszyny znajdują się w tym samym stojaku, więc opóźnienie sieci jest stosunkowo małe, ale bardziej realistyczne niż środowisko pojedynczej maszyny.
+To środowisko używa konfiguracji 2-komputer z bazą danych na oddzielnym komputerze z aplikacji klienckiej. Maszyny znajdują się w tym samym stelażu, więc opóźnienie sieci jest stosunkowo niskie, ale bardziej realistyczne niż środowisko jednoobrobowe.
 
-#### <a name="1111-app-server"></a>Serwer aplikacji 11.1.1
+#### <a name="1111-app-server"></a>11.1.1 Serwer aplikacji
 
-##### <a name="11111-software-environment"></a>Środowisko oprogramowania 11.1.1.1
+##### <a name="11111-software-environment"></a>11.1.1.1 Środowisko programowe
 
 -   Środowisko oprogramowania Entity Framework 4
-    -   Nazwa systemu operacyjnego: Windows Server 2008 R2 Enterprise SP1.
-    -   Visual Studio 2010 — wersja Ultimate.
-    -   Visual Studio 2010 z dodatkiem SP1 (tylko w przypadku niektórych porównań).
--   Entity Framework 5 i 6 środowiska oprogramowania
+    -   Nazwa systemu operacyjnego: Dodatek SP1 dla systemu Windows Server 2008 R2 Enterprise.
+    -   Visual Studio 2010 – Ultimate.
+    -   Visual Studio 2010 z dodatku SP1 (tylko dla niektórych porównań).
+-   Środowisko oprogramowania Entity Framework 5 i 6
     -   Nazwa systemu operacyjnego: Windows 8.1 Enterprise
-    -   Visual Studio 2013 — wersja Ultimate.
+    -   Visual Studio 2013 – Ultimate.
 
-##### <a name="11112-hardware-environment"></a>Środowisko sprzętowe 11.1.1.2
+##### <a name="11112-hardware-environment"></a>11.1.1.2 Środowisko sprzętowe
 
--   Podwójny procesor: Intel (R) Xeon (R) procesora CPU L5520 W3530 @ 2,27 GHz, 2261 Mhz8 GHz, 4 rdzenie, 84 procesorów logicznych.
+-   Dwuprocesor: Procesor Intel(R) Xeon(R) L5520 W3530 @ 2.27GHz, 2261 Mhz8 GHz, 4 Core(s), 84 Procesory logiczne(-y).
 -   2412 GB RamRAM.
--   dysk 136 GB SCSI250GB SATA 7200 RPM WŁĄCZONĄ/s podzielony na 4 partycje.
+-   Dysk 136 GB SCSI250GB SATA 7200 obr./s 3 GB/s dzieli się na 4 partycje.
 
-#### <a name="1112-db-server"></a>Serwer 11.1.2 DB
+#### <a name="1112-db-server"></a>11.1.2 Serwer DB
 
-##### <a name="11121-software-environment"></a>Środowisko oprogramowania 11.1.2.1
+##### <a name="11121-software-environment"></a>11.1.2.1 Środowisko programowe
 
--   Nazwa systemu operacyjnego: Windows Server 2008 R 28.1 Enterprise SP1.
+-   Nazwa systemu operacyjnego: Dodatek SP1 dla systemu Windows Server 2008 R28.1 Enterprise.
 -   SQL Server 2008 R22012.
 
-##### <a name="11122-hardware-environment"></a>Środowisko sprzętowe 11.1.2.2
+##### <a name="11122-hardware-environment"></a>11.1.2.2 Środowisko sprzętowe
 
--   Pojedynczy procesor: Intel (R) Xeon (R) procesor L5520 @ 2,27 GHz, 2261 MhzES-1620 0 @ 3.60 GHz, 4 rdzenie, 8 procesorów logicznych.
+-   Pojedynczy procesor: Procesor Intel(R) Xeon(R) L5520 @ 2.27GHz, 2261 MhzES-1620 0 @ 3.60GHz, 4 Core(s), 8 Procesory logiczne(-y).
 -   824 GB RamRAM.
--   dysk 465 GB ATA500GB SATA 7200 RPM 6 GB/s podzielony na 4 partycje.
+-   465 GB dysk SATA 7200 obr./s 7200 gb/s 465 GB dzieli się na 4 partycje.
 
-### <a name="112-b-query-performance-comparison-tests"></a>11,2 B. testy porównawcze wydajności zapytań
+### <a name="112-b-query-performance-comparison-tests"></a>11.2 B. Testy porównawcze wydajności zapytań
 
-Model Northwind został użyty do wykonania tych testów. Zostało ono wygenerowane na podstawie bazy danych za pomocą narzędzia Entity Framework Designer. Następnie Poniższy kod został użyty do porównania wydajności opcji wykonywania zapytania:
+Model Northwind został użyty do wykonania tych testów. Został wygenerowany z bazy danych przy użyciu projektanta entity framework. Następnie użyto następującego kodu do porównania wydajności opcji wykonywania kwerendy:
 
 ``` csharp
 using System;
@@ -1496,17 +1496,17 @@ namespace QueryComparison
 }
 ```
 
-### <a name="113-c-navision-model"></a>Model 11,3 C. Navision
+### <a name="113-c-navision-model"></a>11.3 C. Model systemu Navision
 
-Baza danych systemu Navision to duża baza danych służąca do pokazania systemu Microsoft Dynamics — NAV. Wygenerowany model koncepcyjny zawiera 1005 zestawów jednostek i 4227 zestawów skojarzeń. Model używany w teście ma wartość "Flat" — nie dodano żadnego dziedziczenia.
+Baza danych systemu Navision jest dużą bazą danych używaną do demonstracji systemu Microsoft Dynamics — NAV. Wygenerowany model koncepcyjny zawiera 1005 zestawów jednostek i 4227 zestawów skojarzeń. Model używany w teście jest "płaski" — nie dodano do niego dziedziczenia.
 
-#### <a name="1131-queries-used-for-navision-tests"></a>zapytania 11.3.1 używane dla testów systemu Navision
+#### <a name="1131-queries-used-for-navision-tests"></a>11.3.1 Zapytania używane do testów systemu Navision
 
-Lista zapytań używana z modelem systemu Navision zawiera trzy kategorie Entity SQL zapytań:
+Lista zapytań używana z modelem systemu Navision zawiera 3 kategorie zapytań SQL encji:
 
-##### <a name="11311-lookup"></a>11.3.1.1, wyszukiwanie
+##### <a name="11311-lookup"></a>11.3.1.1 Odnośnika
 
-Proste zapytanie wyszukiwania bez agregacji
+Prosta kwerenda odnośnika bez agregacji
 
 -   Liczba: 16232
 -   Przykład:
@@ -1517,9 +1517,9 @@ Proste zapytanie wyszukiwania bez agregacji
   </Query>
 ```
 
-##### <a name="11312singleaggregating"></a>11.3.1.2 SingleAggregating
+##### <a name="11312singleaggregating"></a>11.3.1.2 Pojedyncza agregacja
 
-Normalne zapytanie analizy biznesowej z wieloma agregacjami, ale bez sum częściowych (pojedyncze zapytanie)
+Normalna kwerenda analizy biznesowej z wieloma agregacjami, ale bez sum częściowych (pojedyncza kwerenda)
 
 -   Liczba: 2313
 -   Przykład:
@@ -1530,7 +1530,7 @@ Normalne zapytanie analizy biznesowej z wieloma agregacjami, ale bez sum częśc
   </Query>
 ```
 
-Gdzie MDF\_SessionLogin\_czas\_Max () jest zdefiniowany w modelu jako:
+Gdzie MDF\_SessionLogin\_Time\_Max() jest zdefiniowany w modelu jako:
 
 ``` xml
   <Function Name="MDF_SessionLogin_Time_Max" ReturnType="Collection(DateTime)">
@@ -1538,9 +1538,9 @@ Gdzie MDF\_SessionLogin\_czas\_Max () jest zdefiniowany w modelu jako:
   </Function>
 ```
 
-##### <a name="11313aggregatingsubtotals"></a>11.3.1.3 AggregatingSubtotals
+##### <a name="11313aggregatingsubtotals"></a>11.3.1.3 AgregowanieSubtotals
 
-Zapytanie analizy biznesowej z agregacjami i sumami częściowymi (za pośrednictwem UNION ALL)
+Kwerenda BI z agregacjami i sumami częściowymi (za pośrednictwem wszystkich unii)
 
 -   Liczba: 178
 -   Przykład:

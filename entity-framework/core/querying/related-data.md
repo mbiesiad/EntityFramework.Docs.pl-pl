@@ -4,12 +4,12 @@ author: rowanmiller
 ms.date: 10/27/2016
 ms.assetid: f9fb64e2-6699-4d70-a773-592918c04c19
 uid: core/querying/related-data
-ms.openlocfilehash: 915aaa41beb495a046f2d6260e9c3b174d5f3031
-ms.sourcegitcommit: 9b562663679854c37c05fca13d93e180213fb4aa
+ms.openlocfilehash: bfd6e161ed7f7bf96e61946f94c8eeadd24a72f5
+ms.sourcegitcommit: 144edccf9b29a7ffad119c235ac9808ec1a46193
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 04/07/2020
-ms.locfileid: "78417678"
+ms.lasthandoff: 04/16/2020
+ms.locfileid: "81434191"
 ---
 # <a name="loading-related-data"></a>Ładowanie powiązanych danych
 
@@ -55,6 +55,27 @@ Można dołączyć wiele powiązanych jednostek dla jednej z jednostek, która j
 
 > [!CAUTION]
 > Od wersji 3.0.0, każdy `Include` spowoduje dodatkowe JOIN do dodania do zapytań SQL produkowanych przez dostawców relacyjnych, podczas gdy poprzednie wersje generowane dodatkowe zapytania SQL. Może to znacznie zmienić wydajność zapytań, na lepsze lub gorsze. W szczególności zapytania LINQ z niezwykle dużą `Include` liczbą operatorów może być konieczne w podziale na wiele oddzielnych zapytań LINQ w celu uniknięcia problemu rozłąki kartezjańskiej.
+
+### <a name="filtered-include"></a>Filtrowane include
+
+> [!NOTE]
+> Ta funkcja jest wprowadzana w EF Core 5.0.
+
+Podczas stosowania Include do ładowania powiązanych danych, można zastosować niektóre operacje wyliczalne na dołączonej nawigacji kolekcji, co pozwala na filtrowanie i sortowanie wyników.
+
+Obsługiwane `Where`operacje to: `OrderBy` `OrderByDescending`, `ThenBy` `ThenByDescending`, `Skip`, `Take`, , , i .
+
+Takie operacje powinny być stosowane na nawigacji kolekcji w lambda przekazywane do Include metody, jak pokazano w poniższym przykładzie:
+
+[!code-csharp[Main](../../../samples/core/Querying/RelatedData/Sample.cs#FilteredInclude)]
+
+Każda dołączona nawigacja umożliwia tylko jeden unikatowy zestaw operacji filtrowania. W przypadkach, gdy wiele operacji Include są`blog.Posts` stosowane dla danej nawigacji kolekcji (w poniższych przykładach), operacje filtrowania można określić tylko na jednym z nich: 
+
+[!code-csharp[Main](../../../samples/core/Querying/RelatedData/Sample.cs#MultipleLeafIncludesFiltered1)]
+
+Alternatywnie, identyczne operacje mogą być stosowane dla każdej nawigacji, która jest uwzględniona wiele razy:
+
+[!code-csharp[Main](../../../samples/core/Querying/RelatedData/Sample.cs#MultipleLeafIncludesFiltered2)]
 
 ### <a name="include-on-derived-types"></a>Uwzględnij typy pochodne
 

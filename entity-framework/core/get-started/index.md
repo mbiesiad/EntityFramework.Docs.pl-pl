@@ -4,12 +4,12 @@ author: rick-anderson
 ms.date: 09/17/2019
 ms.assetid: 3c88427c-20c6-42ec-a736-22d3eccd5071
 uid: core/get-started/index
-ms.openlocfilehash: 0e7a1ee159cdf5b72448fe6d73c972975b1ab95b
-ms.sourcegitcommit: 9b562663679854c37c05fca13d93e180213fb4aa
+ms.openlocfilehash: 7ace80bf326395d3b68f3e745100cd45356d7973
+ms.sourcegitcommit: 144edccf9b29a7ffad119c235ac9808ec1a46193
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 04/07/2020
-ms.locfileid: "78416884"
+ms.lasthandoff: 04/16/2020
+ms.locfileid: "81434100"
 ---
 # <a name="getting-started-with-ef-core"></a>Wprowadzenie do EF Core
 
@@ -95,7 +95,7 @@ Zdefiniuj klasy kontekstu i klasy jednostek, które tworzą model.
 
 EF Core można również [odtworzyć](../managing-schemas/scaffolding.md) modelu z istniejącej bazy danych.
 
-Wskazówka: W prawdziwej aplikacji można umieścić każdą klasę w osobnym pliku i umieścić [ciąg połączenia](../miscellaneous/connection-strings.md) w pliku konfiguracyjnym lub zmiennej środowiskowej. Aby samouczek był prosty, wszystko jest zawarte w jednym pliku.
+Wskazówka: Ta aplikacja celowo utrzymuje rzeczy proste dla jasności. [Parametry połączenia](../miscellaneous/connection-strings.md) nie powinny być przechowywane w kodzie dla aplikacji produkcyjnych. Można również podzielić każdą klasę C# na własny plik.
 
 ## <a name="create-the-database"></a>Tworzenie bazy danych
 

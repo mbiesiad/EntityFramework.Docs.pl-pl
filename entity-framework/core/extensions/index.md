@@ -1,15 +1,15 @@
 ---
 title: Narzędzia & rozszerzenia - EF Core
 author: ErikEJ
-ms.date: 12/17/2019
+ms.date: 04/11/2020
 ms.assetid: 14fffb6c-a687-4881-a094-af4a1359a296
 uid: core/extensions/index
-ms.openlocfilehash: e3806f7161fecfe66450d3e08f97caf3d2c84cf3
-ms.sourcegitcommit: 9b562663679854c37c05fca13d93e180213fb4aa
+ms.openlocfilehash: 7727229fc50a4bfd39e05481399e392037402396
+ms.sourcegitcommit: 144edccf9b29a7ffad119c235ac9808ec1a46193
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 04/07/2020
-ms.locfileid: "80634241"
+ms.lasthandoff: 04/16/2020
+ms.locfileid: "81434113"
 ---
 # <a name="ef-core-tools--extensions"></a>EF Core Tools & rozszerzenia
 
@@ -71,11 +71,11 @@ Biblioteka wtyczek, która umożliwia automatyczne rejestrowanie zmian danych wy
 
 [Repozytorium GitHub](https://github.com/Arch/AutoHistory/)
 
-### <a name="efsecondlevelcachecore"></a>EFSecondLevelCache.Core
+### <a name="efcoresecondlevelcacheinterceptor"></a>EFCoreSecondLevelCacheInterceptor
 
-Rozszerzenie, które umożliwia przechowywanie wyników zapytań EF Core w pamięci podręcznej drugiego poziomu, dzięki czemu kolejne wykonanie tych samych kwerend można uniknąć dostępu do bazy danych i pobrać dane bezpośrednio z pamięci podręcznej. Dla EF Core: 2.
+Buforowanie drugiego poziomu jest pamięcią podręczną zapytań. Wyniki poleceń EF będą przechowywane w pamięci podręcznej, dzięki czemu te same polecenia EF będą pobierać swoje dane z pamięci podręcznej, a nie wykonując je ponownie w bazie danych. Dla EF Core: 3.
 
-[Repozytorium GitHub](https://github.com/VahidN/EFSecondLevelCache.Core/)
+[Repozytorium GitHub](https://github.com/VahidN/EFCoreSecondLevelCacheInterceptor)
 
 ### <a name="geco"></a>Geco
 
@@ -172,13 +172,13 @@ Rozszerza DbContext o wysokiej wydajności operacji masowych: BulkSaveChanges, B
 
 ### <a name="expressionify"></a>Wyekspresyfikacja
 
-Dodaj obsługę wywoływania metod rozszerzenia w linq lambdas. Dla EF Core: 3.1
+Dodaj obsługę wywoływania metod rozszerzenia w linq lambdas. Dla EF Core: 3.
 
 [Repozytorium GitHub](https://github.com/ClaveConsulting/Expressionify)
 
 ### <a name="xlinq"></a>XLinq (własno)
 
-Technologia linq (Language Integrated Query) dla relacyjnych baz danych. Umożliwia użycie języka C# do pisania silnie wpisanych zapytań. Dla EF Core: 3.1
+Technologia linq (Language Integrated Query) dla relacyjnych baz danych. Umożliwia użycie języka C# do pisania silnie wpisanych zapytań. Dla EF Core: 3.
 
 - Pełna obsługa języka C# dla tworzenia zapytań: wiele instrukcji wewnątrz lambda, zmienne, funkcje itp.
 - Brak luki semantycznej z SQL. XLinq deklaruje instrukcje `SELECT`SQL `FROM` `WHERE`(jak , , ) jako metody pierwszej klasy C#, łącząc znaną składnię z intellisense, bezpieczeństwa typu i refaktoryzacji.
@@ -186,3 +186,27 @@ Technologia linq (Language Integrated Query) dla relacyjnych baz danych. Umożli
 W rezultacie SQL staje się po prostu "inną" biblioteką klas eksponującą swój interfejs API lokalnie, dosłownie *"Language Integrated SQL"*.
 
 [witryna sieci web](http://xlinq.live/)
+
+### <a name="ramses"></a>Ramses
+
+Haki cyklu życia (dla SaveChanges). Dla EF Core: 2, 3.
+
+[Repozytorium GitHub](https://github.com/JValck/Ramses)
+
+### <a name="efcorenamingconventions"></a>EFCore.NamingKonwenty
+
+Spowoduje to automatyczne, że wszystkie nazwy tabel i kolumn mają snake_case, wszystkie nazewnictwo górne lub wszystkie małe litery. Dla EF Core: 3.
+
+[Repozytorium GitHub](https://github.com/efcore/EFCore.NamingConventions)
+
+### <a name="simplersoftwareentityframeworkcoresqlservernodatime"></a>ProstszySoftware.EntityFrameCore.SqlServer.NodaTime
+
+Dodaje natywną obsługę entityframeworkCore dla programu SQL Server dla typów NodaTime. Dla EF Core: 3.
+
+[Repozytorium GitHub](https://github.com/StevenRasmussen/EFCore.SqlServer.NodaTime)
+
+### <a name="dabbleentityframeworkcoretemporalquery"></a>Dabble.EntityFrameworkCore.Temporal.Query
+
+LINQ rozszerzenia do entity framework core 3.1 do obsługi microsoft SQL Server czasowe kwerendy tabeli. Dla EF Core: 3.
+
+[Repozytorium GitHub](https://github.com/Adam-Langley/efcore-temporal-query)
