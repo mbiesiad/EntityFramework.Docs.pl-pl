@@ -1,5 +1,5 @@
 - name: Entity Framework
-  href: index.md
+  href: index.yml
   items:
     - name: EF Core i EF6
       items:
@@ -504,7 +504,7 @@
                       href: ef6/resources/licenses/ef5/cht.md
                     - name: niemiecki
                       href: ef6/resources/licenses/ef5/deu.md
-                    - name: angielski
+                    - name: Angielski
                       href: ef6/resources/licenses/ef5/enu.md
                     - name: Hiszpański
                       href: ef6/resources/licenses/ef5/esn.md
@@ -516,7 +516,7 @@
                       href: ef6/resources/licenses/ef5/jpn.md
                     - name: koreański
                       href: ef6/resources/licenses/ef5/kor.md
-                    - name: rosyjski
+                    - name: Rosyjski
                       href: ef6/resources/licenses/ef5/rus.md
                 - name: EF6
                   items:
@@ -532,7 +532,7 @@
                       href: ef6/resources/licenses/ef6/cht.md
                     - name: niemiecki
                       href: ef6/resources/licenses/ef6/deu.md
-                    - name: angielski
+                    - name: Angielski
                       href: ef6/resources/licenses/ef6/enu.md
                     - name: Hiszpański
                       href: ef6/resources/licenses/ef6/esn.md
@@ -544,7 +544,7 @@
                       href: ef6/resources/licenses/ef6/jpn.md
                     - name: koreański
                       href: ef6/resources/licenses/ef6/kor.md
-                    - name: rosyjski
+                    - name: Rosyjski
                       href: ef6/resources/licenses/ef6/rus.md
         - name: Dokumentacja interfejsów API platformy EF6 >>
           href: /dotnet/api/?view=entity-framework-6.2.0
