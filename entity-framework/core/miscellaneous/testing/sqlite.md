@@ -1,54 +1,46 @@
 ---
 title: Testowanie przy użyciu oprogramowania SQLite-EF Core
-author: rowanmiller
-ms.date: 10/27/2016
-ms.assetid: 7a2b75e2-1875-4487-9877-feff0651b5a6
+description: Testowanie aplikacji EF Core przy użyciu oprogramowania SQLite
+author: ajcvickers
+ms.date: 04/24/2020
 uid: core/miscellaneous/testing/sqlite
-ms.openlocfilehash: f7f847d8c766c0d4d7577ea6760ee72a17f84933
-ms.sourcegitcommit: cc0ff36e46e9ed3527638f7208000e8521faef2e
+ms.openlocfilehash: 327fdc230df2a3b4094accf93fffa81f92e0a931
+ms.sourcegitcommit: 79e460f76b6664e1da5886d102bd97f651d2ffff
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 03/06/2020
-ms.locfileid: "78417303"
+ms.lasthandoff: 04/29/2020
+ms.locfileid: "82538285"
 ---
-# <a name="testing-with-sqlite"></a><span data-ttu-id="1a818-102">Testowanie za pomocą systemu SQLite</span><span class="sxs-lookup"><span data-stu-id="1a818-102">Testing with SQLite</span></span>
+# <a name="using-sqlite-to-test-an-ef-core-application"></a><span data-ttu-id="8747b-103">Testowanie aplikacji EF Core przy użyciu oprogramowania SQLite</span><span class="sxs-lookup"><span data-stu-id="8747b-103">Using SQLite to test an EF Core application</span></span>
 
-<span data-ttu-id="1a818-103">Program SQLite ma tryb w pamięci, który umożliwia używanie oprogramowania SQLite do pisania testów względem relacyjnej bazy danych, bez konieczności wykonywania dodatkowych operacji bazy danych.</span><span class="sxs-lookup"><span data-stu-id="1a818-103">SQLite has an in-memory mode that allows you to use SQLite to write tests against a relational database, without the overhead of actual database operations.</span></span>
+> [!WARNING]
+> <span data-ttu-id="8747b-104">Korzystanie z oprogramowania SQLite może być skutecznym sposobem przetestowania aplikacji EF Core.</span><span class="sxs-lookup"><span data-stu-id="8747b-104">Using SQLite can be an effective way to test an EF Core application.</span></span>
+> <span data-ttu-id="8747b-105">Problemy mogą jednak wystąpić w sytuacji, gdy program SQLite działa inaczej niż w przypadku innych systemów baz danych.</span><span class="sxs-lookup"><span data-stu-id="8747b-105">However, problems can arise where SQLite behaves differently from other database systems.</span></span> <span data-ttu-id="8747b-106">Zobacz [testowanie kodu, który używa EF Core](xref:core/miscellaneous/testing/index) do omówienia problemów i zalet.</span><span class="sxs-lookup"><span data-stu-id="8747b-106">See [Testing code that uses EF Core](xref:core/miscellaneous/testing/index) for a discussion of the issues and trade-offs.</span></span>  
 
-> [!TIP]  
-> <span data-ttu-id="1a818-104">[Przykład](https://github.com/dotnet/EntityFramework.Docs/tree/master/samples/core/Miscellaneous/Testing) tego artykułu można wyświetlić w witrynie GitHub</span><span class="sxs-lookup"><span data-stu-id="1a818-104">You can view this article's [sample](https://github.com/dotnet/EntityFramework.Docs/tree/master/samples/core/Miscellaneous/Testing) on GitHub</span></span>
+<span data-ttu-id="8747b-107">Ten dokument zawiera informacje dotyczące pojęć wprowadzonych w [przykładzie pokazujący sposób testowania aplikacji, które używają EF Core](xref:core/miscellaneous/testing/testing-sample).</span><span class="sxs-lookup"><span data-stu-id="8747b-107">This document builds uses on the concepts introduced in [Sample showing how to test applications that use EF Core](xref:core/miscellaneous/testing/testing-sample).</span></span>
+<span data-ttu-id="8747b-108">Przykłady kodu przedstawione w tym miejscu pochodzą z tego przykładu.</span><span class="sxs-lookup"><span data-stu-id="8747b-108">The code examples shown here come from this sample.</span></span>
 
-## <a name="example-testing-scenario"></a><span data-ttu-id="1a818-105">Przykładowy scenariusz testowania</span><span class="sxs-lookup"><span data-stu-id="1a818-105">Example testing scenario</span></span>
+## <a name="using-sqlite-in-memory-databases"></a><span data-ttu-id="8747b-109">Korzystanie z baz danych programu SQLite w pamięci</span><span class="sxs-lookup"><span data-stu-id="8747b-109">Using SQLite in-memory databases</span></span>
 
-<span data-ttu-id="1a818-106">Należy wziąć pod uwagę następujące usługi, dzięki którym kod aplikacji może wykonywać pewne operacje związane ze blogami.</span><span class="sxs-lookup"><span data-stu-id="1a818-106">Consider the following service that allows application code to perform some operations related to blogs.</span></span> <span data-ttu-id="1a818-107">Wewnętrznie używa `DbContext`, które nawiązuje połączenie z bazą danych SQL Server.</span><span class="sxs-lookup"><span data-stu-id="1a818-107">Internally it uses a `DbContext` that connects to a SQL Server database.</span></span> <span data-ttu-id="1a818-108">Warto przystąpić do zamiany tego kontekstu w celu nawiązania połączenia z bazą danych programu SQLite w pamięci, dzięki czemu możemy pisać wydajne testy dla tej usługi bez konieczności modyfikowania kodu lub wykonywania wielu zadań, aby utworzyć test w podwójnej części kontekstu.</span><span class="sxs-lookup"><span data-stu-id="1a818-108">It would be useful to swap this context to connect to an in-memory SQLite database so that we can write efficient tests for this service without having to modify the code, or do a lot of work to create a test double of the context.</span></span>
+<span data-ttu-id="8747b-110">Zwykle Program SQLite tworzy bazy danych jako proste pliki i uzyskuje dostęp do pliku w procesie przy użyciu aplikacji.</span><span class="sxs-lookup"><span data-stu-id="8747b-110">Normally, SQLite creates databases as simple files and accesses the file in-process with your application.</span></span>
+<span data-ttu-id="8747b-111">Jest to bardzo szybkie, szczególnie w przypadku korzystania z szybkiego dysku [SSD](https://en.wikipedia.org/wiki/Solid-state_drive).</span><span class="sxs-lookup"><span data-stu-id="8747b-111">This is very fast, especially when using a fast [SSD](https://en.wikipedia.org/wiki/Solid-state_drive).</span></span> 
 
-[!code-csharp[Main](../../../../samples/core/Miscellaneous/Testing/BusinessLogic/BlogService.cs)]
+<span data-ttu-id="8747b-112">Program SQLite może również używać baz danych utworzonych w pamięci podręcznej.</span><span class="sxs-lookup"><span data-stu-id="8747b-112">SQLite can also use databases created purely in-memory.</span></span>
+<span data-ttu-id="8747b-113">Jest to łatwe w użyciu z EF Core, o ile zrozumiesz okres istnienia bazy danych w pamięci:</span><span class="sxs-lookup"><span data-stu-id="8747b-113">This is easy to use with EF Core as long as you understand the in-memory database lifetime:</span></span>
+* <span data-ttu-id="8747b-114">Baza danych jest tworzona, gdy zostanie otwarte połączenie</span><span class="sxs-lookup"><span data-stu-id="8747b-114">The database is created when the connection to it is opened</span></span>
+* <span data-ttu-id="8747b-115">Baza danych jest usuwana po zamknięciu połączenia</span><span class="sxs-lookup"><span data-stu-id="8747b-115">The database is deleted when the connection to it is closed</span></span>
 
-## <a name="get-your-context-ready"></a><span data-ttu-id="1a818-109">Przygotuj swój kontekst</span><span class="sxs-lookup"><span data-stu-id="1a818-109">Get your context ready</span></span>
+<span data-ttu-id="8747b-116">EF Core użyje już otwartego połączenia, gdy zostanie on określony, i nigdy nie spróbuje go zamknąć.</span><span class="sxs-lookup"><span data-stu-id="8747b-116">EF Core will use an already open connection when given one, and will never attempt to close it.</span></span>
+<span data-ttu-id="8747b-117">Dlatego klucz używany EF Core z bazą danych programu SQLite w pamięci polega na otwarciu połączenia przed przekazaniem go do EF.</span><span class="sxs-lookup"><span data-stu-id="8747b-117">So the key to using EF Core with an in-memory SQLite database is to open the connection before passing it to EF.</span></span>  
 
-### <a name="avoid-configuring-two-database-providers"></a><span data-ttu-id="1a818-110">Unikaj konfigurowania dwóch dostawców baz danych</span><span class="sxs-lookup"><span data-stu-id="1a818-110">Avoid configuring two database providers</span></span>
+<span data-ttu-id="8747b-118">[Przykład](xref:core/miscellaneous/testing/testing-sample) osiąga ten kod przy użyciu następującego kodu:</span><span class="sxs-lookup"><span data-stu-id="8747b-118">The [sample](xref:core/miscellaneous/testing/testing-sample) achieves this with the following code:</span></span>
 
-<span data-ttu-id="1a818-111">W testach zamierzasz zewnętrznie skonfigurować kontekst do korzystania z dostawcy inMemory.</span><span class="sxs-lookup"><span data-stu-id="1a818-111">In your tests you are going to externally configure the context to use the InMemory provider.</span></span> <span data-ttu-id="1a818-112">W przypadku konfigurowania dostawcy bazy danych przez zastępowanie `OnConfiguring` w kontekście, należy dodać kod warunkowy, aby upewnić się, że tylko dostawca bazy danych nie został jeszcze skonfigurowany.</span><span class="sxs-lookup"><span data-stu-id="1a818-112">If you are configuring a database provider by overriding `OnConfiguring` in your context, then you need to add some conditional code to ensure that you only configure the database provider if one has not already been configured.</span></span>
+[!code-csharp[SqliteInMemory](../../../../samples/core/Miscellaneous/Testing/ItemsWebApi/Tests/SqliteInMemoryItemsControllerTest.cs?name=SqliteInMemory)]
 
-> [!TIP]  
-> <span data-ttu-id="1a818-113">Jeśli używasz ASP.NET Core, ten kod nie powinien być potrzebny, ponieważ dostawca bazy danych jest skonfigurowany poza kontekstem (w Startup.cs).</span><span class="sxs-lookup"><span data-stu-id="1a818-113">If you are using ASP.NET Core, then you should not need this code since your database provider is configured outside of the context (in Startup.cs).</span></span>
+<span data-ttu-id="8747b-119">Wzory</span><span class="sxs-lookup"><span data-stu-id="8747b-119">Notice:</span></span>
+* <span data-ttu-id="8747b-120">`CreateInMemoryDatabase` Metoda tworzy bazę danych w pamięci programu SQLite i otwiera połączenie z nim.</span><span class="sxs-lookup"><span data-stu-id="8747b-120">The `CreateInMemoryDatabase` method creates a SQLite in-memory database and opens the connection to it.</span></span>
+* <span data-ttu-id="8747b-121">Utworzony `DbConnection` został wyodrębniony z `ContextOptions` i zapisany.</span><span class="sxs-lookup"><span data-stu-id="8747b-121">The created `DbConnection` is extracted from the `ContextOptions` and saved.</span></span>
+* <span data-ttu-id="8747b-122">Połączenie jest usuwane, gdy test zostanie usunięty, aby zasoby nie były wyciekami.</span><span class="sxs-lookup"><span data-stu-id="8747b-122">The connection is disposed when the test is disposed so that resources are not leaked.</span></span> 
 
-[!code-csharp[Main](../../../../samples/core/Miscellaneous/Testing/BusinessLogic/BloggingContext.cs#OnConfiguring)]
-
-### <a name="add-a-constructor-for-testing"></a><span data-ttu-id="1a818-114">Dodaj Konstruktor do testowania</span><span class="sxs-lookup"><span data-stu-id="1a818-114">Add a constructor for testing</span></span>
-
-<span data-ttu-id="1a818-115">Najprostszym sposobem na włączenie testowania względem innej bazy danych jest zmodyfikowanie kontekstu, aby uwidocznić konstruktora, który akceptuje `DbContextOptions<TContext>`.</span><span class="sxs-lookup"><span data-stu-id="1a818-115">The simplest way to enable testing against a different database is to modify your context to expose a constructor that accepts a `DbContextOptions<TContext>`.</span></span>
-
-[!code-csharp[Main](../../../../samples/core/Miscellaneous/Testing/BusinessLogic/BloggingContext.cs#Constructors)]
-
-> [!TIP]  
-> <span data-ttu-id="1a818-116">`DbContextOptions<TContext>` informuje kontekst wszystkich jego ustawień, takich jak baza danych, z którą ma zostać nawiązane połączenie.</span><span class="sxs-lookup"><span data-stu-id="1a818-116">`DbContextOptions<TContext>` tells the context all of its settings, such as which database to connect to.</span></span> <span data-ttu-id="1a818-117">Jest to ten sam obiekt, który jest zbudowany przez uruchomienie metody onconfiguring w Twoim kontekście.</span><span class="sxs-lookup"><span data-stu-id="1a818-117">This is the same object that is built by running the OnConfiguring method in your context.</span></span>
-
-## <a name="writing-tests"></a><span data-ttu-id="1a818-118">Pisanie testów</span><span class="sxs-lookup"><span data-stu-id="1a818-118">Writing tests</span></span>
-
-<span data-ttu-id="1a818-119">Klucz do testowania przy użyciu tego dostawcy to możliwość poinformowania kontekstu o konieczności użycia oprogramowania SQLite i kontrolowania zakresu bazy danych w pamięci.</span><span class="sxs-lookup"><span data-stu-id="1a818-119">The key to testing with this provider is the ability to tell the context to use SQLite, and control the scope of the in-memory database.</span></span> <span data-ttu-id="1a818-120">Zakres bazy danych jest kontrolowany przez otwieranie i zamykanie połączenia.</span><span class="sxs-lookup"><span data-stu-id="1a818-120">The scope of the database is controlled by opening and closing the connection.</span></span> <span data-ttu-id="1a818-121">Baza danych jest objęta zakresem czasu, przez który połączenie jest otwarte.</span><span class="sxs-lookup"><span data-stu-id="1a818-121">The database is scoped to the duration that the connection is open.</span></span> <span data-ttu-id="1a818-122">Zwykle potrzebna jest czysta baza danych dla każdej metody testowej.</span><span class="sxs-lookup"><span data-stu-id="1a818-122">Typically you want a clean database for each test method.</span></span>
-
->[!TIP]
-> <span data-ttu-id="1a818-123">Aby użyć `SqliteConnection()` i metody rozszerzenia `.UseSqlite()`, odwołuje się do pakietu NuGet [Microsoft. EntityFrameworkCore. sqlite](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Sqlite/).</span><span class="sxs-lookup"><span data-stu-id="1a818-123">To use `SqliteConnection()` and the `.UseSqlite()` extension method, reference the NuGet package [Microsoft.EntityFrameworkCore.Sqlite](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Sqlite/).</span></span>
-
-[!code-csharp[Main](../../../../samples/core/Miscellaneous/Testing/TestProject/SQLite/BlogServiceTests.cs)]
+> [!NOTE]
+> <span data-ttu-id="8747b-123">[#16103 problemu](https://github.com/dotnet/efcore/issues/16103) śledzi sposoby ułatwienia tego zarządzania połączeniami.</span><span class="sxs-lookup"><span data-stu-id="8747b-123">[Issue #16103](https://github.com/dotnet/efcore/issues/16103) is tracking ways to make this connection management easier.</span></span> 

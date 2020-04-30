@@ -1,6 +1,6 @@
 ### YamlMime:Hub
 title: Dokumentacja Entity Framework
-summary: Entity Framework Core to nowoczesny obiekt — Maper baz danych dla platformy .NET. Obsługuje zapytania LINQ, śledzenie zmian, aktualizacje i migracje schematu. EF Core współpracuje z wieloma bazami danych, w tym SQL Database (lokalnie i na platformie Azure), SQLite, MySQL, PostgreSQL i Azure Cosmos DB.
+summary: Entity Framework Core to nowoczesny obiekt — Maper baz danych dla platformy .NET. Obsługuje zapytania LINQ, śledzenie zmian, aktualizacje i migracje schematu. EF Core współpracuje z wieloma bazami danych, w tym SQL Database (lokalnie i na platformie Azure), oprogramowania SQLite, MySQL, PostgreSQL i Azure Cosmos DB.
 brand: dotnet
 metadata:
   title: Dokumentacja Entity Framework
@@ -10,12 +10,12 @@ metadata:
   author: WadePickett
   ms.author: wpickett
   ms.date: 04/15/2020
-  ms.openlocfilehash: bfb96b06a2832b489e194fede0c04efebcc7496d
-  ms.sourcegitcommit: 387cbd8109c0fc5ce6bdc85d0dec1aed72ad4c33
+  ms.openlocfilehash: 54cbd0fcda19c4e2f35a3c3d4f350e3fecf3f597
+  ms.sourcegitcommit: 79e460f76b6664e1da5886d102bd97f651d2ffff
   ms.translationtype: MT
   ms.contentlocale: pl-PL
-  ms.lasthandoff: 04/23/2020
-  ms.locfileid: "82103103"
+  ms.lasthandoff: 04/29/2020
+  ms.locfileid: "82538378"
 highlightedContent:
   items:
   - title: Entity Framework Core
@@ -48,6 +48,38 @@ additionalContent:
         text: ASP.NET Core Razor Pages aplikacji sieci Web uzyskujących dostęp do SQL Server LocalDB lub oprogramowania SQLite przy użyciu EF Core
       - url: /aspnet/core/data/ef-mvc/
         text: ASP.NET Core aplikacji sieci Web MVC z dostępem do SQL Server za pomocą EF Core
+    - title: Obsługiwane bazy danych
+      links:
+      - url: core/providers/sql-server/index.md
+        text: SQL Server
+      - url: core/providers/sqlite/index.md
+        text: SQLite
+      - url: http://www.npgsql.org/efcore/index.html
+        text: PostgreSQL
+      - url: https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql
+        text: MySQL i MariaDB
+      - url: core/providers/cosmos/index.md
+        text: Cosmos DB interfejsu API SQL
+      - url: core/providers/in-memory/index.md
+        text: W pamięci (testowanie)
+      - url: core/providers/index.md
+        text: Wszyscy dostawcy bieżącej bazy danych
+    - title: Platformy
+      links:
+      - url: https://docs.microsoft.com/ef/core/platforms/
+        text: Wszystkie obsługiwane platformy
+      - url: https://docs.microsoft.com/aspnet/core/data/ef-rp/intro
+        text: ASP.NET Core Razor Pages
+      - url: https://docs.microsoft.com/aspnet/core/data/ef-mvc/
+        text: ASP.NET Core MVC
+      - url: https://docs.microsoft.com/aspnet/core/blazor/dependency-injection?#use-of-entity-framework-dbcontext-from-di
+        text: Serwer Blazor
+      - url: https://docs.microsoft.com/ef/ef6/fundamentals/databinding/wpf
+        text: Windows Presentation Foundation (WPF)
+      - url: https://docs.microsoft.com/ef/ef6/fundamentals/databinding/winforms
+        text: Windows Forms (WinForms)
+      - url: https://github.com/dotnet/efcore/issues?q=is%3Aopen+is%3Aissue+label%3Aarea-xamarin
+        text: Xamarin (częściowa obsługa)
     - title: Podstawy
       links:
       - url: core/miscellaneous/connection-strings.md
@@ -138,22 +170,6 @@ additionalContent:
         text: Zapisywanie asynchroniczne
       - url: core/saving/disconnected-entities.md
         text: Odłączone jednostki
-    - title: Obsługiwane bazy danych
-      links:
-      - url: core/providers/sql-server/index.md
-        text: SQL Server
-      - url: core/providers/sqlite/index.md
-        text: SQLite
-      - url: http://www.npgsql.org/efcore/index.html
-        text: PostgreSQL
-      - url: https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql
-        text: MySQL i MariaDB
-      - url: core/providers/cosmos/index.md
-        text: Cosmos DB interfejsu API SQL
-      - url: core/providers/in-memory/index.md
-        text: W pamięci (testowanie)
-      - url: core/providers/index.md
-        text: Wszyscy dostawcy bieżącej bazy danych
     - title: Dokumentacja wiersza polecenia
       links:
       - url: core/miscellaneous/cli/index.md
