@@ -1,112 +1,117 @@
 ---
-title: Komponenty testowe przy użyciu EF Core - EF Core
-description: Różne podejścia do testowania aplikacji korzystających z EF Core
+title: Testowanie kodu, który używa EF Core-EF Core
+description: Różne podejścia do testowania aplikacji korzystających EF Core
 author: ajcvickers
-ms.date: 03/23/2020
+ms.date: 04/22/2020
 uid: core/miscellaneous/testing/index
-ms.openlocfilehash: b1ab37ebb0a3aae09d5d5b225f746cf83dfba170
-ms.sourcegitcommit: 9b562663679854c37c05fca13d93e180213fb4aa
+ms.openlocfilehash: 308128b0d51b9e0d1fc1ebb0ed00e803100efb52
+ms.sourcegitcommit: 79e460f76b6664e1da5886d102bd97f651d2ffff
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 04/07/2020
-ms.locfileid: "80634251"
+ms.lasthandoff: 04/29/2020
+ms.locfileid: "82538364"
 ---
 # <a name="testing-code-that-uses-ef-core"></a>Testowanie kodu, który używa EF Core
 
-Testowanie kodu, który uzyskuje dostęp do bazy danych wymaga albo:
-* Uruchamianie zapytań i aktualizacji w tym samym systemie bazy danych, który jest używany w produkcji.
-* Uruchamianie zapytań i aktualizacji względem innych łatwiejszych w zarządzaniu systemem baz danych.
-* Za pomocą testu podwaja lub inny mechanizm, aby uniknąć korzystania z bazy danych w ogóle.
+Testowanie kodu, który uzyskuje dostęp do bazy danych, wymaga:
+* Uruchamianie zapytań i aktualizacji w ramach tego samego systemu bazy danych używanego w środowisku produkcyjnym.
+* Uruchamianie zapytań i aktualizacji w celu łatwiejszego zarządzania systemem bazy danych.
+* Używanie podwójnego rozliczania testów lub innego mechanizmu, aby uniknąć używania bazy danych w ogóle.
 
-W tym dokumencie przedstawiono kompromisy związane z każdym z tych wyborów i pokazuje, jak EF Core może być używany z każdym podejściem.  
+Ten dokument zawiera informacje o zaletach wymiany związanych z każdą z tych opcji i sposób, w jaki EF Core mogą być używane z każdym podejściem.  
 
-## <a name="all-database-providers-are-not-equal"></a>Wszyscy dostawcy baz danych nie są
+> [!TIP]
+> Zobacz [przykład testowania EF Core](xref:core/miscellaneous/testing/testing-sample) , aby uzyskać kod pokazujący koncepcje wprowadzone w tym miejscu. 
 
-Jest bardzo ważne, aby zrozumieć, że EF Core nie jest przeznaczony do abstrakcji każdy aspekt systemu baz danych.
-Zamiast tego EF Core jest wspólny zestaw wzorców i pojęć, które mogą być używane z dowolnego systemu bazy danych.
-Ef Core dostawców bazy danych następnie warstwy zachowania specyficzne dla bazy danych i funkcji w tej wspólnej struktury.
-Dzięki temu każdy system bazy danych, aby zrobić to, co robi najlepiej przy jednoczesnym zachowaniu podobieństwa, w stosownych przypadkach, z innymi systemami bazy danych. 
+## <a name="all-database-providers-are-not-equal"></a>Wszyscy dostawcy bazy danych nie są równe
 
-Zasadniczo oznacza to, że wyłączenie dostawcy bazy danych spowoduje zmianę zachowania EF Core i nie można oczekiwać, że aplikacja będzie działać poprawnie, chyba że jawnie uwzględnia wszystkie różnice w zachowaniu.
-Mając na uwadze to, w wielu przypadkach będzie to działać, ponieważ istnieje wysoki stopień podobieństwa między relacyjnymi bazami danych.
-To jest dobre i złe.
-Dobrze, ponieważ przemieszczanie się między bazami danych może być stosunkowo łatwe.
-Źle, ponieważ może dać fałszywe poczucie bezpieczeństwa, jeśli aplikacja nie jest w pełni przetestowany przeciwko nowemu systemowi bazy danych.  
+Bardzo ważne jest, aby zrozumieć, że EF Core nie jest zaprojektowana do abstrakcyjnych wszystkich aspektów bazowego systemu bazy danych.
+Zamiast tego EF Core jest wspólnym zestawem wzorców i koncepcji, które mogą być używane z dowolnym systemem bazy danych.
+EF Core dostawców baz danych, a następnie zachowanie specyficzne dla bazy danych i funkcjonalności w ramach tego wspólnego środowiska.
+Dzięki temu każdy system bazy danych może wykonać to działanie najlepiej, zachowując zgodność z innymi systemami baz danych. 
 
-## <a name="approach-1-production-database-system"></a>Podejście 1: System produkcyjnej bazy danych
+W związku z tym oznacza to, że przełączenie dostawcy bazy danych zmieni zachowanie EF Core i aplikacja nie będzie mogła działać prawidłowo, chyba że jawnie rozwiąże się z wszelkimi różnicami w działaniu.
+W wielu przypadkach ten stan będzie działał, ponieważ istnieje wysoki stopień zgodności między relacyjnymi bazami danych.
+Jest to dobre i złe.
+Dobre, ponieważ przechodzenie między systemami bazy danych może być stosunkowo proste.
+Zła, ponieważ może dać fałszywe znaczenie zabezpieczeń, jeśli aplikacja nie została w pełni przetestowana z nowym systemem bazy danych.  
 
-Jak opisano w poprzedniej sekcji, jedynym sposobem, aby upewnić się, że testujesz to, co działa w produkcji jest użycie tego samego systemu bazy danych.
-Na przykład jeśli wdrożona aplikacja używa sql azure, następnie testowanie należy również wykonać przeciwko SQL Azure.
+## <a name="approach-1-production-database-system"></a>Podejście 1: system produkcyjnej bazy danych
 
-Jednak posiadanie wszystkich testów uruchamiania deweloperów przeciwko sql azure podczas aktywnej pracy nad kodem będzie zarówno powolne, jak i kosztowne.
-Ilustruje to główny kompromis związany z tymi podejściami: kiedy należy odejść od systemu produkcyjnej bazy danych, aby poprawić wydajność testów?
+Zgodnie z opisem w poprzedniej sekcji, jedynym sposobem, aby upewnić się, że testy wykonywane w środowisku produkcyjnym korzystają z tego samego systemu bazy danych.
+Na przykład jeśli wdrożona aplikacja korzysta z platformy SQL Azure, testowanie powinno również odbywać się w odniesieniu do usługi SQL Azure.
 
-Na szczęście w tym przypadku odpowiedź jest dość prosta: użyj lokalnego lub lokalnego programu SQL Server do testowania deweloperów.
-SQL Azure i SQL Server są bardzo podobne, więc testowanie sql server jest zwykle uzasadnione kompromisu.
-Mając na to na powiedziane, nadal jest mądry, aby uruchomić testy przeciwko samej platformy SQL Azure przed przejściem do produkcji.
+Jednak każdy deweloper uruchamia testy na platformie SQL Azure, podczas gdy aktywnie pracujemy nad kodem, może być powolny i kosztowny.
+Ilustruje to główną wymianę uwzględnioną w następujących podejść: Kiedy jest to konieczne, aby odróżnić od produkcyjnego systemu bazy danych tak, aby zwiększyć efektywność testu?
+
+Na szczęście, w tym przypadku odpowiedź jest bardzo łatwa: Użyj lokalnego lub SQL Server lokalnie do testowania dla deweloperów.
+Usługi SQL Azure i SQL Server są bardzo podobne, dlatego testowanie w odniesieniu do SQL Server jest zwykle racjonalnie uzasadnione.
+W takim przypadku nadal można uruchomić testy na platformie SQL Azure przed przejściem do środowiska produkcyjnego.
  
-### <a name="localdb"></a>Localdb 
+### <a name="localdb"></a>LocalDB 
 
-Wszystkie główne systemy baz danych mają jakąś formę "Developer Edition" do testowania lokalnego.
-SQL Server posiada również funkcję o nazwie [LocalDb](/sql/database-engine/configure-windows/sql-server-express-localdb?view=sql-server-ver15).
-Główną zaletą LocalDb jest to, że obraca się wystąpienie bazy danych na żądanie.
-Pozwala to uniknąć usługi bazy danych uruchomionej na komputerze, nawet jeśli nie są uruchomione testy.
+Wszystkie główne systemy baz danych mają pewną postać "Developer Edition" na potrzeby testowania lokalnego.
+SQL Server ma również funkcję o nazwie [LocalDB](/sql/database-engine/configure-windows/sql-server-express-localdb?view=sql-server-ver15).
+Główną zaletą LocalDB jest to, że powoduje to wystąpienie bazy danych na żądanie.
+Pozwala to uniknąć uruchamiania na maszynie usługi bazy danych, nawet jeśli nie są uruchomione testy.
 
-LocalDb nie jest bez problemów:
-* Nie obsługuje wszystkiego, co robi [program SQL Server Developer Edition.](/sql/sql-server/editions-and-components-of-sql-server-2016?view=sql-server-ver15)
-* Nie jest dostępny w systemie Linux.
-* Może to spowodować opóźnienie przy pierwszym uruchomieniu testowym, ponieważ usługa jest spun up.
+LocalDB nie ma problemów:
+* Nie obsługuje ona wszystkich elementów, które [SQL Server Developer Edition](/sql/sql-server/editions-and-components-of-sql-server-2016?view=sql-server-ver15) .
+* Nie jest on dostępny w systemie Linux.
+* Może to spowodować opóźnienie pierwszego przebiegu testu, gdy usługa jest w stanie Spuninst.
 
-Osobiście nigdy nie znalazłem problemu z usługą bazy danych działającą na moim komputerze deweloperskim i ogólnie polecam użycie Developer Edition.
-Jednak może to być odpowiednie dla niektórych osób, zwłaszcza na mniej wydajnych komputerach deweloperskich.  
+Na komputerze deweloperskim nigdy nie udało Ci się znaleźć problemu związanego z uruchomioną usługą bazy danych.
+LocalDB mogą jednak być odpowiednie dla niektórych osób, szczególnie w mniej wydajnych maszynach deweloperskich.
+
+Uruchomienie SQL Server (lub dowolnego innego systemu bazy danych) w kontenerze platformy Docker (podobny system operacyjny) jest innym sposobem, aby uniknąć uruchamiania systemu bazy danych bezpośrednio na komputerze deweloperskim.  
 
 ## <a name="approach-2-sqlite"></a>Podejście 2: SQLite
 
-EF Core testuje dostawcę programu SQL Server przede wszystkim przez uruchomienie go w przypadku lokalnego wystąpienia programu SQL Server.
-Te testy uruchamiają dziesiątki tysięcy zapytań w ciągu kilku minut na szybkim komputerze.
-To pokazuje, że przy użyciu systemu prawdziwej bazy danych może być rozwiązaniem wydajne.
-Jest to mit, że przy użyciu niektórych lżejszych bazy danych jest jedynym sposobem, aby szybko uruchomić testy.
+EF Core testuje dostawcę SQL Server przede wszystkim przez uruchomienie go w odniesieniu do lokalnego wystąpienia SQL Server.
+Te testy uruchamiają dziesiątki tysięcy zapytań w kilka minut na szybkiej maszynie.
+Ilustruje to, że korzystanie z rzeczywistego systemu bazy danych może być rozwiązaniem wydajnym.
+Jest to omówienia, który używa niektórych jaśniejszych baz danych, jest jedynym sposobem na szybkie uruchamianie testów.
 
-Mając na to na myśli, co zrobić, jeśli z jakiegokolwiek powodu nie można uruchomić testy przeciwko coś blisko systemu bazy danych produkcji?
-Następnym najlepszym wyborem jest użycie czegoś o podobnej funkcjonalności.
-Zwykle oznacza to inną relacyjną bazę danych, dla której [SQLite](https://sqlite.org/index.html) jest oczywistym wyborem.
+Co się dzieje, co zrobić, jeśli z jakiegoś powodu nie można uruchomić testów w pobliżu systemu produkcyjnej bazy danych?
+Następnym najlepszym wyborem jest użycie czegoś z podobną funkcjonalnością.
+Zwykle oznacza to inną relacyjną bazę danych, dla której program [SQLite](https://sqlite.org/index.html) jest oczywisty.
 
-SQLite to dobry wybór, ponieważ:
-* Działa w trakcie z aplikacją i tak ma niskie obciążenie.
-* Używa prostych, automatycznie utworzonych plików dla baz danych, a więc nie wymaga zarządzania bazami danych.
-* Ma tryb w pamięci, który pozwala uniknąć nawet tworzenia plików.
+Program SQLite jest dobrym rozwiązaniem, ponieważ:
+* Jest ona uruchamiana w procesie z aplikacją i dlatego ma niewielkie obciążenie.
+* Używa on prostych, automatycznie tworzonych plików dla baz danych i dlatego nie wymaga zarządzania bazami danych.
+* Ma tryb w pamięci, który pozwala uniknąć nawet tworzenia pliku.
 
 Należy jednak pamiętać, że:
-* SqLite inevitability nie obsługuje wszystko, co system produkcyjnej bazy danych nie.
-* SQLite będzie zachowywać się inaczej niż system produkcyjnej bazy danych dla niektórych zapytań.
+* Program SQLite inevitability nie obsługuje wszystkich elementów produkcyjnych systemu bazy danych.
+* Program SQLite będzie zachowywać się inaczej niż system produkcyjnej bazy danych dla niektórych zapytań.
 
-Więc jeśli używasz SQLite do niektórych testów, upewnij się również, aby przetestować przeciwko rzeczywistemu systemowi bazy danych.
+Dlatego jeśli w przypadku niektórych testów używasz oprogramowania SQLite, pamiętaj również o przetestowaniu względem rzeczywistego systemu bazy danych.
 
-Zobacz [Testowanie z SQLite](xref:core/miscellaneous/testing/sqlite) dla EF Core wskazówki dotyczące. 
+Aby EF Core uzyskać szczegółowe wskazówki, zobacz [testowanie przy użyciu oprogramowania SQLite](xref:core/miscellaneous/testing/sqlite) . 
 
-## <a name="approach-3-the-ef-core-in-memory-database"></a>Podejście 3: Baza danych EF Core w pamięci
+## <a name="approach-3-the-ef-core-in-memory-database"></a>Podejście 3: EF Core bazy danych w pamięci
 
-EF Core jest wyposażony w bazę danych w pamięci, której używamy do wewnętrznych testów samego ef core.
-Ta baza danych na ogół **nie nadaje się jako substytut dla aplikacji testujących, które używają EF Core**. Są to:
+EF Core zawiera bazę danych w pamięci, która jest używana do wewnętrznego testowania EF Core samego siebie.
+Ta baza danych nie jest **podstawą do testowania aplikacji, które używają EF Core**. Są to:
 * Nie jest to relacyjna baza danych
 * Nie obsługuje transakcji
 * Nie jest zoptymalizowany pod kątem wydajności
 
-Nic z tego nie jest bardzo ważne podczas testowania ef core wewnętrznych, ponieważ używamy go w szczególności, gdzie baza danych jest bez znaczenia dla testu.
-Z drugiej strony te rzeczy wydają się być bardzo ważne podczas testowania aplikacji, która używa EF Core.
+Żadna z tych elementów nie jest bardzo ważna podczas testowania EF Core wewnętrznych, ponieważ jest ona używana szczególnie w przypadku, gdy baza danych nie ma znaczenia dla testu.
+Z drugiej strony te rzeczy są bardzo ważne podczas testowania aplikacji, która używa EF Core.
 
 ## <a name="unit-testing"></a>Testowanie jednostek
 
-Należy wziąć pod uwagę testowanie fragmentu logiki biznesowej, który może być konieczne użycie niektórych danych z bazy danych, ale nie jest z natury testowania interakcji bazy danych.
-Jedną z opcji jest użycie [podwójnego testu,](https://en.wikipedia.org/wiki/Test_double) takiego jak makieta lub podróbka.
+Należy rozważyć testowanie części logiki biznesowej, która może wymagać użycia niektórych danych z bazy danych, ale nie testowanie interakcji z bazami danych.
+Jedną z opcji jest użycie [testu podwójnego](https://en.wikipedia.org/wiki/Test_double) , takiego jak makieta lub fałszywe.
 
-Używamy podwaja testu do wewnętrznych testów EF Core.
-Jednak nigdy nie staramy się wyśmiewać DbContext lub IQueryable.
-Jest to trudne, uciążliwe i kruche.
+Używamy podwójnej próby do wewnętrznego testowania EF Core.
+Jednak nigdy nie próbujemy zasymulować kontekstu DbContext lub IQueryable.
+Takie działanie jest trudne, uciążliwe i delikatne.
 **Nie rób tego.**
 
-Zamiast tego używamy bazy danych w pamięci podczas testowania jednostki coś, co używa DbContext.
-W takim przypadku przy użyciu bazy danych w pamięci jest właściwe, ponieważ test nie jest zależny od zachowania bazy danych.
-Po prostu nie rób tego, aby przetestować rzeczywiste zapytania bazy danych lub aktualizacje.   
+Zamiast tego używamy bazy danych EF w pamięci podczas testowania jednostkowego, który używa DbContext.
+W takim przypadku użycie EF bazy danych w pamięci jest odpowiednie, ponieważ test nie zależy od zachowania bazy danych.
+Nie wykonuj tej czynności, aby przetestować rzeczywiste zapytania lub aktualizacje bazy danych.   
 
-Zobacz [Testowanie z dostawcą w pamięci](xref:core/miscellaneous/testing/in-memory) ef core wskazówki dotyczące korzystania z bazy danych w pamięci do testowania jednostek.
+[Przykład testowania EF Core](xref:core/miscellaneous/testing/testing-sample) ilustruje testy korzystające z bazy danych EF w pamięci, a także SQL Server i oprogramowania SQLite. 
