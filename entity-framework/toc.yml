@@ -73,8 +73,12 @@
               href: core/miscellaneous/connection-resiliency.md
             - name: Testowanie
               items:
-                - name: Omówienie
+                - name: Testowanie kodu korzystającego ze środowiska EF Core
                   href: core/miscellaneous/testing/index.md
+                - name: Przykład testowania środowiska EF Core
+                  href: core/miscellaneous/testing/testing-sample.md
+                - name: Udostępnianie baz danych między testami
+                  href: core/miscellaneous/testing/sharing-databases.md
                 - name: Testowanie przy użyciu oprogramowania SQLite
                   href: core/miscellaneous/testing/sqlite.md
                 - name: Testowanie za pomocą bazy danych InMemory
@@ -111,6 +115,8 @@
               href: core/modeling/backing-field.md
             - name: Konwersje wartości
               href: core/modeling/value-conversions.md
+            - name: Moduły porównujące wartości
+              href: core/modeling/value-comparers.md
             - name: Wstępne wypełnianie danych
               href: core/modeling/data-seeding.md
             - name: Konstruktorzy typów jednostek
