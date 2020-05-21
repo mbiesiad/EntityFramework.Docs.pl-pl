@@ -1,24 +1,22 @@
 ---
-title: Przykład testowania EF Core — EF Core
-description: Przykład pokazujący, jak testować aplikacje, które używają EF Core
-author: ajcvickers
-ms.date: 04/22/2020
-uid: core/miscellaneous/testing/testing-sample
+title: ''
+description: ''
+author: ''
+ms.date: ''
+uid: ''
 no-loc:
 - Item
 - Tag
 - Items
 - Tags
-- items
-- tags
-ms.openlocfilehash: dda7191df7646aa06aab51d8d7891bd0ba155674
-ms.sourcegitcommit: 79e460f76b6664e1da5886d102bd97f651d2ffff
+ms.openlocfilehash: ae073fc0b3a99fb9de07a3e0a42c638fe0838a5a
+ms.sourcegitcommit: 59e3d5ce7dfb284457cf1c991091683b2d1afe9d
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 04/29/2020
-ms.locfileid: "82564288"
+ms.lasthandoff: 05/20/2020
+ms.locfileid: "83672810"
 ---
-# <a name="ef-core-testing-sample"></a>Przykład testowania EF Core
+# <a name="ef-core-testing-sample"></a>Przykład testowania środowiska EF Core
 
 > [!TIP]
 > Kod w tym dokumencie można znaleźć w witrynie GitHub jako [przykład możliwy do uruchomienia](https://github.com/dotnet/EntityFramework.Docs/tree/master/samples/core/Miscellaneous/Testing/ItemsWebApi/).
@@ -34,49 +32,49 @@ W tym dokumencie przedstawiono przykład testowania kodu, który używa EF Core.
 
 ### <a name="the-model-and-business-rules"></a>Model i reguły biznesowe
 
-Model obsługujący ten interfejs API ma dwa typy jednostek Items : Tagsi.
+Model obsługujący ten interfejs API ma dwa typy jednostek: Items i Tags .
 
-* Itemsma nazwę uwzględniającą wielkość liter i kolekcję Tags.
-* Każda Tag z nich ma etykietę i liczbę reprezentującą liczbę przypadków, gdy została ona zastosowana do Item.
-* Każdy Item z nich powinien mieć Tag tylko jedną z podaną etykietą.
+* Itemsma nazwę uwzględniającą wielkość liter i kolekcję Tags .
+* Każda z nich Tag ma etykietę i liczbę reprezentującą liczbę przypadków, gdy została ona zastosowana do Item .
+* Każdy Item z nich powinien mieć tylko jeden Tag z daną etykietą.
   * Jeśli element jest oznakowany za pomocą tej samej etykiety więcej niż raz, wówczas liczba w istniejącym tagu z tą etykietą jest zwiększana zamiast nowego tworzonego tagu. 
-* Item Usunięcie wszystkich skojarzonych Tags.
+* Usunięcie Item wszystkich skojarzonych Tags .
 
-#### <a name="the-item-entity-type"></a>Typ Item jednostki
+#### <a name="the-item-entity-type"></a>ItemTyp jednostki
 
-Typ `Item` jednostki:
+`Item`Typ jednostki:
 
 [!code-csharp[ItemEntityType](../../../../samples/core/Miscellaneous/Testing/ItemsWebApi/ItemsWebApi/Item.cs?name=ItemEntityType)]
 
-I jego konfiguracja w `DbContext.OnModelCreating`programie:
+I jego konfiguracja w programie `DbContext.OnModelCreating` :
 
 [!code-csharp[ConfigureItem](../../../../samples/core/Miscellaneous/Testing/ItemsWebApi/ItemsWebApi/ItemsContext.cs?name=ConfigureItem)]
 
 Zwróć uwagę, że typ jednostki ogranicza sposób, w jaki może być używany w celu odzwierciedlenia modelu domeny i reguł firmy. W szczególności:
 - Klucz podstawowy jest mapowany bezpośrednio do `_id` pola i nie jest ujawniany publicznie
   - EF wykrywa i używa konstruktora prywatnego akceptującego wartość i nazwę klucza podstawowego.
-- `Name` Właściwość jest tylko do odczytu i ustawiana tylko w konstruktorze. 
-- Tagssą ujawniane jako `IReadOnlyList<Tag>` a, aby zapobiec dowolnej modyfikacji.
-  - EF kojarzy `Tags` właściwość z polem `_tags` zapasowym, dopasowując ich nazwy. 
-  - `AddTag` Metoda przyjmuje etykietę tagu i implementuje regułę biznesową opisaną powyżej.
+- `Name`Właściwość jest tylko do odczytu i ustawiana tylko w konstruktorze. 
+- Tagssą ujawniane jako a, `IReadOnlyList<Tag>` Aby zapobiec dowolnej modyfikacji.
+  - EF kojarzy `Tags` Właściwość z `_tags` polem zapasowym, dopasowując ich nazwy. 
+  - `AddTag`Metoda przyjmuje etykietę tagu i implementuje regułę biznesową opisaną powyżej.
     Oznacza to, że tag jest dodawany tylko dla nowych etykiet.
     W przeciwnym razie liczba w istniejącej etykiecie jest zwiększana.
-- Właściwość `Tags` nawigacji jest skonfigurowana dla relacji wiele-do-jednego
-  - Nie ma potrzeby dla właściwości nawigacji z Tag elementu do Item, dlatego nie jest on uwzględniony.
-  - Ponadto program Tag nie definiuje właściwości klucza obcego.
+- `Tags`Właściwość nawigacji jest skonfigurowana dla relacji wiele-do-jednego
+  - Nie ma potrzeby dla właściwości nawigacji z elementu Tag do Item , dlatego nie jest on uwzględniony.
+  - Ponadto program nie Tag definiuje właściwości klucza obcego.
     Zamiast tego, EF utworzy właściwość w stanie Shadow i zarządza nią.
 
-#### <a name="the-tag-entity-type"></a>Typ Tag jednostki
+#### <a name="the-tag-entity-type"></a>TagTyp jednostki
 
-Typ `Tag` jednostki:
+`Tag`Typ jednostki:
 
 [!code-csharp[TagEntityType](../../../../samples/core/Miscellaneous/Testing/ItemsWebApi/ItemsWebApi/Tag.cs?name=TagEntityType)]
 
-I jego konfiguracja w `DbContext.OnModelCreating`programie:
+I jego konfiguracja w programie `DbContext.OnModelCreating` :
 
 [!code-csharp[ConfigureTag](../../../../samples/core/Miscellaneous/Testing/ItemsWebApi/ItemsWebApi/ItemsContext.cs?name=ConfigureTag)]
 
-Podobnie jak Item, Tag ukrywa swój klucz podstawowy i ustawia właściwość `Label` tylko do odczytu.
+Podobnie jak Item , Tag ukrywa swój klucz podstawowy i ustawia `Label` Właściwość tylko do odczytu.
 
 ### <a name="the-itemscontroller"></a>ItemsController
 
@@ -89,7 +87,7 @@ Ma metody do pobrania wszystkie Items lub Item o podaną nazwę:
 
 [!code-csharp[Get](../../../../samples/core/Miscellaneous/Testing/ItemsWebApi/ItemsWebApi/Controllers/ItemsController.cs?name=Get)]
 
-Ma ona metodę dodawania nowego Item:
+Ma ona metodę dodawania nowego Item :
 
 [!code-csharp[PostItem](../../../../samples/core/Miscellaneous/Testing/ItemsWebApi/ItemsWebApi/Controllers/ItemsController.cs?name=PostItem)]
 
@@ -97,11 +95,11 @@ Metoda Item zwracająca etykietę z etykietą:
 
 [!code-csharp[PostTag](../../../../samples/core/Miscellaneous/Testing/ItemsWebApi/ItemsWebApi/Controllers/ItemsController.cs?name=PostTag)]
 
-I metodę usuwania Item wszystkich skojarzonych Tags:
+I metodę usuwania Item wszystkich skojarzonych Tags :
 
 [!code-csharp[DeleteItem](../../../../samples/core/Miscellaneous/Testing/ItemsWebApi/ItemsWebApi/Controllers/ItemsController.cs?name=DeleteItem)]
 
-Większość walidacji i obsługa błędów została usunięta w celu zmniejszenia bałaganu.
+Większość weryfikacji i obsługi błędów została usunięta w celu zmniejszenia bałaganu.
 
 ## <a name="the-tests"></a>Testy
 
@@ -145,7 +143,7 @@ Po uruchomieniu każdego testu:
 [!code-csharp[Seeding](../../../../samples/core/Miscellaneous/Testing/ItemsWebApi/Tests/ItemsControllerTest.cs?name=Seeding)]
 
 Każda konkretna Klasa testowa dziedziczy po tym.
-Przykład:
+Na przykład:
 
 [!code-csharp[SqliteItemsControllerTest](../../../../samples/core/Miscellaneous/Testing/ItemsWebApi/Tests/SqliteItemsControllerTest.cs?name=SqliteItemsControllerTest)]
 
@@ -153,18 +151,18 @@ Przykład:
 
 Mimo że aplikacja używa iniekcji zależności, testy nie są.
 W tym miejscu warto użyć iniekcji zależności, ale dodatkowy kod, którego wymaga, ma niewiele wartości.
-Zamiast tego, DbContext jest tworzony przy `new` użyciu, a następnie bezpośrednio przekazywać jako zależność do kontrolera.
+Zamiast tego, DbContext jest tworzony przy użyciu, `new` a następnie bezpośrednio przekazywać jako zależność do kontrolera.
 
 Każdy test wykonuje następnie metodę testową na kontrolerze i potwierdza, że wyniki są zgodnie z oczekiwaniami.
-Przykład:
+Na przykład:
 
 [!code-csharp[CanGetItems](../../../../samples/core/Miscellaneous/Testing/ItemsWebApi/Tests/ItemsControllerTest.cs?name=CanGetItems)]
 
-Zwróć uwagę, że różne wystąpienia DbContext są używane do wypełniania bazy danych i uruchamiania testów. Gwarantuje to, że test nie będzie używać jednostek, które są śledzone przez kontekst podczas umieszczania.
+Zwróć uwagę, że różne wystąpienia DbContext są używane do wypełniania bazy danych i uruchamiania testów. Pozwala to zagwarantować, że test nie będzie używać jednostek, które są śledzone przez kontekst podczas umieszczania.
 Lepiej pasuje do tego, co się dzieje w aplikacjach i usługach sieci Web.
 
 Testy, które mutacją bazy danych tworzą drugie wystąpienie DbContext w testach z przyczyn podobnych.
-Oznacza to utworzenie nowego, czystego i kontekstowego, a następnie przeczytanie go z bazy danych, aby upewnić się, że zmiany rzeczywiście zostały zapisane w bazie danych. Przykład:
+Oznacza to utworzenie nowego, czystego i kontekstowego, a następnie przeczytanie go z bazy danych w celu zagwarantowania, że zmiany zostały zapisane w bazie danych. Na przykład:
 
 [!code-csharp[CanAddItem](../../../../samples/core/Miscellaneous/Testing/ItemsWebApi/Tests/ItemsControllerTest.cs?name=CanAddItem)]
 
@@ -180,9 +178,9 @@ Testowanie przy użyciu innego systemu bazy danych niż używany w aplikacji pro
 Są one objęte poziomem koncepcyjnym w [testowaniu kodu, który używa EF Core](xref:core/miscellaneous/testing/index).  
 Poniższe sekcje obejmują dwa przykłady takich problemów, które przedstawiono w testach w tym przykładzie.
 
-### <a name="test-passes-when-application-is-broken"></a>Test kończy się powodzeniem, gdy aplikacja jest uszkodzona
+### <a name="test-passes-when-the-application-is-broken"></a>Test kończy się, gdy aplikacja jest uszkodzona
 
-Jednym z wymagań aplikacji jest to, że "Items ma nazwę uwzględniającą wielkość liter i kolekcję". Tags
+Jednym z wymagań naszej aplikacji jest to, że " Items ma nazwę uwzględniającą wielkość liter i kolekcję Tags ".
 Jest to bardzo proste do przetestowania:
 
 [!code-csharp[CanAddItemCaseInsensitive](../../../../samples/core/Miscellaneous/Testing/ItemsWebApi/Tests/ItemsControllerTest.cs?name=CanAddItemCaseInsensitive)]
@@ -204,14 +202,14 @@ System.InvalidOperationException : Sequence contains more than one element
 Wynika to z faktu, że zarówno w bazie danych EF w pamięci, jak i w bazie danych programu SQLite jest rozróżniana wielkość liter.
 SQL Server, z drugiej strony, nie uwzględnia wielkości liter. 
 
-EF Core, zgodnie z projektem, nie zmienia tych zachowań, ponieważ wymusza zmianę wielkości liter może mieć wpływ na dużą wydajność.
+EF Core, zgodnie z projektem, nie zmienia tych zachowań, ponieważ wymuszanie zmiany w rozróżnieniu wielkości liter może mieć wpływ na dużą wydajność.
 
 Gdy wiemy, że jest to problem, możemy naprawić aplikację i zrekompensować testy.
 Jednak w tym miejscu można pominąć tę usterkę, jeśli tylko testuje się za pomocą programu EF w pamięci podręcznej lub dostawcy oprogramowania SQLite.
 
-### <a name="test-fails-when-application-is-correct"></a>Test kończy się niepowodzeniem, gdy aplikacja jest poprawna 
+### <a name="test-fails-when-the-application-is-correct"></a>Test kończy się niepowodzeniem, gdy aplikacja jest poprawna 
 
-Inne wymagania dotyczące naszej aplikacji to "Usuwanie Item wszystkich skojarzonych. Tags
+Inne wymagania dotyczące naszej aplikacji to "Usuwanie Item wszystkich skojarzonych Tags .
 Ponownie, łatwa do przetestowania:
 
 [!code-csharp[DeleteItem](../../../../samples/core/Miscellaneous/Testing/ItemsWebApi/Tests/ItemsControllerTest.cs?name=DeleteItem)]

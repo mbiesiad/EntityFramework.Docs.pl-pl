@@ -5,12 +5,12 @@ ms.author: bricelam
 ms.date: 11/13/2018
 ms.assetid: 6263EF7D-4989-42E6-BDEE-45DA770342FB
 uid: core/managing-schemas/scaffolding
-ms.openlocfilehash: 41204de8cd8c4f292afa16b209eb5302eaf74905
-ms.sourcegitcommit: 79e460f76b6664e1da5886d102bd97f651d2ffff
+ms.openlocfilehash: cb20120154101a9b92b4bf2bc06d20b1dafe88c1
+ms.sourcegitcommit: 59e3d5ce7dfb284457cf1c991091683b2d1afe9d
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 04/29/2020
-ms.locfileid: "82538439"
+ms.lasthandoff: 05/20/2020
+ms.locfileid: "83672973"
 ---
 # <a name="reverse-engineering"></a> Odtwarzanie
 
@@ -26,15 +26,21 @@ Należy również zainstalować odpowiedniego [dostawcę bazy danych](xref:core/
 
 Pierwszym argumentem polecenia są parametry połączenia z bazą danych. Narzędzia użyją tych parametrów połączenia, aby odczytać schemat bazy danych.
 
-Sposób tworzenia cudzysłowów i ucieczki parametrów połączenia zależy od powłoki, która jest używana do wykonywania polecenia. Szczegółowe informacje można znaleźć w dokumentacji powłoki. Na przykład program PowerShell wymaga `$` znaku ucieczki, ale nie. `\`
+Sposób tworzenia cudzysłowów i ucieczki parametrów połączenia zależy od powłoki, która jest używana do wykonywania polecenia. Szczegółowe informacje można znaleźć w dokumentacji powłoki. Na przykład program PowerShell wymaga znaku ucieczki `$` , ale nie `\` .
+
+### <a name="net-core-cli"></a>[interfejs wiersza polecenia programu .NET Core](#tab/dotnet-core-cli)
+
+```dotnetcli
+dotnet ef dbcontext scaffold "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Chinook" Microsoft.EntityFrameworkCore.SqlServer
+```
+
+### <a name="visual-studio"></a>[Visual Studio](#tab/vs)
 
 ``` powershell
 Scaffold-DbContext 'Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Chinook' Microsoft.EntityFrameworkCore.SqlServer
 ```
 
-```dotnetcli
-dotnet ef dbcontext scaffold "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Chinook" Microsoft.EntityFrameworkCore.SqlServer
-```
+***
 
 ### <a name="configuration-and-user-secrets"></a>Klucze tajne konfiguracji i użytkownika
 
@@ -55,25 +61,31 @@ Drugi argument jest nazwą dostawcy. Nazwa dostawcy jest zwykle taka sama jak na
 
 Wszystkie tabele w schemacie bazy danych są domyślnie odtwarzane w postaci typów jednostek. Można ograniczyć, które tabele są odtworzone, określając schematy i tabele.
 
-`-Schemas` Parametr in PMC i `--schema` opcja w interfejsie wiersza polecenia mogą być używane do dołączania każdej tabeli w schemacie.
+### <a name="net-core-cli"></a>[interfejs wiersza polecenia programu .NET Core](#tab/dotnet-core-cli)
 
-`-Tables`(PMC) i `--table` (CLI) mogą być używane do dołączania określonych tabel.
+`--schema`Opcja może być używana do dołączania każdej tabeli w schemacie, natomiast `--table` może być używana do dołączania określonych tabel.
 
-Aby uwzględnić wiele tabel w kryterium PMC, użyj tablicy.
-
-``` powershell
-Scaffold-DbContext ... -Tables Artist, Album
-```
-
-Aby dołączyć wiele tabel w interfejsie wiersza polecenia, należy wybrać opcję wiele razy.
+Aby dołączyć wiele tabel, określ opcję wiele razy:
 
 ```dotnetcli
 dotnet ef dbcontext scaffold ... --table Artist --table Album
 ```
 
+### <a name="visual-studio"></a>[Visual Studio](#tab/vs)
+
+`-Schemas`Opcja może być używana do dołączania każdej tabeli w schemacie, natomiast `-Tables` może być używana do dołączania określonych tabel.
+
+Aby dołączyć wiele tabel, użyj tablicy:
+
+``` powershell
+Scaffold-DbContext ... -Tables Artist, Album
+```
+
+***
+
 ## <a name="preserving-names"></a>Zachowywanie nazw
 
-Nazwy tabel i kolumn są rozwiązywane w celu lepszego dopasowania do konwencji nazewnictwa platformy .NET dla typów i właściwości. Określenie `-UseDatabaseNames` przełącznika w przystawce PMC `--use-database-names` lub opcja w interfejsie wiersza polecenia spowoduje wyłączenie tego zachowania z zachowaniem oryginalnych nazw baz danych, jak to możliwe. Nieprawidłowe identyfikatory platformy .NET nadal będą stałe i są one zgodne z konwencjami nazewnictwa platformy .NET.
+Nazwy tabel i kolumn są rozwiązywane w celu lepszego dopasowania do konwencji nazewnictwa platformy .NET dla typów i właściwości. Określenie `-UseDatabaseNames` przełącznika w przystawce PMC lub `--use-database-names` opcja w interfejsie wiersza polecenia spowoduje wyłączenie tego zachowania z zachowaniem oryginalnych nazw baz danych, jak to możliwe. Nieprawidłowe identyfikatory platformy .NET nadal będą stałe i są one zgodne z konwencjami nazewnictwa platformy .NET.
 
 ## <a name="fluent-api-or-data-annotations"></a>Interfejs API Fluent lub adnotacje danych
 
@@ -101,27 +113,37 @@ Nazwa klasy DbContext z szkieletem jest nazwą bazy danych domyślnie sufiksem z
 
 ## <a name="directories-and-namespaces"></a>Katalogi i przestrzenie nazw
 
-Klasy jednostek i Klasa DbContext są szkieletowe w katalogu głównym projektu i używają domyślnej przestrzeni nazw projektu. Możesz określić katalog, w którym są używane `-OutputDir` szkieletowe klasy (PMC) lub `--output-dir` (CLI).
+Klasy jednostek i Klasa DbContext są szkieletowe w katalogu głównym projektu i używają domyślnej przestrzeni nazw projektu.
 
-Można również użyć `-ContextDir` (PMC) i `--context-dir` (CLI) do tworzenia szkieletu klasy DbContext w oddzielnym katalogu z klas typu jednostki.
+### <a name="net-core-cli"></a>[interfejs wiersza polecenia programu .NET Core](#tab/dotnet-core-cli)
 
-``` powershell
-Scaffold-DbContext ... -ContextDir Data -OutputDir Models
-```
+Można określić katalog, w którym są używane szkieletowe klasy `--output-dir` , i `--context-dir` może służyć do tworzenia szkieletu klasy DbContext w oddzielnym katalogu z klas typu jednostki:
 
 ```dotnetcli
 dotnet ef dbcontext scaffold ... --context-dir Data --output-dir Models
 ```
 
- Domyślnie przestrzeń nazw będzie główną przestrzenią nazw oraz nazwami wszystkich podkatalogów w katalogu głównym projektu. Można jednak zastąpić przestrzeń nazw dla wszystkich klas wyjściowych za pomocą `-Namespace` (PMC) lub `--namespace` (CLI). Można również przesłonić przestrzeń nazw tylko dla klasy DbContext przy `-ContextNamespace` użyciu (PMC) `--context-namespace` lub (CLI).
+Domyślnie przestrzeń nazw będzie główną przestrzenią nazw oraz nazwami wszystkich podkatalogów w katalogu głównym projektu. Jednakże z EFCore 5,0, można przesłonić przestrzeń nazw dla wszystkich klas wyjściowych za pomocą `--namespace` . Można również przesłonić przestrzeń nazw tylko dla klasy DbContext przy użyciu `--context-namespace` :
+
+```dotnetcli
+dotnet ef dbcontext scaffold ... --namespace Your.Namespace --context-namespace Your.DbContext.Namespace
+```
+
+### <a name="visual-studio"></a>[Visual Studio](#tab/vs)
+
+Można określić katalog, w którym są używane szkieletowe klasy `-OutputDir` , i `-ContextDir` może służyć do tworzenia szkieletu klasy DbContext w oddzielnym katalogu z klas typu jednostki:
+
+``` powershell
+Scaffold-DbContext ... -ContextDir Data -OutputDir Models
+```
+
+Domyślnie przestrzeń nazw będzie główną przestrzenią nazw oraz nazwami wszystkich podkatalogów w katalogu głównym projektu. Jednakże z EFCore 5,0, można przesłonić przestrzeń nazw dla wszystkich klas wyjściowych za pomocą `-Namespace` . Można również przesłonić przestrzeń nazw tylko dla klasy DbContext przy użyciu `-ContextNamespace` .
 
 ``` powershell
 Scaffold-DbContext ... -Namespace Your.Namespace -ContextNamespace Your.DbContext.Namespace
 ```
 
-```dotnetcli
-dotnet ef dbcontext scaffold ... --namespace Your.Namespace --context-namespace Your.DbContext.Namespace
-```
+***
 
 ## <a name="how-it-works"></a>Jak to działa
 
@@ -136,7 +158,7 @@ Na koniec model jest używany do generowania kodu. Odpowiednie klasy typu jednos
 * Nie wszystkie elementy dotyczące modelu mogą być reprezentowane za pomocą schematu bazy danych. Na przykład informacje o [**hierarchiach dziedziczenia**](../modeling/inheritance.md), [**typach będących własnością**](../modeling/owned-entities.md)i [**podziałie tabeli**](../modeling/table-splitting.md) nie są obecne w schemacie bazy danych. W związku z tym konstrukcje te nigdy nie będą odtwarzane.
 * Ponadto **niektóre typy kolumn** mogą nie być obsługiwane przez dostawcę EF Core. Te kolumny nie zostaną uwzględnione w modelu.
 * Można zdefiniować [**tokeny współbieżności**](../modeling/concurrency.md)w modelu EF Core, aby uniemożliwić dwóm użytkownikom Aktualizowanie tej samej jednostki w tym samym czasie. Niektóre bazy danych mają specjalny typ reprezentujący ten typ kolumny (na przykład rowversion w SQL Server), w którym można odtworzyć te informacje. Jednak inne tokeny współbieżności nie będą odtwarzane.
-* [Funkcja typ referencyjny języka C# 8](/dotnet/csharp/tutorials/nullable-reference-types) nie jest obecnie obsługiwana w przypadku odtwarzania: EF Core zawsze generuje kod C#, który zakłada, że ta funkcja jest wyłączona. Na przykład kolumny tekstu dopuszczające wartość null będą szkieletem jako właściwość typu `string` , a nie `string?`z interfejsem API Fluent lub adnotacjami danych używanymi do konfigurowania, czy właściwość jest wymagana. Można edytować kod szkieletowy i zastąpić je za pomocą adnotacji o wartości null w języku C#. Obsługa tworzenia szkieletów dla typów odwołań do wartości null jest śledzona przez [#15520](https://github.com/aspnet/EntityFrameworkCore/issues/15520)problemu.
+* [Funkcja typ referencyjny języka C# 8](/dotnet/csharp/tutorials/nullable-reference-types) nie jest obecnie obsługiwana w przypadku odtwarzania: EF Core zawsze generuje kod C#, który zakłada, że ta funkcja jest wyłączona. Na przykład kolumny tekstu dopuszczające wartość null będą szkieletem jako właściwość typu `string` , a nie `string?` z interfejsem API Fluent lub adnotacjami danych używanymi do konfigurowania, czy właściwość jest wymagana. Można edytować kod szkieletowy i zastąpić je za pomocą adnotacji o wartości null w języku C#. Obsługa tworzenia szkieletów dla typów odwołań do wartości null jest śledzona przez [#15520](https://github.com/aspnet/EntityFrameworkCore/issues/15520)problemu.
 
 ## <a name="customizing-the-model"></a>Dostosowywanie modelu
 
@@ -150,7 +172,7 @@ Można również dodać dodatkowe konstruktory, metody, właściwości itp. uży
 
 Po wprowadzeniu zmian w bazie danych może być konieczne zaktualizowanie modelu EF Core w celu odzwierciedlenia tych zmian. W przypadku, gdy baza danych jest prosta, może być najłatwiej ręcznie wprowadzić zmiany w modelu EF Core. Na przykład zmiana nazwy tabeli lub kolumny, usunięcie kolumny lub aktualizacja typu kolumny to proste zmiany wprowadzane w kodzie.
 
-Bardziej znaczące zmiany nie są jednak łatwe do ręcznego wprowadzania. Jednym z typowych przepływów pracy jest ponowne odtwarzanie modelu z bazy danych przy `-Force` użyciu (PMC) `--force` lub (CLI), aby zastąpić istniejący model zaktualizowanym.
+Bardziej znaczące zmiany nie są jednak łatwe do ręcznego wprowadzania. Jednym z typowych przepływów pracy jest ponowne odtwarzanie modelu z bazy danych przy użyciu `-Force` (PMC) lub `--force` (CLI), aby zastąpić istniejący model zaktualizowanym.
 
 Inną często żądaną funkcją jest możliwość aktualizowania modelu z bazy danych przy zachowaniu dostosowania, takiego jak renames, hierarchie typów itd. Użyj [#831](https://github.com/aspnet/EntityFrameworkCore/issues/831) problemu, aby śledzić postęp tej funkcji.
 

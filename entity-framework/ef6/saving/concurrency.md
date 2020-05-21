@@ -3,12 +3,12 @@ title: Obsługa konfliktów współbieżności — EF6
 author: divega
 ms.date: 10/23/2016
 ms.assetid: 2318e4d3-f561-4720-bbc3-921556806476
-ms.openlocfilehash: 81ae186201fdfac331b1d4e7836b222545fe78b5
-ms.sourcegitcommit: cc0ff36e46e9ed3527638f7208000e8521faef2e
+ms.openlocfilehash: a99f824fe256a10b84f539a5339a09624315efa4
+ms.sourcegitcommit: 59e3d5ce7dfb284457cf1c991091683b2d1afe9d
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 03/06/2020
-ms.locfileid: "78419693"
+ms.lasthandoff: 05/20/2020
+ms.locfileid: "83672710"
 ---
 # <a name="handling-concurrency-conflicts"></a>Obsługa konfliktów współbieżności
 Optymistyczna współbieżność obejmuje optymistycznie próbę zapisania jednostki w bazie danych w celu uzyskania, że dane nie uległy zmianie od momentu załadowania jednostki. Jeśli spowoduje to wypróbowanie, że dane uległy zmianie, zostanie zgłoszony wyjątek i należy rozwiązać konflikt przed podjęciem ponownej próby zapisania. W tym temacie omówiono sposób obsługi takich wyjątków w Entity Framework. Techniki przedstawione w tym temacie dotyczą również modeli utworzonych przy użyciu Code First i programu Dr Designer.  
@@ -52,7 +52,7 @@ using (var context = new BloggingContext())
 }
 ```  
 
-Dobrym sposobem symulowania wyjątku współbieżności jest ustawienie punktu przerwania w wywołaniu metody SaveChanges, a następnie zmodyfikowanie jednostki, która jest zapisywana w bazie danych przy użyciu innego narzędzia, takiego jak SQL Management Studio. Możesz również wstawić wiersz przed metody SaveChanges, aby zaktualizować bazę danych bezpośrednio przy użyciu polecenia SqlCommand. Na przykład:  
+Dobrym sposobem symulowania wyjątku współbieżności jest ustawienie punktu przerwania w wywołaniu metody SaveChanges, a następnie zmodyfikowanie jednostki, która jest zapisywana w bazie danych przy użyciu innego narzędzia, takiego jak SQL Server Management Studio. Możesz również wstawić wiersz przed metody SaveChanges, aby zaktualizować bazę danych bezpośrednio przy użyciu polecenia SqlCommand. Na przykład:  
 
 ``` csharp
 context.Database.SqlCommand(

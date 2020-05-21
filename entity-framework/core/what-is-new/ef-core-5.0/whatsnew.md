@@ -2,14 +2,14 @@
 title: Co nowego w EF Core 5,0
 description: Omówienie nowych funkcji w EF Core 5,0
 author: ajcvickers
-ms.date: 03/30/2020
+ms.date: 05/11/2020
 uid: core/what-is-new/ef-core-5.0/whatsnew.md
-ms.openlocfilehash: c902988920e3b1a6039808fe0658fc19dee2728a
-ms.sourcegitcommit: 387cbd8109c0fc5ce6bdc85d0dec1aed72ad4c33
+ms.openlocfilehash: fcb2eb8df99a06eaf3459835347a4027a363b86b
+ms.sourcegitcommit: 59e3d5ce7dfb284457cf1c991091683b2d1afe9d
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 04/23/2020
-ms.locfileid: "82103077"
+ms.lasthandoff: 05/20/2020
+ms.locfileid: "83672855"
 ---
 # <a name="whats-new-in-ef-core-50"></a>Co nowego w EF Core 5,0
 
@@ -21,12 +21,44 @@ Plan opisuje ogólne motywy dla EF Core 5,0, w tym wszystko, co planujemy uwzgl�
 
 Będziemy dodawać linki z tego miejsca do oficjalnej dokumentacji w trakcie jej publikacji.
 
+## <a name="preview-4"></a>Wersja zapoznawcza 4
+
+### <a name="configure-database-precisionscale-in-model"></a>Konfiguruj precyzję i skalowanie bazy danych w modelu
+
+Precyzja i skala właściwości można teraz określić przy użyciu konstruktora modeli.
+Na przykład:
+
+```CSharp
+modelBuilder
+    .Entity<Blog>()
+    .Property(b => b.Numeric)
+    .HasPrecision(16, 4);
+```
+
+Precyzja i skala można nadal ustawiać za pośrednictwem pełnego typu bazy danych, na przykład "Decimal (16, 4)". 
+
+Dokumentacja jest śledzona przez [#527](https://github.com/dotnet/EntityFramework.Docs/issues/527)problemu.
+
+### <a name="specify-sql-server-index-fill-factor"></a>Określ współczynnik wypełnienia indeksu SQL Server
+
+Współczynnik wypełniania można teraz określić podczas tworzenia indeksu na SQL Server.
+Na przykład:
+
+```CSharp
+modelBuilder
+    .Entity<Customer>()
+    .HasIndex(e => e.Name)
+    .HasFillFactor(90);
+```
+
+Dokumentacja jest śledzona przez [#2378](https://github.com/dotnet/EntityFramework.Docs/issues/2378)problemu.
+
 ## <a name="preview-3"></a>Wersja zapoznawcza 3
 
 ### <a name="filtered-include"></a>Filtr obejmujący
 
 Metoda include obsługuje teraz filtrowanie uwzględnionych jednostek.
-Przykład:
+Na przykład:
 
 ```CSharp
 var blogs = context.Blogs
@@ -37,7 +69,7 @@ var blogs = context.Blogs
 To zapytanie będzie zwracać Blogi razem z poszczególnymi wpisami skojarzonymi, ale tylko wtedy, gdy tytuł wpisu zawiera "ser".
 
 Pomiń i zrób można także użyć, aby zmniejszyć liczbę uwzględnionych jednostek.
-Przykład:
+Na przykład:
  
 ```CSharp
 var blogs = context.Blogs
@@ -58,10 +90,10 @@ Na przykład, aby ustawić pole zapasowe dla nawigacji, gdy pole nie zostanie zn
 modelBuilder.Entity<Blog>().Navigation(e => e.Posts).HasField("_myposts");
 ```
 
-Należy pamiętać, `Navigation` że interfejs API nie zastępuje konfiguracji relacji.
+Należy pamiętać, że `Navigation` interfejs API nie zastępuje konfiguracji relacji.
 Zamiast tego umożliwia dodatkową konfigurację właściwości nawigacji w już odnalezionych lub zdefiniowanych relacjach.
 
-Dokumentacja jest śledzona przez [#2302](https://github.com/dotnet/EntityFramework.Docs/issues/2302)problemu.
+Zapoznaj się z [dokumentacją dotyczącą konfigurowania właściwości nawigacji](xref:core/modeling/relationships#configuring-navigation-properties).
 
 ### <a name="new-command-line-parameters-for-namespaces-and-connection-strings"></a>Nowe parametry wiersza polecenia dla przestrzeni nazw i parametrów połączenia 
 
@@ -72,24 +104,27 @@ Na przykład w celu odtworzenia bazy danych, w której są umieszczane klasy kon
 dotnet ef dbcontext scaffold "connection string" Microsoft.EntityFrameworkCore.SqlServer --context-namespace "My.Context" --namespace "My.Model"
 ```
 
+Szczegółowe informacje znajdują się [w dokumentacji](xref:core/managing-schemas/scaffolding#directories-and-namespaces) dotyczącej [migracji](xref:core/managing-schemas/migrations/index#namespaces) i odtwarzania.
+
+---
 Ponadto parametry połączenia można teraz przekazywać do `database-update` polecenia:
 
 ```
 dotnet ef database update --connection "connection string"
 ```
 
-Do poleceń programu PowerShell, które są używane w konsoli Menedżera pakietów programu VS, dodano również równoważne parametry.
+Szczegółowe informacje znajdują się w [dokumentacji narzędzi](xref:core/miscellaneous/cli/dotnet#dotnet-ef-database-update) .
 
-Dokumentacja jest śledzona przez [#2303](https://github.com/dotnet/EntityFramework.Docs/issues/2303)problemu.
+Do poleceń programu PowerShell, które są używane w konsoli Menedżera pakietów programu VS, dodano również równoważne parametry.
 
 ### <a name="enabledetailederrors-has-returned"></a>EnableDetailedErrors
 
 Ze względu na wydajność EF nie wykonuje dodatkowych kontroli wartości null podczas odczytywania wartości z bazy danych.
 Może to spowodować, że wyjątki są trudne do wylogowania, gdy zostanie napotkany nieoczekiwany element null.
 
-Korzystanie `EnableDetailedErrors` z programu spowoduje dodanie dodatkowych kontroli wartości null do zapytań, takich jak w przypadku małego obciążenia wydajności, te błędy są łatwiejsze do śledzenia z przyczyn głównych.  
+Korzystanie z programu `EnableDetailedErrors` spowoduje dodanie dodatkowych kontroli wartości null do zapytań, takich jak w przypadku małego obciążenia wydajności, te błędy są łatwiejsze do śledzenia z przyczyn głównych.  
 
-Przykład:
+Na przykład:
 ```CSharp
 protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     => optionsBuilder
@@ -103,7 +138,7 @@ Dokumentacja jest śledzona przez [#955](https://github.com/dotnet/EntityFramewo
 ### <a name="cosmos-partition-keys"></a>Klucze partycji Cosmos
 
 Klucz partycji, który ma być używany dla danego zapytania, można teraz określić w zapytaniu.
-Przykład:
+Na przykład:
 
 ```CSharp
 await context.Set<Customer>()
@@ -115,8 +150,8 @@ Dokumentacja jest śledzona przez [#2199](https://github.com/dotnet/EntityFramew
 
 ### <a name="support-for-the-sql-server-datalength-function"></a>Obsługa funkcji SQL Server DATALENGTH
 
-Dostęp do niego można uzyskać za pomocą `EF.Functions.DataLength` nowej metody.
-Przykład:
+Dostęp do niego można uzyskać za pomocą nowej `EF.Functions.DataLength` metody.
+Na przykład:
 ```CSharp
 var count = context.Orders.Count(c => 100 < EF.Functions.DataLength(c.OrderDate));
 ``` 
@@ -127,7 +162,7 @@ var count = context.Orders.Count(c => 100 < EF.Functions.DataLength(c.OrderDate)
 
 Atrybut języka C# może być teraz używany do określania pola zapasowego dla właściwości.
 Ten atrybut pozwala EF Core nadal pisać i odczytywać dane z pola zapasowego, tak jak zwykle, nawet jeśli nie można automatycznie znaleźć pola zapasowego.
-Przykład:
+Na przykład:
 
 ```CSharp
 public class Blog
@@ -192,7 +227,7 @@ Dodatkowa dokumentacja jest śledzona przez [#2085](https://github.com/dotnet/En
 
 ### <a name="simple-way-to-get-generated-sql"></a>Prosty sposób uzyskiwania wygenerowanego kodu SQL
 
-EF Core 5,0 wprowadza metodę `ToQueryString` rozszerzenia, która zwróci kod SQL, który EF Core zostanie wygenerowany podczas wykonywania zapytania LINQ.
+EF Core 5,0 wprowadza `ToQueryString` metodę rozszerzenia, która zwróci kod SQL, który EF Core zostanie wygenerowany podczas wykonywania zapytania LINQ.
 
 Wstępna dokumentacja jest uwzględniona w [statusie tygodniowym EF dla 9 stycznia 2020](https://github.com/dotnet/efcore/issues/19549#issuecomment-572823246).
 
@@ -200,8 +235,8 @@ Dodatkowa dokumentacja jest śledzona przez [#1331](https://github.com/dotnet/En
 
 ### <a name="use-a-c-attribute-to-indicate-that-an-entity-has-no-key"></a>Użyj atrybutu języka C#, aby wskazać, że jednostka nie ma klucza
 
-Typ jednostki można teraz skonfigurować jako bez klucza przy użyciu nowego `KeylessAttribute`elementu.
-Przykład:
+Typ jednostki można teraz skonfigurować jako bez klucza przy użyciu nowego elementu `KeylessAttribute` .
+Na przykład:
 
 ```CSharp
 [Keyless]
@@ -260,7 +295,7 @@ Dokumentacja jest śledzona przez [#2018](https://github.com/dotnet/EntityFramew
 ### <a name="generation-of-check-constraints-for-enum-mappings"></a>Generowanie ograniczeń check dla mapowań wyliczenia
 
 Migracje EF Core 5,0 mogą teraz generować ograniczenia CHECK dla mapowań właściwości enum.
-Przykład:
+Na przykład:
 
 ```SQL
 MyEnumColumn VARCHAR(10) NOT NULL CHECK (MyEnumColumn IN ('Useful', 'Useless', 'Unknown'))
@@ -270,9 +305,9 @@ Dokumentacja jest śledzona przez [#2082](https://github.com/dotnet/EntityFramew
 
 ### <a name="isrelational"></a>Isrelacyjne
 
-Dodano nową `IsRelational` metodę oprócz istniejących `IsSqlServer`, `IsSqlite`i. `IsInMemory`
+Dodano nową `IsRelational` metodę oprócz istniejących `IsSqlServer` , `IsSqlite` i `IsInMemory` .
 Tej metody można użyć do sprawdzenia, czy DbContext używa dowolnego dostawcy relacyjnej bazy danych.
-Przykład:
+Na przykład:
 
 ```CSharp
 protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -295,7 +330,7 @@ Użyj konstruktora modeli w OnModelCreating, aby skonfigurować element ETag:
 builder.Entity<Customer>().Property(c => c.ETag).IsEtagConcurrency();
 ```
 
-Metody SaveChanges następnie `DbUpdateConcurrencyException` zgłosi konflikt współbieżności, który [można obsłużyć](https://docs.microsoft.com/ef/core/saving/concurrency) w celu zaimplementowania ponownych prób itd.
+Metody SaveChanges następnie zgłosi `DbUpdateConcurrencyException` konflikt współbieżności, który [można obsłużyć](https://docs.microsoft.com/ef/core/saving/concurrency) w celu zaimplementowania ponownych prób itd.
 
 Dokumentacja jest śledzona przez [#2099](https://github.com/dotnet/EntityFramework.Docs/issues/2099)problemu.
 
@@ -308,7 +343,7 @@ Ponadto następujące funkcje SQL Server są teraz mapowane:
 * DateDiffWeek
 * DateFromParts
 
-Przykład:
+Na przykład:
 
 ```CSharp
 var count = context.Orders.Count(c => date > EF.Functions.DateFromParts(DateTime.Now.Year, 12, 25));
@@ -327,8 +362,8 @@ Dodatkowa dokumentacja jest śledzona przez [#2079](https://github.com/dotnet/En
 
 ### <a name="query-translation-for-reverse"></a>Tłumaczenie zapytania do tyłu
 
-Zapytania z `Reverse` użyciem są teraz tłumaczone.
-Przykład:
+Zapytania z użyciem `Reverse` są teraz tłumaczone.
+Na przykład:
 
 ```CSharp
 context.Employees.OrderBy(e => e.EmployeeID).Reverse()

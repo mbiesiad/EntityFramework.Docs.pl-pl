@@ -1,75 +1,76 @@
 ---
-title: Powiązanie danych za pomocą WPF - EF6
+title: Wiązanie danych przy użyciu WPF-EF6
 author: divega
-ms.date: 04/02/2020
+ms.date: 05/19/2020
 ms.assetid: e90d48e6-bea7785-47ef-b756-7b89cce4daf0
-ms.openlocfilehash: 6908e2a7597d0c199620c6015ed3ea06226c5ea9
-ms.sourcegitcommit: 9b562663679854c37c05fca13d93e180213fb4aa
+ms.openlocfilehash: c8e9e9a0810d8192e5184abbc7df2e74e4ee7edb
+ms.sourcegitcommit: 59e3d5ce7dfb284457cf1c991091683b2d1afe9d
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 04/03/2020
-ms.locfileid: "80639144"
+ms.lasthandoff: 05/20/2020
+ms.locfileid: "83672906"
 ---
+# <a name="databinding-with-wpf"></a>Wiązanie danych z WPF
+
 > [!IMPORTANT]
-> **Ten dokument jest prawidłowy tylko dla programu WPF w programie .NET Framework**
+> **Ten dokument jest prawidłowy dla WPF tylko na .NET Framework**
 >
-> W tym dokumencie opisano powiązanie danych dla WPF WPF w programie .NET Framework. W przypadku nowych projektów .NET Core zaleca się użycie [ef core](/ef/core) zamiast entity framework 6. Dokumentacja wiązania danych w EF Core jest śledzona w [#778 problem](https://github.com/dotnet/EntityFramework.Docs/issues/778).
+> W tym dokumencie opisano powiązanie DataBinding dla WPF na .NET Framework. W przypadku nowych projektów platformy .NET Core zalecamy używanie [EF Core](/ef/core) zamiast Entity Framework 6. Dokumentacja powiązania danych w EF Core jest śledzona w [#778 problemu](https://github.com/dotnet/EntityFramework.Docs/issues/778).
 
-# <a name="databinding-with-wpf"></a>Powiązanie danych za pomocą WPF
-W tym przewodniku krok po kroku pokazano, jak powiązać typy POCO do formantów WPF w formularzu "master-detail". Aplikacja używa interfejsów API frameworka do wypełniania obiektów danymi z bazy danych, śledzenia zmian i utrwalania danych w bazie danych.
+W tym przewodniku krok po kroku pokazano, jak powiązać typy POCO z kontrolkami WPF w formularzu "wzorzec-szczegóły". Aplikacja używa Entity Framework interfejsów API do wypełniania obiektów danymi z bazy danych, śledzenia zmian i utrwalania danych w bazie danych.
 
-Model definiuje dwa typy, które uczestniczą w **Category** relacji jeden\\do wielu: Kategoria (główny główny) i **Produkt** (szczegóły zależne).\\ Następnie narzędzia programu Visual Studio są używane do powiązania typów zdefiniowanych w modelu do formantów WPF. Struktura powiązania danych WPF umożliwia nawigację między powiązanymi obiektami: wybranie wierszy w widoku głównym powoduje, że widok szczegółów do aktualizacji z odpowiednimi danymi podrzędnymi.
+Model definiuje dwa typy, które uczestniczą w relacji jeden do wielu: **Kategoria** (główny podmiot zabezpieczeń \\ ) i **produkt** (szczegóły zależne \\ ). Następnie narzędzia programu Visual Studio są używane do powiązania typów zdefiniowanych w modelu z kontrolkami WPF. Struktura powiązań danych WPF umożliwia nawigowanie między obiektami pokrewnymi: wybranie wierszy w widoku wzorca powoduje aktualizację widoku szczegółów z odpowiednimi danymi podrzędnymi.
 
-Zrzuty ekranu i listy kodów w tym instruktażu są pobierane z programu Visual Studio 2013, ale można ukończyć ten przewodnik za pomocą programu Visual Studio 2012 lub Visual Studio 2010.
+Zrzuty ekranu i listy kodu w tym instruktażu są pobierane z Visual Studio 2013 ale można wykonać ten Instruktaż w programie Visual Studio 2012 lub Visual Studio 2010.
 
-## <a name="use-the-object-option-for-creating-wpf-data-sources"></a>Użyj opcji "Obiekt" do tworzenia źródeł danych WPF
+## <a name="use-the-object-option-for-creating-wpf-data-sources"></a>Użyj opcji "Object" do tworzenia źródeł danych WPF
 
-W poprzedniej wersji entity framework uzyliśmy przy użyciu **opcji bazy danych** podczas tworzenia nowego źródła danych na podstawie modelu utworzonego za pomocą projektanta EF. Stało się tak, ponieważ projektant będzie generować kontekst, który pochodzi z ObjectContext i klasy jednostek, które pochodzą z EntityObject. Za pomocą opcji bazy danych pomoże napisać najlepszy kod do interakcji z tej powierzchni interfejsu API.
+W przypadku wcześniejszej wersji Entity Framework zalecamy użycie opcji **bazy danych** podczas tworzenia nowego źródła danych na podstawie modelu utworzonego za pomocą narzędzia Dr Designer. To dlatego, że projektant wygeneruje kontekst pochodzący z klas ObjectContext i Entity Classes, które pochodzą z obiektu EntityObject. Użycie opcji baza danych pomoże Ci napisać najlepszy kod do współdziałania z tą powierzchnią interfejsu API.
 
-Projektanci EF dla programu Visual Studio 2012 i Visual Studio 2013 generują kontekst, który wywodzi się z DbContext wraz z prostymi klasami jednostek POCO. W programie Visual Studio 2010 zaleca się zamianę na szablon generowania kodu, który używa DbContext, jak opisano w dalszej części tego przewodnika.
+Projektanci programu EF dla programu Visual Studio 2012 i Visual Studio 2013 generują kontekst, który pochodzi od DbContext wraz z prostymi klasami jednostek POCO. W programie Visual Studio 2010 zalecamy zamianę na szablon generowania kodu, który używa DbContext, zgodnie z opisem w dalszej części tego instruktażu.
 
-Podczas korzystania z powierzchni interfejsu API DbContext należy użyć **opcji Obiekt** podczas tworzenia nowego źródła danych, jak pokazano w tym instruktażu.
+Korzystając z powierzchni interfejsu API DbContext, należy użyć opcji **Object** podczas tworzenia nowego źródła danych, jak pokazano w tym instruktażu.
 
-W razie potrzeby można [przywrócić do generowania kodu opartego na ObjectContext](~/ef6/modeling/designer/codegen/legacy-objectcontext.md) dla modeli utworzonych za pomocą projektanta EF.
+W razie potrzeby można [wrócić do generowania kodu opartego na obiekcie ObjectContext](~/ef6/modeling/designer/codegen/legacy-objectcontext.md) dla modeli utworzonych za pomocą programu EF Designer.
 
 ## <a name="pre-requisites"></a>Wymagania wstępne
 
-Aby ukończyć ten przewodnik, musisz mieć zainstalowany program Visual Studio 2013, Visual Studio 2012 lub Visual Studio 2010.
+Aby ukończyć ten przewodnik, musisz mieć zainstalowany Visual Studio 2013, Visual Studio 2012 lub Visual Studio 2010.
 
-Jeśli używasz programu Visual Studio 2010, należy również zainstalować NuGet. Aby uzyskać więcej informacji, zobacz [Instalowanie nuget](https://docs.microsoft.com/nuget/install-nuget-client-tools).  
+W przypadku korzystania z programu Visual Studio 2010 należy również zainstalować pakiet NuGet. Aby uzyskać więcej informacji, zobacz [Instalowanie programu NuGet](https://docs.microsoft.com/nuget/install-nuget-client-tools).  
 
 ## <a name="create-the-application"></a>Tworzenie aplikacji
 
 -   Otwórz program Visual Studio.
--   **Plik&gt; —&gt; nowy — projekt....**
--   Wybieranie **systemu Windows** w lewym okienku i **WPFApplication** w prawym okienku
--   Wprowadź **WPFwithEFSample** jako nazwę
+-   **Plik — &gt; Nowy — &gt; projekt...**
+-   Wybierz pozycję **Windows**   w lewym okienku i **WPFApplication** w okienku po prawej stronie
+-   Wprowadź **WPFwithEFSample**   jako nazwę
 -   Wybierz **przycisk OK**
 
-## <a name="install-the-entity-framework-nuget-package"></a>Instalowanie pakietu NuGet framework encji
+## <a name="install-the-entity-framework-nuget-package"></a>Zainstaluj pakiet NuGet Entity Framework
 
--   W Eksploratorze rozwiązań kliknij prawym przyciskiem myszy projekt **WinFormswithEFSample**
--   Wybierz **pozycję Zarządzaj pakietami NuGet...**
--   W oknie dialogowym Zarządzanie pakietami NuGet wybierz kartę **Online** i wybierz pakiet **EntityFramework**
--   Kliknij **pozycję Zainstaluj**  
+-   W Eksplorator rozwiązań kliknij prawym przyciskiem myszy projekt **WinFormswithEFSample**
+-   Wybierz pozycję **Zarządzaj pakietami NuGet...**
+-   W oknie dialogowym Zarządzanie pakietami NuGet wybierz kartę **online** i wybierz pakiet **EntityFramework**
+-   Kliknij przycisk **Instaluj**  
     >[!NOTE]
-    > Oprócz zestawu EntityFramework dodano również odwołanie do System.ComponentModel.DataAnnotations. Jeśli projekt ma odwołanie do System.Data.Entity, zostanie on usunięty po zainstalowaniu pakietu EntityFramework. Zestaw System.Data.Entity nie jest już używany dla aplikacji Entity Framework 6.
+    > Oprócz zestawu EntityFramework dodawane jest również odwołanie do elementu System. ComponentModel. DataAnnotations. Jeśli projekt zawiera odwołanie do System. Data. Entity, zostanie usunięte po zainstalowaniu pakietu EntityFramework. Zestaw system. Data. Entity nie jest już używany w przypadku aplikacji Entity Framework 6.
 
-## <a name="define-a-model"></a>Definiowanie modelu
+## <a name="define-a-model"></a>Zdefiniuj model
 
-W tym instruktażu można wybrać do zaimplementowania modelu przy użyciu code first lub projektanta EF. Ukończ jedną z dwóch poniższych sekcji.
+W tym instruktażu możesz wybrać wdrożenie modelu przy użyciu Code First lub programu Dr Designer. Wykonaj jedną z dwóch poniższych sekcji.
 
-### <a name="option-1-define-a-model-using-code-first"></a>Opcja 1: Najpierw zdefiniuj model przy użyciu kodu
+### <a name="option-1-define-a-model-using-code-first"></a>Opcja 1: definiowanie modelu przy użyciu Code First
 
-W tej sekcji pokazano, jak utworzyć model i skojarzoną z nim bazę danych przy użyciu kodu najpierw. Przejdź do następnej sekcji **(Opcja 2: Zdefiniuj model przy użyciu bazy danych najpierw),** jeśli wolisz użyć bazy danych najpierw do odtworzenia modelu z bazy danych przy użyciu projektanta EF
+W tej sekcji pokazano, jak utworzyć model i skojarzoną z nim bazę danych przy użyciu Code First. Przejdź do następnej sekcji (**Opcja 2: zdefiniuj model przy użyciu Database First)** , jeśli wolisz używać Database First do odtwarzania modelu z bazy danych przy użyciu narzędzia Dr Designer
 
-Podczas korzystania z code first rozwoju zwykle rozpocząć od pisania .NET Framework klas, które definiują model koncepcyjny (domena).
+W przypadku korzystania z Code First projektowania zwykle zaczynasz od pisania klas .NET Framework, które definiują model koncepcyjny (domeny).
 
 -   Dodaj nową klasę do **WPFwithEFSample:**
     -   Kliknij prawym przyciskiem myszy nazwę projektu
-    -   Wybierz pozycję **Dodaj**, a następnie **pozycję Nowy element**
-    -   Wybierz **klasę** i wprowadź **produkt** dla nazwy klasy
--   Zastąp definicję klasy **produktu** następującym kodem:
+    -   Wybierz pozycję **Dodaj**, a następnie pozycję **nowy element**
+    -   Wybierz **klasę** i wprowadź **produkt**   dla nazwy klasy
+-   Zastąp **Product**   definicję klasy produktu następującym kodem:
 
 ``` csharp
     namespace WPFwithEFSample
@@ -105,11 +106,11 @@ Podczas korzystania z code first rozwoju zwykle rozpocząć od pisania .NET Fram
     }
 ```
 
-**Właściwość Produkty** w **Category** klasy i **Category** właściwości na **Product** klasy są właściwości nawigacji. W entity framework właściwości nawigacji umożliwiają poruszanie się po relacji między dwoma typami jednostek.
+Właściwości **Products** klasy **Category** i **Category** klasy **Product** są właściwościami nawigacji. W Entity Framework właściwości nawigacji umożliwiają nawigowanie po relacjach między dwoma typami jednostek.
 
-Oprócz definiowania jednostek, należy zdefiniować klasę, która pochodzi z DbContext&lt;i udostępnia&gt; właściwości DbSet TEntity. Właściwości DbSet&lt;TEntity&gt; niech kontekst wiedzieć, jakie typy, które mają zostać uwzględnione w modelu.
+Oprócz definiowania jednostek należy zdefiniować klasę, która dziedziczy z DbContext i uwidacznia &lt; &gt; Właściwości nieogólnymi. Właściwości Nieogólnymiości &lt; &gt; pozwalają określić, które typy mają być uwzględnione w modelu.
 
-Wystąpienie typu pochodnego DbContext zarządza obiektami jednostki w czasie wykonywania, który obejmuje wypełnianie obiektów danymi z bazy danych, śledzenie zmian i utrwalanie danych do bazy danych.
+Wystąpienie typu pochodnego DbContext zarządza obiektami obiektów w czasie wykonywania, co obejmuje wypełnianie obiektów danymi z bazy danych, śledzenie zmian i utrwalanie danych w bazie danych.
 
 -   Dodaj nową klasę **ProductContext** do projektu z następującą definicją:
 
@@ -126,41 +127,41 @@ Wystąpienie typu pochodnego DbContext zarządza obiektami jednostki w czasie wy
     }
 ```
 
-Skompiluj projekt.
+Kompiluj projekt.
 
-### <a name="option-2-define-a-model-using-database-first"></a>Opcja 2: Najpierw zdefiniuj model przy użyciu bazy danych
+### <a name="option-2-define-a-model-using-database-first"></a>Opcja 2: definiowanie modelu przy użyciu Database First
 
-W tej sekcji pokazano, jak używać najpierw bazy danych do inżynierii wstecznej modelu z bazy danych przy użyciu projektanta EF. Jeśli poprzednia sekcja została ukończona (**Opcja 1: Zdefiniuj model przy użyciu najpierw kodu),** pomiń tę sekcję i przejdź bezpośrednio do sekcji **Ładowanie z opóźnieniem.**
+W tej sekcji pokazano, jak używać programu Database First, aby odtworzyć model z bazy danych przy użyciu narzędzia Dr Designer. Jeśli poprzednia sekcja została ukończona (**Opcja 1: zdefiniuj model przy użyciu Code First)**, Pomiń tę sekcję i przejdź bezpośrednio do sekcji **ładowanie z opóźnieniem** .
 
 #### <a name="create-an-existing-database"></a>Tworzenie istniejącej bazy danych
 
-Zazwyczaj podczas kierowania istniejącej bazy danych zostanie już utworzona, ale w tym instruktażu musimy utworzyć bazę danych, aby uzyskać dostęp.
+Zwykle w przypadku określania docelowej istniejącej bazy danych zostanie ona już utworzona, ale w tym instruktażu musimy utworzyć bazę danych do uzyskania dostępu.
 
-Serwer bazy danych zainstalowany w programie Visual Studio różni się w zależności od zainstalowanej wersji programu Visual Studio:
+Serwer bazy danych zainstalowany przy użyciu programu Visual Studio różni się w zależności od zainstalowanej wersji programu Visual Studio:
 
--   Jeśli używasz programu Visual Studio 2010, będziesz tworzyć bazę danych PROGRAMU SQL Express.
--   Jeśli używasz programu Visual Studio 2012, a następnie będziesz tworzyć bazy danych [LocalDB.](https://msdn.microsoft.com/library/hh510202.aspx)
+-   Jeśli używasz programu Visual Studio 2010, tworzysz bazę danych SQL Express.
+-   Jeśli używasz programu Visual Studio 2012, zostanie utworzona baza danych [LocalDB](https://msdn.microsoft.com/library/hh510202.aspx) .
 
-Przejdźmy dalej i wygenerujmy bazę danych.
+Przyjrzyjmy się i wygenerujemy bazę danych.
 
--   **Widok&gt; — Eksplorator serwera**
--   Kliknij prawym przyciskiem myszy na **Połączenia danych -&gt; Dodaj połączenie...**
--   Jeśli nie masz połączenia z bazą danych z Eksploratora serwera, zanim będziesz musiał wybrać program Microsoft SQL Server jako źródło danych
+-   **Widok- &gt; Eksplorator serwera**
+-   Kliknij prawym przyciskiem myszy pozycję **połączenia danych — &gt; Dodaj połączenie...**
+-   Jeśli nie masz połączenia z bazą danych Eksplorator serwera przed wybraniem Microsoft SQL Server jako źródła danych
 
-    ![Zmienianie źródła danych](~/ef6/media/changedatasource.png)
+    ![Zmień źródło danych](~/ef6/media/changedatasource.png)
 
--   Połącz się z localdb lub SQL Express, w zależności od tego, który z nich został zainstalowany, i wprowadź **produkty** jako nazwę bazy danych
+-   Połącz się z usługą LocalDB lub SQL Express, w zależności od tego, który został zainstalowany, i wprowadź **produkty** jako nazwę bazy danych
 
-    ![Dodawanie lokalnej bazy danych połączeń](~/ef6/media/addconnectionlocaldb.png)
+    ![Dodaj LocalDB połączenia](~/ef6/media/addconnectionlocaldb.png)
 
-    ![Dodaj ekspres połączenia](~/ef6/media/addconnectionexpress.png)
+    ![Dodaj połączenie ekspresowe](~/ef6/media/addconnectionexpress.png)
 
--   Wybierz **przycisk OK,** a pojawi się pytanie, czy chcesz utworzyć nową bazę danych, wybierz **tak**
+-   Wybierz pozycję **OK** . pojawi się monit z prośbą o utworzenie nowej bazy danych, a następnie wybierz pozycję **tak** .
 
     ![Create Database](~/ef6/media/createdatabase.png)
 
--   Nowa baza danych pojawi się teraz w Eksploratorze serwera, kliknij ją prawym przyciskiem myszy i wybierz **pozycję Nowa kwerenda**
--   Skopiuj następujący SQL do nowej kwerendy, a następnie kliknij prawym przyciskiem myszy kwerendę i wybierz polecenie **Wykonaj**
+-   Nowa baza danych będzie teraz wyświetlana w Eksplorator serwera, kliknij ją prawym przyciskiem myszy, a następnie wybierz pozycję **nowe zapytanie** .
+-   Skopiuj następujące SQL do nowego zapytania, a następnie kliknij prawym przyciskiem myszy zapytanie i wybierz polecenie **Execute (wykonaj** ).
 
 ``` SQL
     CREATE TABLE [dbo].[Categories] (
@@ -181,88 +182,88 @@ Przejdźmy dalej i wygenerujmy bazę danych.
     ALTER TABLE [dbo].[Products] ADD CONSTRAINT [FK_dbo.Products_dbo.Categories_CategoryId] FOREIGN KEY ([CategoryId]) REFERENCES [dbo].[Categories] ([CategoryId]) ON DELETE CASCADE
 ```
 
-#### <a name="reverse-engineer-model"></a>Model inżyniera odwrotnego
+#### <a name="reverse-engineer-model"></a>Odtwórz Model
 
-Mamy zamiar korzystać z Entity Framework Designer, który jest dołączony do programu Visual Studio, aby utworzyć nasz model.
+Będziemy używać Entity Framework Designer, które są dołączone jako część programu Visual Studio, aby utworzyć nasz model.
 
--   **Projekt&gt; — dodaj nowy element...**
--   Wybierz **pozycję Dane** z lewego menu, a następnie ADO.NET modelu danych **encji**
--   Wprowadź **ProductModel** jako nazwę i kliknij **przycisk OK**
--   Spowoduje to uruchomienie **Kreatora modeli danych encji**
--   Wybierz **pozycję Generuj z bazy danych** i kliknij przycisk **Dalej**
+-   **Projekt — &gt; Dodaj nowy element...**
+-   Wybierz pozycję **dane** z menu po lewej stronie, a następnie **ADO.NET Entity Data Model**
+-   Wprowadź **ProductModel** jako nazwę, a następnie kliknij przycisk **OK** .
+-   Spowoduje to uruchomienie **kreatora Entity Data Model**
+-   Wybierz pozycję **Generuj z bazy danych** i kliknij przycisk **dalej** .
 
     ![Wybierz zawartość modelu](~/ef6/media/choosemodelcontents.png)
 
--   Wybierz połączenie z bazą danych utworzoną w pierwszej sekcji, wprowadź **ProductContext** jako nazwę ciągu połączenia i kliknij przycisk **Dalej**
+-   Wybierz połączenie z bazą danych utworzoną w pierwszej sekcji, wprowadź **ProductContext** jako nazwę parametrów połączenia i kliknij przycisk **dalej** .
 
     ![Wybierz połączenie](~/ef6/media/chooseyourconnection.png)
 
--   Kliknij pole wyboru obok pozycji "Tabele", aby zaimportować wszystkie tabele i kliknij przycisk "Zakończ"
+-   Kliknij pole wyboru obok pozycji "tabele", aby zaimportować wszystkie tabele, a następnie kliknij przycisk Zakończ.
 
-    ![Wybierz swoje obiekty](~/ef6/media/chooseyourobjects.png)
+    ![Wybieranie obiektów](~/ef6/media/chooseyourobjects.png)
 
-Po zakończeniu procesu inżynierii odwrotnej nowy model jest dodawany do projektu i otwiera się do wyświetlania w Entity Framework Designer. Plik App.config został również dodany do projektu ze szczegółami połączenia dla bazy danych.
+Po zakończeniu procesu odtwarzania nowy model zostanie dodany do projektu i otwarty do wyświetlania w Entity Framework Designer. Plik App. config został również dodany do projektu i zawiera szczegółowe informacje o połączeniu dla bazy danych.
 
 #### <a name="additional-steps-in-visual-studio-2010"></a>Dodatkowe kroki w programie Visual Studio 2010
 
-Jeśli pracujesz w programie Visual Studio 2010, należy zaktualizować projektanta EF do generowania kodu EF6.
+Jeśli pracujesz w programie Visual Studio 2010, musisz zaktualizować projektanta EF, aby korzystał z generowania kodu EF6.
 
--   Kliknij prawym przyciskiem myszy puste miejsce modelu w projektancie EF i wybierz pozycję **Dodaj element generowania kodu...**
--   Wybierz **szablony online** z lewego menu i wyszukaj **DbContext**
--   Wybierz **EF 6.x DbContext\#Generator dla C ,** wprowadź **ProductsModel** jako nazwę i kliknij przycisk Dodaj
+-   Kliknij prawym przyciskiem myszy pusty punkt w modelu w programie Dr Designer i wybierz polecenie **Dodaj element generowania kodu...**
+-   Wybierz pozycję **Szablony online** z menu po lewej stronie i Wyszukaj w usłudze **DbContext**
+-   Wybierz pozycję **Dr 6. x DbContext generator dla języka C \# ,** wprowadź **ProductsModel** jako nazwę i kliknij przycisk Dodaj.
 
 #### <a name="updating-code-generation-for-data-binding"></a>Aktualizowanie generowania kodu dla powiązania danych
 
-EF generuje kod z modelu przy użyciu szablonów T4. Szablony dostarczane z programem Visual Studio lub pobrane z galerii programu Visual Studio są przeznaczone do użytku ogólnego. Oznacza to, że jednostki generowane z tych szablonów mają proste właściwości ICollection&lt;T.&gt; Jednak podczas wykonywania powiązania danych przy użyciu WPF WPF jest pożądane, aby użyć **ObservableCollection** dla właściwości kolekcji, dzięki czemu WPF można śledzić zmiany wprowadzone do kolekcji. W tym celu będziemy modyfikować szablony do korzystania z ObservableCollection.
+EF generuje kod z modelu przy użyciu szablonów T4. Szablony dostarczane z programem Visual Studio lub pobrane z galerii programu Visual Studio są przeznaczone do ogólnego użycia. Oznacza to, że jednostki wygenerowane na podstawie tych szablonów mają &lt; proste &gt; właściwości ICollection T. Jednak podczas tworzenia powiązań danych przy użyciu platformy WPF pożądane jest użycie **ObservableCollection** dla właściwości kolekcji, dzięki czemu WPF może śledzić zmiany wprowadzone do kolekcji. W tym celu będziemy modyfikować szablony, aby używać ObservableCollection.
 
--   Otwórz **Eksploratora rozwiązań** i znajdź plik **ProductModel.edmx**
--   Znajdź plik **ProductModel.tt,** który będzie zagnieżdżony pod plikiem ProductModel.edmx
+-   Otwórz **Eksplorator rozwiązań** i Znajdź plik **ProductModel. edmx**
+-   Znajdź plik **ProductModel.tt** , który zostanie zagnieżdżony w pliku ProductModel. edmx
 
     ![Szablon modelu produktu WPF](~/ef6/media/wpfproductmodeltemplate.png)
 
--   Kliknij dwukrotnie plik ProductModel.tt, aby otworzyć go w edytorze Visual Studio
--   Znajdź i wymień dwa wystąpienia "**ICollection**" na "**ObservableCollection**". Znajdują się one w przybliżeniu na liniach 296 i 484.
--   Znajdź i zastąp pierwsze wystąpienie**hashsetu**na "**ObservableCollection**". To wystąpienie znajduje się w przybliżeniu na linii 50. **Nie** należy zastępować drugiego wystąpienia zestawu hashset znalezionego w dalszej części kodu.
--   Znajdź i zastąp jedyne wystąpienie "**System.Collections.Generic**" na "**System.Collections.ObjectModel**". Znajduje się on w przybliżeniu na linii 424.
--   Zapisz plik ProductModel.tt. Powinno to spowodować, że kod dla jednostek do ponownego wygenerowanie. Jeśli kod nie zostanie automatycznie wygenerowany, kliknij prawym przyciskiem myszy ProductModel.tt i wybierz "Uruchom narzędzie niestandardowe".
+-   Kliknij dwukrotnie plik ProductModel.tt, aby otworzyć go w edytorze programu Visual Studio.
+-   Znajdź i Zamień dwa wystąpienia elementu "**ICollection**" na "**ObservableCollection**". Znajdują się one w przybliżeniu w wierszach 296 i 484.
+-   Znajdź i Zamień pierwsze wystąpienie elementu "**HashSet —**" na "**ObservableCollection**". To wystąpienie znajduje się około w wierszu 50. **Nie** zamieniaj drugiego wystąpienia HashSet — znalezionego w dalszej części kodu.
+-   Znajdź i Zamień jedynym wystąpieniem elementu "**System. Collections. Generic**" na "**System. Collections. ObjectModel**". Ta lokalizacja znajduje się około w wierszu 424.
+-   Zapisz plik ProductModel.tt. Powinno to spowodować, że kod dla jednostek zostanie ponownie wygenerowany. Jeśli kod nie zostanie wygenerowany automatycznie, kliknij prawym przyciskiem myszy pozycję ProductModel.tt i wybierz polecenie "Uruchom narzędzie niestandardowe".
 
-Jeśli teraz otworzysz plik Category.cs (który jest zagnieżdżony w obszarze ProductModel.tt), powinieneś zobaczyć, że kolekcja Products ma typ **&lt;ObservableCollection Product&gt;**.
+Jeśli teraz otworzysz plik Category.cs (który jest zagnieżdżony w obszarze ProductModel.tt), powinna zostać wyświetlona, że kolekcja Products zawiera ** &lt; &gt; produkt typu ObservableCollection**.
 
-Skompiluj projekt.
+Kompiluj projekt.
 
-## <a name="lazy-loading"></a>Z opóźnieniem
+## <a name="lazy-loading"></a>Ładowanie z opóźnieniem
 
-**Właściwość Produkty** w **Category** klasy i **Category** właściwości na **Product** klasy są właściwości nawigacji. W entity framework właściwości nawigacji umożliwiają poruszanie się po relacji między dwoma typami jednostek.
+Właściwości **Products** klasy **Category** i **Category** klasy **Product** są właściwościami nawigacji. W Entity Framework właściwości nawigacji umożliwiają nawigowanie po relacjach między dwoma typami jednostek.
 
-EF umożliwia automatyczne ładowanie powiązanych jednostek z bazy danych przy pierwszym wejściu do właściwości nawigacji. W przypadku tego typu ładowania (nazywanego ładowaniem z opóźnieniem) należy pamiętać, że przy pierwszym dostępie do każdej właściwości nawigacji zostanie wykonana oddzielna kwerenda względem bazy danych, jeśli zawartość nie znajduje się jeszcze w kontekście.
+EF oferuje opcję ładowania powiązanych jednostek z bazy danych automatycznie przy pierwszym dostępie do właściwości nawigacji. W przypadku tego typu ładowania (nazywanego ładowaniem opóźnionym) należy pamiętać, że podczas pierwszego uzyskiwania dostępu do każdej właściwości nawigacji oddzielne zapytanie zostanie wykonane względem bazy danych, jeśli zawartość nie jest jeszcze w kontekście.
 
-Podczas korzystania z typów jednostek POCO EF osiąga ładowanie z opóźnieniem, tworząc wystąpienia pochodnych typów proxy w czasie wykonywania, a następnie zastępując właściwości wirtualne w klasach, aby dodać hak ładowania. Aby uzyskać opóźnienie ładowania powiązanych obiektów, należy zadeklarować metodyciwości nawigacji jako **publiczne** i **wirtualne** **(możliwe do zastąpienia** w języku Visual Basic), a klasa nie może być **zapieczętowana** **(NotOverridable** w języku Visual Basic). Podczas korzystania z bazy danych pierwsze właściwości nawigacji są automatycznie wirtualne, aby włączyć ładowanie z opóźnieniem. W sekcji Code First zdecydowaliśmy się uczynić właściwości nawigacji wirtualnymi z tego samego powodu
+W przypadku korzystania z typów jednostek POCO EF osiąga opóźnione ładowanie przez utworzenie wystąpień pochodnych typów proxy podczas wykonywania, a następnie Zastępowanie właściwości wirtualnych w klasach, aby dodać punkt zaczepienia ładowania. Aby uzyskać opóźnione ładowanie pokrewnych obiektów, należy zadeklarować metody do pobierania właściwości nawigacji jako **publiczne** i **wirtualne** (Zastąp w Visual Basic), a Klasa nie może być **zapieczętowana** **(** **NotOverridable** w Visual Basic). Przy użyciu Database First właściwości nawigacji są automatycznie wprowadzane do wirtualnego, aby umożliwić ładowanie z opóźnieniem. W sekcji Code First wybrano, aby właściwości nawigacji były wirtualne z tego samego powodu
 
-## <a name="bind-object-to-controls"></a>Obiekt powiązania z formanty
+## <a name="bind-object-to-controls"></a>Powiąż obiekt z kontrolkami
 
 Dodaj klasy, które są zdefiniowane w modelu jako źródła danych dla tej aplikacji WPF.
 
--   Kliknij dwukrotnie plik **MainWindow.xaml** w Eksploratorze rozwiązań, aby otworzyć formularz główny
--   Z menu głównego wybierz **Project -&gt; Dodaj nowe źródło danych ...**
-    (w programie Visual Studio 2010 należy wybrać **opcję Dane —&gt; Dodaj nowe źródło danych...**)
--   W obszarze Wybieranie okna typem źródła danych wybierz pozycję **Obiekt** i kliknij przycisk **Dalej**
--   W oknie dialogowym Wybieranie obiektów danych rozwiń **wpfwithefsample** dwa razy i wybierz **kategorię**  
-    *Nie ma potrzeby wybierania źródła danych **produktu,** ponieważ do niego przejdziemy za pośrednictwem właściwości **Product**'s w źródle danych **kategoria***  
+-   Kliknij dwukrotnie pozycję **MainWindow. XAML** w Eksplorator rozwiązań, aby otworzyć formularz główny.
+-   Z menu głównego wybierz **projekt — &gt; Dodaj nowe źródło danych...**
+    (w programie Visual Studio 2010 musisz wybrać pozycję **dane &gt; Dodaj nowe źródło danych...**)
+-   W oknie Wybieranie źródła danych Typewindow wybierz **obiekt** , a następnie kliknij przycisk **dalej** .
+-   W oknie dialogowym Wybieranie obiektów danych unfold **WPFwithEFSample**   dwa razy i wybierz **kategorię**  
+    *Nie ma potrzeby wybierania źródła danych **produktu** , ponieważ zostanie on przejdziemy do niego za pomocą właściwości **produktu**w źródle danych **kategorii** .*  
 
-    ![Wybieranie obiektów danych](~/ef6/media/selectdataobjects.png)
+    ![Wybierz obiekty danych](~/ef6/media/selectdataobjects.png)
 
--   Kliknij **pozycję Zakończ.**
--   Okno Źródła danych jest otwierane obok okna MainWindow.xaml *Jeśli okno Źródła danych nie jest wyświetlane, wybierz pozycję Widok — **&gt; Inne źródła&gt; danych systemu Windows** *
--   Naciśnij ikonę pinezki, aby okno Źródła danych nie było automatycznie ukrywane. Może być konieczne naciśnięcie przycisku odświeżania, jeśli okno było już widoczne.
+-   Kliknij przycisk **Zakończ.**
+-   Okno źródła danych jest otwierane obok okna MainWindow. XAML *, jeśli okno źródła danych nie jest wyświetlane, wybierz pozycję **Widok — &gt; inne okna — &gt; źródła danych** *
+-   Naciśnij ikonę pinezki, aby okno źródła danych nie było ukrywane. Może być konieczne kliknięcie przycisku Odśwież, jeśli okno było już widoczne.
 
     ![Źródła danych](~/ef6/media/datasources.png)
 
--   Zaznacz źródło danych **Kategoria** i przeciągnij je w formularzu.
+-   Wybierz **kategorię** źródło danych i przeciągnij ją na formularz.
 
-Następujące zdarzenia miały miejsce, gdy przeciągliśmy to źródło:
+Podczas przeciągania tego źródła wystąpił następujący:
 
--   Do XAML dodano zasób **CategoryViewSource** i formant **categoryDataGrid** 
--   Właściwość DataContext w nadrzędnym elemencie Siatki została ustawiona na "{StaticResource **categoryViewSource** }".Zasób **CategoryViewSource** służy jako źródło\\powiązania dla zewnętrznego elementu siatki nadrzędnej. Wewnętrzne elementy siatki dziedziczą następnie wartość DataContext z nadrzędnej siatki (właściwość CategoryDataGrid's ItemsSource jest ustawiona na "{Binding}")
+-   Dodano zasób **categoryViewSource** i kontrolkę **categoryDataGrid** do języka XAML 
+-   Właściwość DataContext elementu nadrzędnej siatki ma ustawioną wartość "{StaticResource **categoryViewSource** }".Zasób **categoryViewSource** służy jako źródło powiązań dla zewnętrznego \\ elementu siatki nadrzędnej. Elementy wewnętrznej siatki dziedziczą wartość DataContext z siatki nadrzędnej (Właściwość ItemsSource categoryDataGrid jest ustawiona na "{Binding}")
 
 ``` xml
     <Window.Resources>
@@ -285,32 +286,32 @@ Następujące zdarzenia miały miejsce, gdy przeciągliśmy to źródło:
 
 ## <a name="adding-a-details-grid"></a>Dodawanie siatki szczegółów
 
-Teraz, gdy mamy siatkę do wyświetlania kategorii dodajmy siatkę szczegółów, aby wyświetlić skojarzone produkty.
+Teraz, gdy mamy siatkę do wyświetlania kategorii dodajemy siatkę szczegółów, aby wyświetlić skojarzone produkty.
 
--   Wybierz **Products** właściwość spod źródła danych **kategoria** i przeciągnij go w formularzu.
-    -   Do xaml są dodawane zasoby **CategoryProductsViewSource** i **siatka productDataGrid**
-    -   Ścieżka powiązania dla tego zasobu jest ustawiona na Produkty
-    -   Struktura wiązania danych WPF zapewnia, że tylko produkty związane z wybraną kategorią są wyświetlane w **productDataGrid**
--   W przyborniku przeciągnij **przycisk** do formularza. Ustaw **właściwość Nazwa** na **buttonSave** i **Content,** właściwość **Zapisz**.
+-   Wybierz właściwość **Products (produkty** ) w obszarze Źródło danych **kategorii** i przeciągnij ją na formularz.
+    -   Zasób **categoryProductsViewSource** i siatka **productDataGrid** są dodawane do języka XAML
+    -   Ścieżka powiązania dla tego zasobu jest ustawiona na produkty
+    -   Struktura powiązań danych WPF zapewnia, że tylko produkty powiązane z wybraną kategorią będą widoczne w **productDataGrid**
+-   Z przybornika przeciągnij **przycisk** do formularza. Ustaw właściwość **name** na **buttonSave** oraz Właściwość **Content** , która ma zostać **zapisana**.
 
 Formularz powinien wyglądać podobnie do tego:
 
 ![Projektant](~/ef6/media/designer.png) 
 
-## <a name="add-code-that-handles-data-interaction"></a>Dodaj kod, który obsługuje interakcję z danymi
+## <a name="add-code-that-handles-data-interaction"></a>Dodawanie kodu, który obsługuje interakcję z danymi
 
-Nadszedł czas, aby dodać niektóre programy obsługi zdarzeń do okna głównego.
+Czas na dodanie obsługi zdarzeń do okna głównego.
 
--   W oknie XAML kliknij element ** &lt;Okno,** w tym oknie wybiera okno główne
--   W oknie **Właściwości** wybierz pozycję **Zdarzenia** w prawym górnym rogu, a następnie kliknij dwukrotnie pole tekstowe po prawej stronie etykiety **Loaded**
+-   W oknie XAML kliknij element ** &lt; window** , zaznaczając Okno główne
+-   W oknie **Właściwości** wybierz pozycję **zdarzenia** w prawym górnym rogu, a następnie kliknij dwukrotnie pole tekstowe po prawej stronie **załadowanej** etykiety.
 
     ![Właściwości okna głównego](~/ef6/media/mainwindowproperties.png)
 
--   Dodaj również zdarzenie **Kliknij** dla przycisku **Zapisz,** klikając dwukrotnie przycisk Zapisz w projektancie. 
+-   Dodaj również zdarzenie **kliknięcia** dla przycisku **Zapisz** przez dwukrotne kliknięcie przycisku Zapisz w projektancie. 
 
-Spowoduje to, że do kodu za formularzem, będziemy teraz edytować kod, aby użyć ProductContext do wykonywania dostępu do danych. Zaktualizuj kod mainwindow, jak pokazano poniżej.
+Spowoduje to przeprowadzenie pracy z kodem związanym z formularzem. teraz edytujemy kod, aby użyć ProductContext do zapewnienia dostępu do danych. Zaktualizuj kod dla MainWindow, jak pokazano poniżej.
 
-Kod deklaruje długotrwałe wystąpienie **ProduktuContext**. **Obiekt ProductContext** służy do wykonywania zapytań i zapisywania danych w bazie danych. **Dispose()** w **ProductContext wystąpienie** jest następnie wywoływana z overridden **OnClosing** metody.Komentarze do kodu zawierają szczegółowe informacje o tym, co robi kod.
+Kod deklaruje długotrwałe wystąpienie **ProductContext**. Obiekt **ProductContext** jest używany do wykonywania zapytań i zapisywania danych w bazie danych. Metoda **Dispose ()** w wystąpieniu **ProductContext** jest następnie wywoływana z przesłoniętej metody **onzamykającej** .Komentarze do kodu zawierają szczegółowe informacje o tym, co robi kod.
 
 ``` csharp
     using System.Data.Entity;
@@ -387,17 +388,17 @@ Kod deklaruje długotrwałe wystąpienie **ProduktuContext**. **Obiekt ProductCo
 
 ## <a name="test-the-wpf-application"></a>Testowanie aplikacji WPF
 
--   Skompiluj i uruchom aplikację. Jeśli użyto najpierw kodu, wtedy zobaczysz, że **wpfwithEFSample.ProductContext** bazy danych jest tworzony dla Ciebie.
--   Wprowadź nazwę kategorii w górnej siatce i nazwy produktów w dolnej siatce *Nie wprowadzaj niczego w kolumnach identyfikatorów, ponieważ klucz podstawowy jest generowany przez bazę danych*
+-   Skompiluj i uruchom aplikację. Jeśli użyto Code First, zostanie wyświetlona baza danych **WPFwithEFSample. ProductContext** .
+-   Wprowadź nazwę kategorii w górnej siatce i nazwy produktów w dolnej siatce *nie wprowadzaj niczego w kolumnach identyfikatorów, ponieważ klucz podstawowy jest generowany przez bazę danych* .
 
     ![Okno główne z nowymi kategoriami i produktami](~/ef6/media/screen1.png)
 
--   Naciśnij przycisk **Zapisz,** aby zapisać dane w bazie danych
+-   Naciśnij przycisk **Save (Zapisz** ), aby zapisać dane w bazie danych
 
-Po wywołaniu **SaveChanges()** programu DbContext identyfikatory są wypełniane wartościami generowanymi przez bazę danych. Ponieważ po **savechanges()** nazwaliśmy **refresh()** formanty **DataGrid** są również aktualizowane o nowe wartości.
+Po wywołaniu elementu DbContext **metody SaveChanges ()** identyfikatory są wypełniane wartościami wygenerowanymi przez bazę danych. Ze względu na to, że wywołano **odświeżanie ()** po **metody SaveChanges ()** , formanty **DataGrid** są aktualizowane również przy użyciu nowych wartości.
 
 ![Okno główne z wypełnionymi identyfikatorami](~/ef6/media/screen2.png)
 
 ## <a name="additional-resources"></a>Dodatkowe zasoby
 
-Aby dowiedzieć się więcej na temat powiązania danych z kolekcjami przy użyciu WPF, zobacz [ten temat](https://docs.microsoft.com/dotnet/framework/wpf/data/data-binding-overview#binding-to-collections) w dokumentacji WPF.  
+Aby dowiedzieć się więcej na temat powiązania danych z kolekcjami przy użyciu platformy WPF, zobacz [ten temat](https://docs.microsoft.com/dotnet/framework/wpf/data/data-binding-overview#binding-to-collections) w dokumentacji WPF.  

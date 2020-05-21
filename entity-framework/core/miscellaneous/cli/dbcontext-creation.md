@@ -4,46 +4,47 @@ author: bricelam
 ms.author: bricelam
 ms.date: 09/16/2019
 uid: core/miscellaneous/cli/dbcontext-creation
-ms.openlocfilehash: f44f0648678af5a70e5171d69692bde1c1d5e0eb
-ms.sourcegitcommit: cc0ff36e46e9ed3527638f7208000e8521faef2e
+ms.openlocfilehash: 0b0271dcabea63a2529c091cc14cb9059d56ac8d
+ms.sourcegitcommit: 59e3d5ce7dfb284457cf1c991091683b2d1afe9d
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 03/06/2020
-ms.locfileid: "78416743"
+ms.lasthandoff: 05/20/2020
+ms.locfileid: "83672956"
 ---
 # <a name="design-time-dbcontext-creation"></a>Tworzenie klasy DbContext w czasie projektowania
 
-Niektóre polecenia narzędzi EF Core (na przykład polecenia [migracji][1] ) wymagają utworzenia wystąpienia pochodnego `DbContext`, które ma zostać utworzone w czasie projektowania w celu zebrania szczegółowych informacji o typach jednostek aplikacji i sposobie ich mapowania na schemat bazy danych. W większości przypadków wskazane jest, aby `DbContext` utworzone w ten sposób został skonfigurowany w podobny sposób, jak zostanie [skonfigurowany w czasie wykonywania][2].
+Niektóre polecenia narzędzi EF Core (na przykład polecenia [migracji][1] ) wymagają utworzenia wystąpienia pochodnego w `DbContext` czasie projektowania w celu zebrania szczegółowych informacji o typach jednostek aplikacji i sposobie ich mapowania na schemat bazy danych. W większości przypadków wskazane jest, aby utworzone w `DbContext` ten sposób jest skonfigurowane w podobny sposób jak w [czasie wykonywania][2].
 
-Istnieją różne sposoby tworzenia `DbContext`przez narzędzia:
+Istnieją różne sposoby tworzenia `DbContext` :
 
 ## <a name="from-application-services"></a>Z usług aplikacji
 
 Jeśli projekt startowy używa hosta [sieci Web ASP.NET Core][3] lub [hosta ogólnego platformy .NET Core][4], narzędzia próbują uzyskać obiekt DbContext od dostawcy usług aplikacji.
 
-Narzędzia najpierw próbują uzyskać dostawcę usługi przez wywoływanie `Program.CreateHostBuilder()`, wywoływanie `Build()`, a następnie uzyskanie dostępu do właściwości `Services`.
+Narzędzia najpierw próbują uzyskać dostawcę usług `Program.CreateHostBuilder()` , wywołując wywoływanie, `Build()` a następnie uzyskując dostęp do `Services` właściwości.
 
 [!code-csharp[Main](../../../../samples/core/Miscellaneous/CommandLine/ApplicationService.cs)]
 
 > [!NOTE]
 > Podczas tworzenia nowej aplikacji ASP.NET Core ten element Hook jest uwzględniany domyślnie.
 
-Sama `DbContext` i wszelkie zależności w jego konstruktorze muszą być zarejestrowane jako usługi w dostawcy usług aplikacji. Można to łatwo osiągnąć poprzez posiadanie [konstruktora na `DbContext`, który przyjmuje wystąpienie `DbContextOptions<TContext>` jako argument][5] i przy użyciu [metody`AddDbContext<TContext>`][6].
+`DbContext`Sama i wszystkie zależności w jego konstruktorze muszą być zarejestrowane jako usługi w dostawcy usług aplikacji. Można to łatwo osiągnąć poprzez posiadanie [konstruktora na `DbContext` , który przyjmuje wystąpienie `DbContextOptions<TContext>` jako argument][5] i przy użyciu [ `AddDbContext<TContext>` metody][6].
 
 ## <a name="using-a-constructor-with-no-parameters"></a>Korzystanie z konstruktora bez parametrów
 
-Jeśli nie można uzyskać kontekstu DbContext od dostawcy usług aplikacji, narzędzia szukają typu pochodnego `DbContext` wewnątrz projektu. Następnie próbują utworzyć wystąpienie przy użyciu konstruktora bez parametrów. Może to być Konstruktor domyślny, jeśli `DbContext` jest skonfigurowany przy użyciu metody [`OnConfiguring`][7] .
+Jeśli nie można uzyskać elementu DbContext od dostawcy usług aplikacji, narzędzia szukają typu pochodnego `DbContext` wewnątrz projektu. Następnie próbują utworzyć wystąpienie przy użyciu konstruktora bez parametrów. Może to być Konstruktor domyślny, jeśli `DbContext` jest skonfigurowany przy użyciu [`OnConfiguring`][7] metody.
 
 ## <a name="from-a-design-time-factory"></a>Z fabryki czasu projektowania
 
-Możesz również poinformować o narzędziach, jak utworzyć DbContext, implementując interfejs `IDesignTimeDbContextFactory<TContext>`: Jeśli klasa implementująca ten interfejs znajduje się w tym samym projekcie co pochodna `DbContext` lub w projekcie startowym aplikacji, narzędzia te pomijają inne sposoby tworzenia kontekstu DBI używania fabryki czasu projektowania.
+Możesz również poinformować narzędzia jak utworzyć DbContext, implementując `IDesignTimeDbContextFactory<TContext>` Interfejs: Jeśli klasa implementująca ten interfejs znajduje się w tym samym projekcie, co pochodna `DbContext` lub w projekcie startowym aplikacji, narzędzia te pomijają inne sposoby tworzenia kontekstu DBI używania fabryki czasu projektowania.
 
 [!code-csharp[Main](../../../../samples/core/Miscellaneous/CommandLine/BloggingContextFactory.cs)]
 
 > [!NOTE]
-> Parametr `args` nie jest obecnie używany. Występuje [problem][8] ze śledzeniem możliwości określania argumentów czasu projektowania z narzędzi.
+> Przed EFCore 5,0 `args` parametr był nieużywany (zobacz [ten problem][8]).
+> Jest to rozwiązane w EFCore 5,0 i wszelkie dodatkowe argumenty czasu projektowania są przesyłane do aplikacji za pomocą tego parametru.
 
-Fabryka czasu projektowania może być szczególnie przydatna, jeśli trzeba skonfigurować DbContext dla czasu projektowania niż w czasie wykonywania, jeśli Konstruktor `DbContext` przyjmuje dodatkowe parametry nie są zarejestrowani w programie DI, jeśli nie używasz DI w ogóle lub jeśli z jakiegoś powodu wolisz, aby nie mieć metody `BuildWebHost` w klasie `Main` aplikacji ASP.NET Core.
+Fabryka czasu projektowania może być szczególnie przydatna, jeśli trzeba skonfigurować DbContext w inny sposób niż czas projektowania niż w czasie wykonywania, jeśli `DbContext` Konstruktor przyjmuje dodatkowe parametry nie są zarejestrowane w programie di, jeśli nie używasz di lub jeśli z jakiegoś powodu wolisz, aby nie mieć `BuildWebHost` metody w klasie aplikacji ASP.NET Core `Main` .
 
   [1]: xref:core/managing-schemas/migrations/index
   [2]: xref:core/miscellaneous/configuring-dbcontext
