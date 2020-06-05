@@ -4,12 +4,12 @@ description: Różne podejścia do testowania aplikacji korzystających EF Core
 author: ajcvickers
 ms.date: 04/22/2020
 uid: core/miscellaneous/testing/index
-ms.openlocfilehash: 415769e9c3c664ce49c9308740d39a65a10807ba
-ms.sourcegitcommit: 59e3d5ce7dfb284457cf1c991091683b2d1afe9d
+ms.openlocfilehash: a5ff85a60af1f56a0924d6fa0646195146a6827e
+ms.sourcegitcommit: 1f0f93c66b2b50e03fcbed90260e94faa0279c46
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 05/20/2020
-ms.locfileid: "83672892"
+ms.lasthandoff: 06/04/2020
+ms.locfileid: "84418913"
 ---
 # <a name="testing-code-that-uses-ef-core"></a>Testowanie kodu korzystającego ze środowiska EF Core
 
@@ -93,8 +93,10 @@ Aby EF Core uzyskać szczegółowe wskazówki, zobacz [testowanie przy użyciu o
 
 EF Core zawiera bazę danych w pamięci, która jest używana do wewnętrznego testowania EF Core samego siebie.
 Ta baza danych nie jest **podstawą do testowania aplikacji, które używają EF Core**. Są to:
+
 * Nie jest to relacyjna baza danych.
 * Nie obsługuje transakcji.
+* Nie można uruchamiać nieprzetworzonych zapytań SQL.
 * Nie jest zoptymalizowany pod kątem wydajności.
 
 Żadna z tych elementów nie jest bardzo ważna podczas testowania EF Core wewnętrznych, ponieważ jest ona używana szczególnie w przypadku, gdy baza danych nie ma znaczenia dla testu.

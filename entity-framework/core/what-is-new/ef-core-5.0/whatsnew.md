@@ -2,14 +2,14 @@
 title: Co nowego w EF Core 5,0
 description: Omówienie nowych funkcji w EF Core 5,0
 author: ajcvickers
-ms.date: 05/11/2020
+ms.date: 06/02/2020
 uid: core/what-is-new/ef-core-5.0/whatsnew.md
-ms.openlocfilehash: fcb2eb8df99a06eaf3459835347a4027a363b86b
-ms.sourcegitcommit: 59e3d5ce7dfb284457cf1c991091683b2d1afe9d
+ms.openlocfilehash: 45d851a4b08a26dda0c24e20c79f42964fa4fae4
+ms.sourcegitcommit: 1f0f93c66b2b50e03fcbed90260e94faa0279c46
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 05/20/2020
-ms.locfileid: "83672855"
+ms.lasthandoff: 06/04/2020
+ms.locfileid: "84418947"
 ---
 # <a name="whats-new-in-ef-core-50"></a>Co nowego w EF Core 5,0
 
@@ -21,12 +21,123 @@ Plan opisuje ogólne motywy dla EF Core 5,0, w tym wszystko, co planujemy uwzgl�
 
 Będziemy dodawać linki z tego miejsca do oficjalnej dokumentacji w trakcie jej publikacji.
 
+## <a name="preview-5"></a>Wersja zapoznawcza 5
+
+### <a name="database-collations"></a>Sortowanie bazy danych
+
+Domyślne sortowanie dla bazy danych można teraz określić w modelu EF.
+Spowoduje to przetworzenie przetworzonych migracji w celu ustawienia sortowania podczas tworzenia bazy danych.
+Przykład:
+
+```CSharp
+modelBuilder.UseCollation("German_PhoneBook_CI_AS");
+```
+
+Następnie migracja generuje następujące elementy, aby utworzyć bazę danych na SQL Server:
+
+```sql
+CREATE DATABASE [Test]
+COLLATE German_PhoneBook_CI_AS;
+```
+
+Można również określić sortowanie, które ma być używane dla określonych kolumn bazy danych.
+Przykład:
+
+```CSharp
+ modelBuilder
+     .Entity<User>()
+     .Property(e => e.Name)
+     .UseCollation("German_PhoneBook_CI_AS");
+```
+
+Dla tych, które nie korzystają z migracji, sortowania są teraz odtwarzane z bazy danych podczas tworzenia szkieletu DbContext.
+
+Na koniec `EF.Functions.Collate()` zezwala na kwerendy ad hoc przy użyciu różnych ustawień sortowania.
+Przykład:
+
+```CSharp
+context.Users.Single(e => EF.Functions.Collate(e.Name, "French_CI_AS") == "Jean-Michel Jarre");
+```
+
+Spowoduje to wygenerowanie następującej kwerendy dla SQL Server:
+
+```sql
+SELECT TOP(2) [u].[Id], [u].[Name]
+FROM [Users] AS [u]
+WHERE [u].[Name] COLLATE French_CI_AS = N'Jean-Michel Jarre'
+```
+
+Należy pamiętać, że sortowania ad-hoc należy używać z ostrożnością, ponieważ mogą one mieć negatywny wpływ na wydajność bazy danych.
+
+Dokumentacja jest śledzona przez [#2273](https://github.com/dotnet/EntityFramework.Docs/issues/2273)problemu.
+
+### <a name="flow-arguments-into-idesigntimedbcontextfactory"></a>Argumenty przepływu w IDesignTimeDbContextFactory
+
+Argumenty są teraz przepływane z wiersza polecenia do `CreateDbContext` metody [IDesignTimeDbContextFactory](https://docs.microsoft.com/dotnet/api/microsoft.entityframeworkcore.design.idesigntimedbcontextfactory-1?view=efcore-3.1). Na przykład, aby wskazać, że jest to kompilacja dev, argument niestandardowy (np. `dev` ) może zostać zakończony w wierszu polecenia:
+
+```
+dotnet ef migrations add two --verbose --dev
+``` 
+
+Ten argument będzie przepływał do fabryki, gdzie może służyć do kontrolowania sposobu tworzenia i inicjowania kontekstu.
+Przykład:
+
+```CSharp
+public class MyDbContextFactory : IDesignTimeDbContextFactory<SomeDbContext>
+{
+    public SomeDbContext CreateDbContext(string[] args) 
+        => new SomeDbContext(args.Contains("--dev"));
+}
+```
+
+Dokumentacja jest śledzona przez [#2419](https://github.com/dotnet/EntityFramework.Docs/issues/2419)problemu.
+
+### <a name="no-tracking-queries-with-identity-resolution"></a>Nie śledzij zapytań z rozpoznawaniem tożsamości
+
+Nie można teraz skonfigurować zapytań śledzenia, aby przeprowadzić rozpoznawanie tożsamości.
+Na przykład następujące zapytanie utworzy nowe wystąpienie blogu dla każdego wpisu, nawet jeśli każdy blog ma ten sam klucz podstawowy. 
+
+```CSharp
+context.Posts.AsNoTracking().Include(e => e.Blog).ToList();
+```
+
+Jednak koszt zwykle jest nieco wolniejszy i zawsze korzysta z większej ilości pamięci, to zapytanie można zmienić, aby upewnić się, że tworzone jest tylko jedno wystąpienie blogu:
+
+```CSharp
+context.Posts.AsNoTracking().PerformIdentityResolution().Include(e => e.Blog).ToList();
+```
+
+Należy zauważyć, że jest to przydatne tylko w przypadku zapytań bez śledzenia, ponieważ wszystkie zapytania śledzenia już wykazują takie zachowanie. Ponadto, po przeglądzie interfejsu API, `PerformIdentityResolution` składnia zostanie zmieniona.
+Zobacz [#19877](https://github.com/dotnet/efcore/issues/19877#issuecomment-637371073).
+
+Dokumentacja jest śledzona przez [#1895](https://github.com/dotnet/EntityFramework.Docs/issues/1895)problemu.
+
+### <a name="stored-persisted-computed-columns"></a>Przechowywane (utrwalone) kolumny obliczane
+
+Większość baz danych umożliwia przechowywanie wartości kolumn obliczanych po obliczeniach.
+Gdy to zajmuje miejsce na dysku, kolumna obliczana jest obliczana tylko raz podczas aktualizacji, a nie za każdym razem, gdy jej wartość zostanie pobrana.
+Pozwala to również na indeksowanie kolumny dla niektórych baz danych.
+
+EF Core 5,0 umożliwia skonfigurowanie kolumn obliczanych jako przechowywanych.
+Przykład:
+ 
+```CSharp
+modelBuilder
+    .Entity<User>()
+    .Property(e => e.SomethingComputed)
+    .HasComputedColumnSql("my sql", stored: true);
+```
+
+### <a name="sqlite-computed-columns"></a>Kolumny obliczane przez SQLite
+
+EF Core teraz obsługuje kolumny obliczane w bazach danych oprogramowania SQLite.
+
 ## <a name="preview-4"></a>Wersja zapoznawcza 4
 
 ### <a name="configure-database-precisionscale-in-model"></a>Konfiguruj precyzję i skalowanie bazy danych w modelu
 
 Precyzja i skala właściwości można teraz określić przy użyciu konstruktora modeli.
-Na przykład:
+Przykład:
 
 ```CSharp
 modelBuilder
@@ -42,7 +153,7 @@ Dokumentacja jest śledzona przez [#527](https://github.com/dotnet/EntityFramewo
 ### <a name="specify-sql-server-index-fill-factor"></a>Określ współczynnik wypełnienia indeksu SQL Server
 
 Współczynnik wypełniania można teraz określić podczas tworzenia indeksu na SQL Server.
-Na przykład:
+Przykład:
 
 ```CSharp
 modelBuilder
@@ -51,14 +162,12 @@ modelBuilder
     .HasFillFactor(90);
 ```
 
-Dokumentacja jest śledzona przez [#2378](https://github.com/dotnet/EntityFramework.Docs/issues/2378)problemu.
-
 ## <a name="preview-3"></a>Wersja zapoznawcza 3
 
 ### <a name="filtered-include"></a>Filtr obejmujący
 
 Metoda include obsługuje teraz filtrowanie uwzględnionych jednostek.
-Na przykład:
+Przykład:
 
 ```CSharp
 var blogs = context.Blogs
@@ -69,7 +178,7 @@ var blogs = context.Blogs
 To zapytanie będzie zwracać Blogi razem z poszczególnymi wpisami skojarzonymi, ale tylko wtedy, gdy tytuł wpisu zawiera "ser".
 
 Pomiń i zrób można także użyć, aby zmniejszyć liczbę uwzględnionych jednostek.
-Na przykład:
+Przykład:
  
 ```CSharp
 var blogs = context.Blogs
@@ -124,7 +233,7 @@ Może to spowodować, że wyjątki są trudne do wylogowania, gdy zostanie napot
 
 Korzystanie z programu `EnableDetailedErrors` spowoduje dodanie dodatkowych kontroli wartości null do zapytań, takich jak w przypadku małego obciążenia wydajności, te błędy są łatwiejsze do śledzenia z przyczyn głównych.  
 
-Na przykład:
+Przykład:
 ```CSharp
 protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     => optionsBuilder
@@ -138,7 +247,7 @@ Dokumentacja jest śledzona przez [#955](https://github.com/dotnet/EntityFramewo
 ### <a name="cosmos-partition-keys"></a>Klucze partycji Cosmos
 
 Klucz partycji, który ma być używany dla danego zapytania, można teraz określić w zapytaniu.
-Na przykład:
+Przykład:
 
 ```CSharp
 await context.Set<Customer>()
@@ -151,7 +260,7 @@ Dokumentacja jest śledzona przez [#2199](https://github.com/dotnet/EntityFramew
 ### <a name="support-for-the-sql-server-datalength-function"></a>Obsługa funkcji SQL Server DATALENGTH
 
 Dostęp do niego można uzyskać za pomocą nowej `EF.Functions.DataLength` metody.
-Na przykład:
+Przykład:
 ```CSharp
 var count = context.Orders.Count(c => 100 < EF.Functions.DataLength(c.OrderDate));
 ``` 
@@ -162,7 +271,7 @@ var count = context.Orders.Count(c => 100 < EF.Functions.DataLength(c.OrderDate)
 
 Atrybut języka C# może być teraz używany do określania pola zapasowego dla właściwości.
 Ten atrybut pozwala EF Core nadal pisać i odczytywać dane z pola zapasowego, tak jak zwykle, nawet jeśli nie można automatycznie znaleźć pola zapasowego.
-Na przykład:
+Przykład:
 
 ```CSharp
 public class Blog
@@ -236,7 +345,7 @@ Dodatkowa dokumentacja jest śledzona przez [#1331](https://github.com/dotnet/En
 ### <a name="use-a-c-attribute-to-indicate-that-an-entity-has-no-key"></a>Użyj atrybutu języka C#, aby wskazać, że jednostka nie ma klucza
 
 Typ jednostki można teraz skonfigurować jako bez klucza przy użyciu nowego elementu `KeylessAttribute` .
-Na przykład:
+Przykład:
 
 ```CSharp
 [Keyless]
@@ -295,7 +404,7 @@ Dokumentacja jest śledzona przez [#2018](https://github.com/dotnet/EntityFramew
 ### <a name="generation-of-check-constraints-for-enum-mappings"></a>Generowanie ograniczeń check dla mapowań wyliczenia
 
 Migracje EF Core 5,0 mogą teraz generować ograniczenia CHECK dla mapowań właściwości enum.
-Na przykład:
+Przykład:
 
 ```SQL
 MyEnumColumn VARCHAR(10) NOT NULL CHECK (MyEnumColumn IN ('Useful', 'Useless', 'Unknown'))
@@ -307,7 +416,7 @@ Dokumentacja jest śledzona przez [#2082](https://github.com/dotnet/EntityFramew
 
 Dodano nową `IsRelational` metodę oprócz istniejących `IsSqlServer` , `IsSqlite` i `IsInMemory` .
 Tej metody można użyć do sprawdzenia, czy DbContext używa dowolnego dostawcy relacyjnej bazy danych.
-Na przykład:
+Przykład:
 
 ```CSharp
 protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -343,7 +452,7 @@ Ponadto następujące funkcje SQL Server są teraz mapowane:
 * DateDiffWeek
 * DateFromParts
 
-Na przykład:
+Przykład:
 
 ```CSharp
 var count = context.Orders.Count(c => date > EF.Functions.DateFromParts(DateTime.Now.Year, 12, 25));
@@ -363,7 +472,7 @@ Dodatkowa dokumentacja jest śledzona przez [#2079](https://github.com/dotnet/En
 ### <a name="query-translation-for-reverse"></a>Tłumaczenie zapytania do tyłu
 
 Zapytania z użyciem `Reverse` są teraz tłumaczone.
-Na przykład:
+Przykład:
 
 ```CSharp
 context.Employees.OrderBy(e => e.EmployeeID).Reverse()
