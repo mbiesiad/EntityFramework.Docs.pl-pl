@@ -10,12 +10,12 @@ metadata:
   author: WadePickett
   ms.author: wpickett
   ms.date: 04/15/2020
-  ms.openlocfilehash: 54cbd0fcda19c4e2f35a3c3d4f350e3fecf3f597
-  ms.sourcegitcommit: 79e460f76b6664e1da5886d102bd97f651d2ffff
+  ms.openlocfilehash: 1411737453563ac5377dbda2804dd0bd058133a7
+  ms.sourcegitcommit: 92d54fe3702e0c92e198334da22bacb42e9842b1
   ms.translationtype: MT
   ms.contentlocale: pl-PL
-  ms.lasthandoff: 04/29/2020
-  ms.locfileid: "82538378"
+  ms.lasthandoff: 06/10/2020
+  ms.locfileid: "84664172"
 highlightedContent:
   items:
   - title: Entity Framework Core
@@ -94,6 +94,8 @@ additionalContent:
         text: Konfigurowanie klasy DbContext
       - url: core/miscellaneous/nullable-reference-types.md
         text: Typy referencyjne dopuszczające wartość null
+      - url: core/miscellaneous/collations-and-case-sensitivity.md
+        text: Sortowanie i rozróżnianie wielkości liter
     - title: Tworzenie modelu
       links:
       - url: core/modeling/index.md
