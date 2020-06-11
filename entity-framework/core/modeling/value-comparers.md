@@ -4,12 +4,12 @@ description: Używanie funkcji porównujących wartości do kontrolowania sposob
 author: ajcvickers
 ms.date: 03/20/2020
 uid: core/modeling/value-comparers
-ms.openlocfilehash: 9dfed7b7ef8163f4f5c94a0c81c510807c53c13d
-ms.sourcegitcommit: c3b8386071d64953ee68788ef9d951144881a6ab
+ms.openlocfilehash: 9e33bfb840606b746626daa1da7331904b495ab4
+ms.sourcegitcommit: 92d54fe3702e0c92e198334da22bacb42e9842b1
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 03/24/2020
-ms.locfileid: "80148272"
+ms.lasthandoff: 06/10/2020
+ms.locfileid: "84664120"
 ---
 # <a name="value-comparers"></a>Porównania wartości
 
@@ -94,7 +94,7 @@ Na przykład mapowanie właściwości zawierającej listę liczb:
 
 [!code-csharp[ListProperty](../../../samples/core/Modeling/ValueConversions/MappingListProperty.cs?name=ListProperty)]
 
-[Klasa`List<T>`](/dotnet/api/system.collections.generic.list-1?view=netstandard-2.1):
+[ `List<T>` Klasa](/dotnet/api/system.collections.generic.list-1?view=netstandard-2.1):
 * Ma równość odwołania; dwie listy zawierające te same wartości są traktowane jako różne.
 * Jest modyfikowalny; wartości na liście można dodawać i usuwać.
 
@@ -102,7 +102,7 @@ Typowa konwersja wartości we właściwości listy może konwertować listę do 
 
 [!code-csharp[ConfigureListProperty](../../../samples/core/Modeling/ValueConversions/MappingListProperty.cs?name=ConfigureListProperty)]
 
-Następnie wymaga ustawienia `ValueComparer<T>` we właściwości, aby wymusić EF Core użyć poprawnych porównań przy użyciu tej konwersji:
+Następnie wymaga ustawienia a `ValueComparer<T>` we właściwości, aby wymusić EF Core poprawne porównania z tą konwersją:
 
 [!code-csharp[ConfigureListPropertyComparer](../../../samples/core/Modeling/ValueConversions/MappingListProperty.cs?name=ConfigureListPropertyComparer)]
 
@@ -110,8 +110,8 @@ Następnie wymaga ustawienia `ValueComparer<T>` we właściwości, aby wymusić 
 > Interfejs API konstruktora modeli ("Fluent") służący do ustawiania funkcji porównującej wartości nie został jeszcze zaimplementowany.
 > Zamiast tego kod powyżej wywołuje SetValueComparer na niższym poziomie IMutableProperty uwidocznionym przez konstruktora jako "Metadata".
 
-Konstruktor `ValueComparer<T>` akceptuje trzy wyrażenia:
-* Wyrażenie do sprawdzania jakości
+`ValueComparer<T>`Konstruktor akceptuje trzy wyrażenia:
+* Wyrażenie do sprawdzania równości
 * Wyrażenie służące do generowania kodu skrótu
 * Wyrażenie służące do tworzenia migawek wartości  
 

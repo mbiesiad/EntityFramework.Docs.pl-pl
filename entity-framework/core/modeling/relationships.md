@@ -4,12 +4,12 @@ description: Jak skonfigurować relacje między typami jednostek podczas korzyst
 author: AndriySvyryd
 ms.date: 11/21/2019
 uid: core/modeling/relationships
-ms.openlocfilehash: 8d3df109f34c2a77305db1e2be2eea1694d7ad6b
-ms.sourcegitcommit: 59e3d5ce7dfb284457cf1c991091683b2d1afe9d
+ms.openlocfilehash: 3ed25b752970cf0f55d38f1ce5b8383f1c90edc3
+ms.sourcegitcommit: 92d54fe3702e0c92e198334da22bacb42e9842b1
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 05/20/2020
-ms.locfileid: "83672770"
+ms.lasthandoff: 06/10/2020
+ms.locfileid: "84664146"
 ---
 # <a name="relationships"></a>Relacje
 
@@ -152,7 +152,8 @@ Po utworzeniu właściwości nawigacji może być konieczne jej dalsze skonfigur
 
 [!code-csharp[Main](../../../samples/core/Modeling/FluentAPI/Relationships/NavigationConfiguration.cs?name=NavigationConfiguration&highlight=7-9)]
 
-[!NOTE] Tego wywołania nie można użyć do utworzenia właściwości nawigacji. Służy tylko do konfigurowania właściwości nawigacji, która została wcześniej utworzona przez zdefiniowanie relacji lub Konwencji.
+> [!NOTE]
+> Tego wywołania nie można użyć do utworzenia właściwości nawigacji. Służy tylko do konfigurowania właściwości nawigacji, która została wcześniej utworzona przez zdefiniowanie relacji lub Konwencji.
 
 ### <a name="foreign-key"></a>Klucz obcy
 

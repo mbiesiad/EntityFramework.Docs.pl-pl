@@ -4,12 +4,12 @@ author: ErikEJ
 ms.date: 04/11/2020
 ms.assetid: 14fffb6c-a687-4881-a094-af4a1359a296
 uid: core/extensions/index
-ms.openlocfilehash: 246cf687f2a087e9a9a569c875b27712ebe80c5c
-ms.sourcegitcommit: 79e460f76b6664e1da5886d102bd97f651d2ffff
+ms.openlocfilehash: 41bc403b586c9e67033d6db0dc4418510bc7b061
+ms.sourcegitcommit: 92d54fe3702e0c92e198334da22bacb42e9842b1
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 04/29/2020
-ms.locfileid: "82538332"
+ms.lasthandoff: 06/10/2020
+ms.locfileid: "84664185"
 ---
 # <a name="ef-core-tools--extensions"></a>Rozszerzenia narzędzi EF Core &
 
@@ -18,7 +18,7 @@ Te narzędzia i rozszerzenia zapewniają dodatkową funkcjonalność dla Entity 
 > [!IMPORTANT]  
 > Rozszerzenia są tworzone przez różne źródła i nie są obsługiwane w ramach projektu Entity Framework Core. Biorąc pod uwagę rozszerzenie innej firmy, pamiętaj o ocenie jego jakości, licencjonowania, zgodności, wsparcia itp., aby upewnić się, że spełnia Twoje wymagania. W szczególności rozszerzenie skompilowane dla starszej wersji EF Core może wymagać aktualizacji, zanim będzie działały z najnowszymi wersjami.
 
-## <a name="tools"></a>Narzędzia
+## <a name="tools"></a>narzędzia
 
 ### <a name="llblgen-pro"></a>LLBLGen Pro
 
@@ -58,10 +58,10 @@ CatFactory to aparat tworzenia szkieletów dla platformy .NET Core, który umoż
 
 ### <a name="loresofts-entity-framework-core-generator"></a>Generator Entity Framework Core LoreSoft
 
-Generator Entity Framework Core (EFG) to narzędzie interfejs wiersza polecenia platformy .NET Core, które może generować modele EF Core z istniejącej bazy danych, podobnie jak `dotnet ef dbcontext scaffold`, ale również zapewnia bezpieczną [regenerację](https://efg.loresoft.com/en/latest/regeneration/) kodu przez zastąpienie regionu lub przeanalizowanie plików mapowania. To narzędzie obsługuje generowanie modeli widoku, walidacji i kodu mapowania obiektów. Dla EF Core: 2.
+Generator Entity Framework Core (EFG) to narzędzie interfejs wiersza polecenia platformy .NET Core, które może generować modele EF Core z istniejącej bazy danych, podobnie jak `dotnet ef dbcontext scaffold` , ale również zapewnia bezpieczną [regenerację](https://efg.loresoft.com/en/latest/regeneration/) kodu przez zastąpienie regionu lub przeanalizowanie plików mapowania. To narzędzie obsługuje generowanie modeli widoku, walidacji i kodu mapowania obiektów. Dla EF Core: 2.
 
-[Dokumentacja samouczka](https://www.loresoft.com/Generate-ASP-NET-Web-API)
-[Documentation](https://efg.loresoft.com/en/latest/)
+[Samouczek](https://www.loresoft.com/Generate-ASP-NET-Web-API) 
+ [Dokumentacja](https://efg.loresoft.com/en/latest/)
 
 ## <a name="extensions"></a>Rozszerzenia
 
@@ -133,13 +133,13 @@ Implementacja obsługi danych czasowych. Dla EF Core: 2.
 
 ### <a name="efcoretemporaltable"></a>EfCoreTemporalTable
 
-Łatwe wykonywanie zapytań czasowych w ulubionej bazie danych przy użyciu wprowadzonych `AsTemporalAsOf(date)`metod `AsTemporalFrom(startDate, endDate)`rozszerzających `AsTemporalContained(startDate, endDate)`: `AsTemporalAll()`,, `AsTemporalBetween(startDate, endDate)`,. Dla EF Core: 3.
+Łatwe wykonywanie zapytań czasowych w ulubionej bazie danych przy użyciu wprowadzonych metod rozszerzających: `AsTemporalAll()` , `AsTemporalAsOf(date)` ,, `AsTemporalFrom(startDate, endDate)` `AsTemporalBetween(startDate, endDate)` `AsTemporalContained(startDate, endDate)` . Dla EF Core: 3.
 
 [Repozytorium GitHub](https://github.com/glautrou/EfCoreTemporalTable)
 
 ### <a name="efcoretimetraveler"></a>EFCore.TimeTraveler
 
-Zezwalaj na w pełni funkcjonalne zapytania Entity Framework Core w odniesieniu do [SQL Server historii](/sql/relational-databases/tables/temporal-table-usage-scenarios#point-in-time-analysis-time-travel) danych czasowych przy użyciu zdefiniowanego w EF Core kodu, jednostek i mapowań.  Poruszaj się po czasie, zawijając `using (TemporalQuery.AsOf(targetDateTime)) {...}`kod w. Dla EF Core: 3.
+Zezwalaj na w pełni funkcjonalne zapytania Entity Framework Core w odniesieniu do [SQL Server historii](/sql/relational-databases/tables/temporal-table-usage-scenarios#point-in-time-analysis-time-travel) danych czasowych przy użyciu zdefiniowanego w EF Core kodu, jednostek i mapowań.  Poruszaj się po czasie, zawijając kod w `using (TemporalQuery.AsOf(targetDateTime)) {...}` . Dla EF Core: 3.
 
 [Repozytorium GitHub](https://github.com/VantageSoftware/EFCore.TimeTraveler)
 
@@ -161,8 +161,8 @@ Pamięć podręczna zapytań o wysokiej wydajności. Dla EF Core: 2.
 
 Rozszerza kontekst DbContext z funkcjami takimi jak: Filter include, Audit, buforowanie, Future Query, Batch Delete, Batch Update i innych. Dla EF Core: 2, 3.
 
-[Website](https://entityframework-plus.net/)
-[Repozytorium GitHub](https://github.com/zzzprojects/EntityFramework-Plus) witryny sieci Web
+[Witryna sieci Web](https://entityframework-plus.net/) 
+ [Repozytorium GitHub](https://github.com/zzzprojects/EntityFramework-Plus)
 
 ### <a name="entity-framework-extensions"></a>Rozszerzenia Entity Framework
 
@@ -181,7 +181,7 @@ Dodano obsługę wywoływania metod rozszerzających w składniku LINQ lambda. D
 Technologia Integrated Language Query (LINQ) dla relacyjnych baz danych. Pozwala na używanie języka C# do pisania kwerend o jednoznacznie określonym typie. Dla EF Core: 3.
 
 - Pełna obsługa języka C# na potrzeby tworzenia zapytań: wiele instrukcji wewnątrz wyrażenia lambda, zmienne, funkcje itd.
-- Brak przerwy semantycznej z SQL. XLinq deklaruje instrukcje języka SQL `SELECT`( `FROM`takie `WHERE`jak,,) jako metody pierwszej klasy języka C#, łącząc znaną składnię z technologią IntelliSense, bezpieczeństwo typów i refaktoryzację.
+- Brak przerwy semantycznej z SQL. XLinq deklaruje instrukcje języka SQL (takie jak `SELECT` , `FROM` , `WHERE` ) jako metody pierwszej klasy języka C#, łącząc znaną składnię z technologią IntelliSense, bezpieczeństwo typów i refaktoryzację.
 
 W związku z tym, w wyniku tego, w programie SQL Server, "inna" Biblioteka klas uwidacznia interfejs API lokalnie, dosłownie *"język zintegrowany języka SQL"*.
 
@@ -216,3 +216,11 @@ Rozszerzenia LINQ do Entity Framework Core 3,1 do obsługi Microsoft SQL Server 
 Dodaje obsługę hierarchyid do dostawcy EF Core SQL Server. Dla EF Core: 3.
 
 [Repozytorium GitHub](https://github.com/efcore/EFCore.SqlServer.HierarchyId)
+
+### <a name="linq2dbentityframeworkcore"></a>linq2db. EntityFrameworkCore
+
+Alternatywny translator zapytań LINQ do wyrażeń SQL. Dla EF Core: 3.
+
+Obejmuje obsługę zaawansowanych funkcji SQL, takich jak cyklicznych, kopia zbiorcza, wskazówki tabeli, funkcje okienkowe, tabele tymczasowe oraz operacje tworzenia/aktualizowania/usuwania po stronie bazy danych.
+
+[Repozytorium GitHub](https://github.com/linq2db/linq2db.EntityFrameworkCore)
