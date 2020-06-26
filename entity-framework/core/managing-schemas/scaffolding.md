@@ -5,12 +5,12 @@ ms.author: bricelam
 ms.date: 11/13/2018
 ms.assetid: 6263EF7D-4989-42E6-BDEE-45DA770342FB
 uid: core/managing-schemas/scaffolding
-ms.openlocfilehash: cb20120154101a9b92b4bf2bc06d20b1dafe88c1
-ms.sourcegitcommit: 59e3d5ce7dfb284457cf1c991091683b2d1afe9d
+ms.openlocfilehash: 2422e7455dc4ef52f0a9d3bdaebfa02f62e6d50f
+ms.sourcegitcommit: ebfd3382fc583bc90f0da58e63d6e3382b30aa22
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 05/20/2020
-ms.locfileid: "83672973"
+ms.lasthandoff: 06/25/2020
+ms.locfileid: "85370603"
 ---
 # <a name="reverse-engineering"></a> Odtwarzanie
 
@@ -34,7 +34,7 @@ Sposób tworzenia cudzysłowów i ucieczki parametrów połączenia zależy od p
 dotnet ef dbcontext scaffold "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Chinook" Microsoft.EntityFrameworkCore.SqlServer
 ```
 
-### <a name="visual-studio"></a>[Visual Studio](#tab/vs)
+### <a name="visual-studio"></a>[Program Visual Studio](#tab/vs)
 
 ``` powershell
 Scaffold-DbContext 'Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Chinook' Microsoft.EntityFrameworkCore.SqlServer
@@ -71,7 +71,7 @@ Aby dołączyć wiele tabel, określ opcję wiele razy:
 dotnet ef dbcontext scaffold ... --table Artist --table Album
 ```
 
-### <a name="visual-studio"></a>[Visual Studio](#tab/vs)
+### <a name="visual-studio"></a>[Program Visual Studio](#tab/vs)
 
 `-Schemas`Opcja może być używana do dołączania każdej tabeli w schemacie, natomiast `-Tables` może być używana do dołączania określonych tabel.
 
@@ -85,11 +85,11 @@ Scaffold-DbContext ... -Tables Artist, Album
 
 ## <a name="preserving-names"></a>Zachowywanie nazw
 
-Nazwy tabel i kolumn są rozwiązywane w celu lepszego dopasowania do konwencji nazewnictwa platformy .NET dla typów i właściwości. Określenie `-UseDatabaseNames` przełącznika w przystawce PMC lub `--use-database-names` opcja w interfejsie wiersza polecenia spowoduje wyłączenie tego zachowania z zachowaniem oryginalnych nazw baz danych, jak to możliwe. Nieprawidłowe identyfikatory platformy .NET nadal będą stałe i są one zgodne z konwencjami nazewnictwa platformy .NET.
+Nazwy tabel i kolumn są rozwiązywane w celu lepszego dopasowania do konwencji nazewnictwa platformy .NET dla typów i właściwości. Określenie `-UseDatabaseNames` przełącznika w przystawce PMC lub `--use-database-names` opcji w interfejs wiersza polecenia platformy .NET Core spowoduje wyłączenie tego zachowania, które zachowuje pierwotne nazwy baz danych, tak jak to możliwe. Nieprawidłowe identyfikatory platformy .NET nadal będą stałe i są one zgodne z konwencjami nazewnictwa platformy .NET.
 
 ## <a name="fluent-api-or-data-annotations"></a>Interfejs API Fluent lub adnotacje danych
 
-Typy jednostek są domyślnie konfigurowane przy użyciu interfejsu API Fluent. Określ `-DataAnnotations` (PMC) lub `--data-annotations` (CLI), aby zamiast tego używać adnotacji danych, gdy jest to możliwe.
+Typy jednostek są domyślnie konfigurowane przy użyciu interfejsu API Fluent. Określ `-DataAnnotations` (PMC) lub `--data-annotations` (interfejs wiersza polecenia platformy .NET Core), aby zamiast tego używać adnotacji danych, gdy jest to możliwe.
 
 Na przykład korzystanie z interfejsu API Fluent spowoduje przetworzenie szkieletu:
 
@@ -109,7 +109,7 @@ public string Title { get; set; }
 
 ## <a name="dbcontext-name"></a>Nazwa kontekstu
 
-Nazwa klasy DbContext z szkieletem jest nazwą bazy danych domyślnie sufiksem z *kontekstem* . Aby określić inny sposób, użyj `-Context` w PMC i `--context` w interfejsie wiersza polecenia.
+Nazwa klasy DbContext z szkieletem jest nazwą bazy danych domyślnie sufiksem z *kontekstem* . Aby określić inny, użyj `-Context` w PMC i `--context` w interfejs wiersza polecenia platformy .NET Core.
 
 ## <a name="directories-and-namespaces"></a>Katalogi i przestrzenie nazw
 
@@ -129,7 +129,7 @@ Domyślnie przestrzeń nazw będzie główną przestrzenią nazw oraz nazwami ws
 dotnet ef dbcontext scaffold ... --namespace Your.Namespace --context-namespace Your.DbContext.Namespace
 ```
 
-### <a name="visual-studio"></a>[Visual Studio](#tab/vs)
+### <a name="visual-studio"></a>[Program Visual Studio](#tab/vs)
 
 Można określić katalog, w którym są używane szkieletowe klasy `-OutputDir` , i `-ContextDir` może służyć do tworzenia szkieletu klasy DbContext w oddzielnym katalogu z klas typu jednostki:
 

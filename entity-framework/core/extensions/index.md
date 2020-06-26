@@ -4,12 +4,12 @@ author: ErikEJ
 ms.date: 04/11/2020
 ms.assetid: 14fffb6c-a687-4881-a094-af4a1359a296
 uid: core/extensions/index
-ms.openlocfilehash: 41bc403b586c9e67033d6db0dc4418510bc7b061
-ms.sourcegitcommit: 92d54fe3702e0c92e198334da22bacb42e9842b1
+ms.openlocfilehash: 47a5601e996afab9c0aa0538a2a2b47f204f7753
+ms.sourcegitcommit: ebfd3382fc583bc90f0da58e63d6e3382b30aa22
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 06/10/2020
-ms.locfileid: "84664185"
+ms.lasthandoff: 06/25/2020
+ms.locfileid: "85370359"
 ---
 # <a name="ef-core-tools--extensions"></a>Rozszerzenia narzędzi EF Core &
 
@@ -18,7 +18,7 @@ Te narzędzia i rozszerzenia zapewniają dodatkową funkcjonalność dla Entity 
 > [!IMPORTANT]  
 > Rozszerzenia są tworzone przez różne źródła i nie są obsługiwane w ramach projektu Entity Framework Core. Biorąc pod uwagę rozszerzenie innej firmy, pamiętaj o ocenie jego jakości, licencjonowania, zgodności, wsparcia itp., aby upewnić się, że spełnia Twoje wymagania. W szczególności rozszerzenie skompilowane dla starszej wersji EF Core może wymagać aktualizacji, zanim będzie działały z najnowszymi wersjami.
 
-## <a name="tools"></a>narzędzia
+## <a name="tools"></a>Narzędzia
 
 ### <a name="llblgen-pro"></a>LLBLGen Pro
 
@@ -28,7 +28,7 @@ LLBLGen Pro to rozwiązanie do modelowania jednostek z obsługą Entity Framewor
 
 ### <a name="devart-entity-developer"></a>Devart Entity Developer
 
-Deweloper jednostki jest zaawansowanym projektantem ORM dla ADO.NET Entity Framework, NHibernate, LinqConnect, Telerik Data Access i LINQ to SQL. Obsługuje ona projektowanie EF Core modeli wizualnie, przy użyciu pierwszej metody modelu lub pierwszej podejścia do bazy danych, a także generowania kodu w języku C# lub Visual Basic. Dla EF Core: 2.
+Deweloper jednostki jest zaawansowanym projektantem ORM dla ADO.NET Entity Framework, NHibernate, LinqConnect, Telerik Data Access i LINQ to SQL. Obsługuje ona projektowanie EF Core modeli wizualnie, przy użyciu pierwszej metody modelu lub pierwszej podejścia do bazy danych, a także generowania kodu w języku C# lub Visual Basic. Dla EF Core: 1, 2, 3, 5.
 
 [witryna sieci web](https://www.devart.com/entitydeveloper/)
 

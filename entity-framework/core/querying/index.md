@@ -1,24 +1,24 @@
 ---
-title: Wyszukiwanie danych — EF Core
+title: Wykonywanie zapytania dotyczącego danych — EF Core
 author: smitpatel
 ms.date: 10/03/2019
 ms.assetid: 7c65ec3e-46c8-48f8-8232-9e31f96c277b
 uid: core/querying/index
-ms.openlocfilehash: 0e1e50d1a3f647d65301552d0a447f9fcae81438
-ms.sourcegitcommit: 9b562663679854c37c05fca13d93e180213fb4aa
+ms.openlocfilehash: 82f8a2e8e78e9d82f46f2fc6ced6dd9141329a22
+ms.sourcegitcommit: ebfd3382fc583bc90f0da58e63d6e3382b30aa22
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 04/07/2020
-ms.locfileid: "78417688"
+ms.lasthandoff: 06/25/2020
+ms.locfileid: "85370344"
 ---
 # <a name="querying-data"></a>Wykonanie zapytania o dane
 
-Entity Framework Core używa języka zintegrowane zapytanie (LINQ) do kwerendy danych z bazy danych. LINQ umożliwia używanie języka C# (lub wybranego języka .NET) do pisania silnie wpisanych zapytań. Używa pochodnego kontekstu i klasy jednostek do odwoływania się do obiektów bazy danych. EF Core przekazuje reprezentację kwerendy LINQ do dostawcy bazy danych. Dostawcy bazy danych z kolei tłumaczą go na język kwerend specyficznych dla bazy danych (na przykład SQL dla relacyjnej bazy danych).
+Entity Framework Core używa programu Language Integrated Query (LINQ) do wykonywania zapytań dotyczących danych z bazy danych. LINQ umożliwia pisanie kwerend o jednoznacznie określonym typie w języku C# (lub w języku .NET). Używa ona kontekstów pochodnych i klas jednostek do odwoływania się do obiektów bazy danych. EF Core przekazuje reprezentację zapytania LINQ do dostawcy bazy danych. Dostawcy bazy danych z kolei przekładają ją na język zapytań specyficznych dla bazy danych (na przykład SQL dla relacyjnej bazy danych).
 
 > [!TIP]
-> Możesz wyświetlić [ten](https://github.com/dotnet/EntityFramework.Docs/tree/master/samples/core/Querying) przykład artykułu na GitHub.
+> [Przykład](https://github.com/dotnet/EntityFramework.Docs/tree/master/samples/core/Querying) tego artykułu można wyświetlić w witrynie GitHub.
 
-Poniższe fragmenty kodu pokazują kilka przykładów, jak osiągnąć typowe zadania za pomocą programu Entity Framework Core.
+Poniższe fragmenty kodu zawierają kilka przykładów, w których można wykonać typowe zadania z Entity Framework Core.
 
 ## <a name="loading-all-data"></a>Ładowanie wszystkich danych
 
@@ -35,4 +35,4 @@ Poniższe fragmenty kodu pokazują kilka przykładów, jak osiągnąć typowe za
 ## <a name="further-readings"></a>Dalsze odczyty
 
 - Dowiedz się więcej o [wyrażeniach zapytań LINQ](/dotnet/csharp/programming-guide/concepts/linq/basic-linq-query-operations)
-- Aby uzyskać bardziej szczegółowe informacje na temat sposobu przetwarzania kwerendy w ef core, zobacz [Jak działa kwerenda](xref:core/querying/how-query-works).
+- Aby uzyskać bardziej szczegółowe informacje na temat przetwarzania zapytania w EF Core, zobacz [jak działają zapytania](xref:core/querying/how-query-works).

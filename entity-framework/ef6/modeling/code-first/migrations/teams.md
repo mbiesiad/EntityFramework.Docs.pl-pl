@@ -3,12 +3,12 @@ title: Migracje Code First w środowiskach zespołów — EF6
 author: divega
 ms.date: 10/23/2016
 ms.assetid: 4c2d9a95-de6f-4e97-9738-c1f8043eff69
-ms.openlocfilehash: 46c22c997b8db53bb381d0b528c65733f1766849
-ms.sourcegitcommit: 387cbd8109c0fc5ce6bdc85d0dec1aed72ad4c33
+ms.openlocfilehash: 7ab66a8ec29b60bb2e0102fbca5745d352b07325
+ms.sourcegitcommit: ebfd3382fc583bc90f0da58e63d6e3382b30aa22
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 04/23/2020
-ms.locfileid: "82103168"
+ms.lasthandoff: 06/25/2020
+ms.locfileid: "85370412"
 ---
 # <a name="code-first-migrations-in-team-environments"></a>Migracje Code First w środowiskach zespołu
 > [!NOTE]
@@ -24,7 +24,7 @@ Zanim Dig się na zarządzanie scalanymi migracjami wygenerowanymi przez wielu d
 
 ### <a name="each-team-member-should-have-a-local-development-database"></a>Każdy członek zespołu powinien mieć lokalną bazę danych programistycznych
 
-Migracja korzysta ** \_ \_** z tabeli MigrationsHistory do przechowywania migracji, które zostały zastosowane do bazy danych programu. Jeśli masz wielu deweloperów generujących różne migracje przy próbie docelowej tej samej bazy danych (i w ** \_ \_** ten sposób udostępnianie tabeli MigrationsHistory), migracje są bardzo mylone.
+Migracja korzysta z tabeli ** \_ \_ MigrationsHistory** do przechowywania migracji, które zostały zastosowane do bazy danych programu. Jeśli masz wielu deweloperów generujących różne migracje przy próbie docelowej tej samej bazy danych (i w ten sposób udostępnianie tabeli ** \_ \_ MigrationsHistory** ), migracje są bardzo mylone.
 
 Oczywiście, jeśli masz członków zespołu, którzy nie generują migracji, nie ma żadnego problemu, aby udostępnić centralną bazę danych programistycznych.
 
@@ -98,22 +98,22 @@ Będziemy śledzić model EF i migracje przez wiele zmian. W przypadku punktu po
 
 ![Punkt początkowy](~/ef6/media/startingpoint.png)
 
-Deweloperzy \#1 i Developer \#2 wprowadzają teraz pewne zmiany w modelu EF w ich lokalnej bazie kodu. Deweloper \#1 dodaje do **blogu** Właściwość **oceny** — i generuje migrację **addrating** , aby zastosować zmiany do bazy danych. Deweloper \#2 dodaje właściwość **czytelnicy** do **blogu** — i generuje odpowiednie migracje **addreader** . Obaj deweloperzy uruchamiają **aktualizację bazy danych**, aby zastosować zmiany do ich lokalnych baz danych, a następnie kontynuować opracowywanie aplikacji.
+Deweloperzy \# 1 i Developer \# 2 wprowadzają teraz pewne zmiany w modelu EF w ich lokalnej bazie kodu. Deweloper \# 1 dodaje do **blogu** Właściwość **oceny** — i generuje migrację **addrating** , aby zastosować zmiany do bazy danych. Deweloper \# 2 dodaje właściwość **czytelnicy** do **blogu** — i generuje odpowiednie migracje **addreader** . Obaj deweloperzy uruchamiają **aktualizację bazy danych**, aby zastosować zmiany do ich lokalnych baz danych, a następnie kontynuować opracowywanie aplikacji.
 
 > [!NOTE]
-> Migracje są poprzedzone sygnaturą czasową, więc nasza ilustracja przedstawia, że migracja addreader z \#dewelopera 2 jest dostępna po migracji addrating \#z dewelopera 1. Niezależnie od \#tego, \#czy deweloper 1 lub 2 wygenerował proces migracji, nie ma żadnego wpływu na problemy związane z pracą w zespole ani procesu scalania, który przeprowadzimy w następnej sekcji.
+> Migracje są poprzedzone sygnaturą czasową, więc nasza ilustracja przedstawia, że migracja addreader z dewelopera \# 2 jest dostępna po migracji addrating z dewelopera \# 1. Niezależnie od tego, czy deweloper \# 1 lub \# 2 wygenerował proces migracji, nie ma żadnego wpływu na problemy związane z pracą w zespole ani procesu scalania, który przeprowadzimy w następnej sekcji.
 
 ![Zmiany lokalne](~/ef6/media/localchanges.png)
 
-Jest to cieszymy dzień dla deweloperów \#1, gdy nastąpiła najpierw przesłanie zmian. Ponieważ nikt inny nie zaewidencjonuje się, ponieważ synchronizuje swoje repozytorium, może po prostu przesłać zmiany bez wykonywania scalania.
+Jest to cieszymy dzień dla deweloperów \# 1, gdy nastąpiła najpierw przesłanie zmian. Ponieważ nikt inny nie zaewidencjonuje się, ponieważ synchronizuje swoje repozytorium, może po prostu przesłać zmiany bez wykonywania scalania.
 
-![Submit](~/ef6/media/submit.png)
+![Prześlij](~/ef6/media/submit.png)
 
-Teraz czas na przesłanie dewelopera \#2. Nie cieszymy. Ponieważ ktoś inny przesłał zmiany od czasu ich synchronizacji, będzie musiał ściągnąć zmiany i scalić. System kontroli źródła prawdopodobnie będzie mógł automatycznie scalić zmiany na poziomie kodu, ponieważ są one bardzo proste. Stan repozytorium lokalnego dewelopera \#2 po synchronizacji przedstawiono na poniższej ilustracji. 
+Teraz czas na \# przesłanie dewelopera 2. Nie cieszymy. Ponieważ ktoś inny przesłał zmiany od czasu ich synchronizacji, będzie musiał ściągnąć zmiany i scalić. System kontroli źródła prawdopodobnie będzie mógł automatycznie scalić zmiany na poziomie kodu, ponieważ są one bardzo proste. Stan \# repozytorium lokalnego dewelopera 2 po synchronizacji przedstawiono na poniższej ilustracji. 
 
 ![Ściąganie](~/ef6/media/pull.png)
 
-Na tym etapie deweloper \#2 może uruchomić program **Update-Database** , który wykryje nową migrację **addrating** (która nie została zastosowana do bazy danych dewelopera \#2) i zastosuje ją. Teraz kolumna **Rating** zostanie dodana do tabeli **Blogi** , a baza danych jest zsynchronizowana z modelem.
+Na tym etapie deweloper \# 2 może uruchomić program **Update-Database** , który wykryje nową migrację **addrating** (która nie została zastosowana do \# bazy danych dewelopera 2) i zastosuje ją. Teraz kolumna **Rating** zostanie dodana do tabeli **Blogi** , a baza danych jest zsynchronizowana z modelem.
 
 Istnieje kilka problemów, chociaż:
 
@@ -133,7 +133,7 @@ Dostępne są dwie opcje, najłatwiej jest wygenerować pustą migrację, która
 
 W tej opcji wygenerujemy pustą migrację wyłącznie na potrzeby upewnienia się, że w ramach najnowszej migracji Zapisano poprawną migawkę modelu.
 
-Tej opcji można użyć niezależnie od tego, kto wygenerował ostatnią migrację. W przykładzie, który został uruchomiony przez dewelopera \#2, zajmiemy się scalaniem i wystąpiły one w celu wygenerowania ostatniej migracji. Jednak te same kroki mogą być używane, jeśli \#deweloper 1 wygenerował ostatnią migrację. Te kroki mają zastosowanie również w przypadku istnienia wielu migracji, w celu ich prostego przeprowadzenia.
+Tej opcji można użyć niezależnie od tego, kto wygenerował ostatnią migrację. W przykładzie, który został uruchomiony przez dewelopera \# 2, zajmiemy się scalaniem i wystąpiły one w celu wygenerowania ostatniej migracji. Jednak te same kroki mogą być używane, jeśli deweloper \# 1 wygenerował ostatnią migrację. Te kroki mają zastosowanie również w przypadku istnienia wielu migracji, w celu ich prostego przeprowadzenia.
 
 Następujący proces może służyć do tego podejścia, od momentu wprowadzenia zmian, które muszą zostać zsynchronizowane z kontroli źródła.
 
@@ -141,11 +141,11 @@ Następujący proces może służyć do tego podejścia, od momentu wprowadzenia
 2.  Synchronizuj z kontrolą źródła.
 3.  Uruchom opcję **Update-Database** , aby zastosować nowe migracje, które zostały zaewidencjonowane przez innych deweloperów.
     **_Uwaga:_** *Jeśli nie otrzymasz żadnych ostrzeżeń z polecenia Update-Database, nie było żadnych nowych migracji od innych deweloperów i nie ma potrzeby wykonywania dalszych scalania.*
-4.  Uruchom polecenie **Add- &lt;Migration\_wybierz\_nazwę&gt; – IgnoreChanges** (na przykład polecenie **Add-Migration Merge – IgnoreChanges**). Spowoduje to wygenerowanie migracji ze wszystkimi metadanymi (łącznie z migawką bieżącego modelu), ale zignoruje wszelkie zmiany, które wykryje podczas porównywania bieżącego modelu z migawką w ostatniej migracji (co oznacza, że można uzyskać pustą metodę w **górę** i **w dół** ).
+4.  Uruchom polecenie **Add- &lt; Migration \_ Wybierz \_ nazwę &gt; – IgnoreChanges** (na przykład polecenie **Add-Migration Merge – IgnoreChanges**). Spowoduje to wygenerowanie migracji ze wszystkimi metadanymi (łącznie z migawką bieżącego modelu), ale zignoruje wszelkie zmiany, które wykryje podczas porównywania bieżącego modelu z migawką w ostatniej migracji (co oznacza, że można uzyskać pustą metodę w **górę** i **w dół** ).
 5.  Uruchom **aktualizację-Database** , aby ponownie zastosować najnowszą migrację ze zaktualizowanymi metadanymi.
 6.  Kontynuuj opracowywanie lub Prześlij do kontroli źródła (po uruchomieniu testów jednostkowych kursu).
 
-Poniżej znajduje się stan lokalnej bazy \#kodu dewelopera 2 po użyciu tego podejścia.
+Poniżej znajduje się stan \# lokalnej bazy kodu dewelopera 2 po użyciu tego podejścia.
 
 ![Scalanie migracji](~/ef6/media/mergemigration.png)
 
@@ -163,15 +163,15 @@ Następujący proces może służyć do tego podejścia, od momentu wprowadzenia
 2.  Synchronizuj z kontrolą źródła.
 3.  Uruchom opcję **Update-Database** , aby zastosować nowe migracje, które zostały zaewidencjonowane przez innych deweloperów.
     **_Uwaga:_** *Jeśli nie otrzymasz żadnych ostrzeżeń z polecenia Update-Database, nie było żadnych nowych migracji od innych deweloperów i nie ma potrzeby wykonywania dalszych scalania.*
-4.  Uruchom **Update-Database – TargetMigration &lt;sekundę\_Ostatnia\_migracja&gt; ** (w przykładzie poniżej zostałaby to **Aktualizacja-Database – TargetMigration addrating**). Powoduje to, że baza danych jest przywracana do stanu drugiej ostatniej migracji — w praktyce "cofnięto stosowanie" ostatniej migracji z bazy danych.
-    **_Uwaga:_** *ten krok jest wymagany, aby można było bezpiecznie edytować metadane migracji, ponieważ metadane są również przechowywane w \_ \_MigrationsHistoryTable bazy danych. Dlatego należy używać tej opcji tylko wtedy, gdy Ostatnia migracja jest tylko w lokalnej bazie kodu. Jeśli podczas ostatniej zastosowanej migracji istnieją inne bazy danych, należy również ponownie je wycofać i zastosować ostatniej migracji w celu zaktualizowania metadanych.* 
-5.  Uruchom **pełną &lt;\_nazwę\_migracji z uwzględnieniem\_sygnatury czasowej\_\_ostatniej\_migracji** &gt; (w przykładzie, w którym został on wykonany, będzie coś takiego jak **Add\_-Migration 201311062215252 addreader**).
+4.  Uruchom **Update-Database – TargetMigration &lt; sekundę \_ Ostatnia \_ migracja &gt; ** (w przykładzie poniżej zostałaby to **Aktualizacja-Database – TargetMigration addrating**). Spowoduje to przywrócenie bazy danych z powrotem do stanu drugiej ostatniej migracji — w praktyce "cofnięto stosowanie" ostatniej migracji z bazy danych.
+    **_Uwaga:_** *ten krok jest wymagany, aby można było bezpiecznie edytować metadane migracji, ponieważ metadane są również przechowywane w \_ \_ MigrationsHistoryTable bazy danych. Dlatego należy używać tej opcji tylko wtedy, gdy Ostatnia migracja jest tylko w lokalnej bazie kodu. Jeśli podczas ostatniej zastosowanej migracji istnieją inne bazy danych, należy również ponownie je wycofać i zastosować ostatniej migracji w celu zaktualizowania metadanych.* 
+5.  Uruchom ** &lt; pełną nazwę migracji z \_ \_ uwzględnieniem \_ sygnatury czasowej \_ \_ ostatniej \_ migracji** &gt; (w przykładzie, w którym został on wykonany, będzie coś takiego jak **Add-Migration 201311062215252 \_ addreader**).
     **_Uwaga:_** należy *dołączyć sygnaturę czasową, aby migracja wiedziała, że chcesz edytować istniejącą migrację, a nie utworzyć szkieletu nowej.*
-    Spowoduje to zaktualizowanie metadanych ostatniej migracji w celu dopasowania do bieżącego modelu. Po zakończeniu wykonywania polecenia otrzymasz następujące ostrzeżenie, ale to dokładnie to, czego potrzebujesz. "*Został utworzony ponowny szkielet" tylko kod\_projektanta dla migracji "201311062215252 addreader". Aby przeprowadzić ponowną próbę przetworzenia szkieletu całej migracji, użyj parametru-Force.*
+    Spowoduje to zaktualizowanie metadanych ostatniej migracji w celu dopasowania do bieżącego modelu. Po zakończeniu wykonywania polecenia otrzymasz następujące ostrzeżenie, ale to dokładnie to, czego potrzebujesz. "*Został utworzony ponowny szkielet" tylko kod projektanta dla migracji "201311062215252 \_ addreader". Aby przeprowadzić ponowną próbę przetworzenia szkieletu całej migracji, użyj parametru-Force.*
 6.  Uruchom **aktualizację-Database** , aby ponownie zastosować najnowszą migrację ze zaktualizowanymi metadanymi.
 7.  Kontynuuj opracowywanie lub Prześlij do kontroli źródła (po uruchomieniu testów jednostkowych kursu).
 
-Poniżej znajduje się stan lokalnej bazy \#kodu dewelopera 2 po użyciu tego podejścia.
+Poniżej znajduje się stan \# lokalnej bazy kodu dewelopera 2 po użyciu tego podejścia.
 
 ![Zaktualizowane metadane](~/ef6/media/updatedmetadata.png)
 

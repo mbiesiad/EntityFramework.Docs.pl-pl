@@ -3,12 +3,12 @@ title: Filtry zapytania globalnego — EF Core
 author: anpete
 ms.date: 11/03/2017
 uid: core/querying/filters
-ms.openlocfilehash: f6c59bcbab31edcbed22079a1320c060ce08c6f7
-ms.sourcegitcommit: 92d54fe3702e0c92e198334da22bacb42e9842b1
+ms.openlocfilehash: 233289b0c50e15f4555b342bc654211ce04c24d3
+ms.sourcegitcommit: ebfd3382fc583bc90f0da58e63d6e3382b30aa22
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 06/10/2020
-ms.locfileid: "84664133"
+ms.lasthandoff: 06/25/2020
+ms.locfileid: "85370464"
 ---
 # <a name="global-query-filters"></a>Filtry zapytań globalnych
 
@@ -52,7 +52,7 @@ Podczas definiowania filtrów zapytania globalnego można używać nawigacji. S�
 > [!NOTE]
 > Obecnie EF Core nie wykrywa cykli w definicjach filtrów globalnych, dlatego należy zachować ostrożność podczas definiowania ich. Jeśli jest określony nieprawidłowo, może to spowodować nieskończone pętle podczas translacji zapytań.
 
-## <a name="accessing-entity-with-query-filter-using-reqiured-navigation"></a>Uzyskiwanie dostępu do jednostki z filtrem zapytania przy użyciu nawigacji reqiured
+## <a name="accessing-entity-with-query-filter-using-required-navigation"></a>Uzyskiwanie dostępu do jednostki z filtrem zapytania przy użyciu wymaganej nawigacji
 
 > [!CAUTION]
 > Użycie wymaganej nawigacji do jednostki, która ma zdefiniowany filtr zapytania globalnego może prowadzić do nieoczekiwanych wyników. 

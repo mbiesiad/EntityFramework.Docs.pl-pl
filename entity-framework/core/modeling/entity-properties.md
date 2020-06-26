@@ -1,16 +1,16 @@
 ---
 title: Właściwości jednostki — EF Core
 description: Jak skonfigurować i zmapować właściwości jednostki przy użyciu Entity Framework Core
-author: roji
-ms.date: 12/10/2019
+author: lajones
+ms.date: 05/27/2020
 ms.assetid: e9dff604-3469-4a05-8f9e-18ac281d82a9
 uid: core/modeling/entity-properties
-ms.openlocfilehash: e4a1867a90df1fb277e7dd44b93d6c2d47895030
-ms.sourcegitcommit: 92d54fe3702e0c92e198334da22bacb42e9842b1
+ms.openlocfilehash: fcf3b0f8480fde2f3ba6b5fd601db115f1d246b8
+ms.sourcegitcommit: ebfd3382fc583bc90f0da58e63d6e3382b30aa22
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 06/10/2020
-ms.locfileid: "84664159"
+ms.lasthandoff: 06/25/2020
+ms.locfileid: "85370516"
 ---
 # <a name="entity-properties"></a>Właściwości jednostki
 
@@ -85,6 +85,26 @@ W poniższym przykładzie skonfigurowanie maksymalnej długości 500 spowoduje u
 
 ***
 
+### <a name="precision-and-scale"></a>Precyzja i skala
+
+Począwszy od EFCore 5,0, można użyć interfejsu API Fluent, aby skonfigurować precyzję i skalowanie. Informuje dostawcę bazy danych o ile miejsca do magazynowania jest potrzebnych dla danej kolumny. Ma zastosowanie tylko do typów danych, w których dostawca umożliwia precyzję i skalowalność — zwykle po prostu `decimal` i `DateTime` .
+
+Dla `decimal` Właściwości precyzja określa maksymalną liczbę cyfr wymaganą do wyrażenia każdej wartości, która będzie zawierać kolumna, i skala definiuje maksymalną wymaganą liczbę miejsc dziesiętnych. Dla `DateTime` Właściwości precyzja określa maksymalną liczbę cyfr wymaganą do wyrażania ułamków sekund, a skala nie jest używana.
+
+> [!NOTE]
+> Entity Framework nie sprawdza poprawności precyzji ani skali przed przekazaniem danych do dostawcy. Jest on do dostawcy lub magazynu danych do zweryfikowania, zgodnie z potrzebami. Na przykład podczas określania wartości docelowej SQL Server kolumna typu danych nie `datetime` pozwala na ustawienie precyzji, natomiast `datetime2` jeden z nich może mieć dokładność z zakresu od 0 do 7 włącznie.
+
+W poniższym przykładzie skonfigurowanie właściwości tak, `Score` aby miało precyzję 14 i skalę 2, spowoduje utworzenie kolumny typu `decimal(14,2)` na SQL Server i skonfigurowanie właściwości tak, `LastUpdated` aby miała dokładność 3 spowoduje, że kolumna typu `datetime2(3)` :
+
+#### <a name="fluent-api"></a>[Interfejs API Fluent](#tab/fluent-api)
+
+[!code-csharp[Main](../../../samples/core/Modeling/FluentAPI/PrecisionAndScale.cs?name=PrecisionAndScale&highlight=3-9)]
+
+> [!NOTE]
+> Skalowanie nigdy nie jest zdefiniowane bez wcześniejszego zdefiniowania precyzji, więc interfejs API Fluent służący do definiowania skali `HasPrecision(precision, scale)` .
+
+***
+
 ## <a name="required-and-optional-properties"></a>Właściwości wymagane i opcjonalne
 
 Właściwość jest uważana za opcjonalną, jeśli jest poprawna, aby mogła ją zawierać `null` . Jeśli `null` nie jest prawidłową wartością do przypisania do właściwości, zostanie ona uznana za właściwość wymaganą. Podczas mapowania na schemat relacyjnej bazy danych, wymagane właściwości są tworzone jako kolumny niedopuszczające wartości null, a właściwości opcjonalne są tworzone jako kolumny dopuszczające wartości null.
@@ -142,4 +162,4 @@ Sortowanie można definiować w kolumnach tekstowych, określając, w jaki spos�
 
 Jeśli wszystkie kolumny w bazie danych muszą używać określonego sortowania, zdefiniuj sortowanie na poziomie bazy danych.
 
-Ogólne informacje na temat obsługi sortowania EF Core można znaleźć na [stronie dokumentacji sortowania](xref:core/miscellaneous/collations-and-case-sensitivity.md).
+Ogólne informacje na temat obsługi sortowania EF Core można znaleźć na [stronie dokumentacji sortowania](xref:core/miscellaneous/collations-and-case-sensitivity).

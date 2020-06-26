@@ -5,12 +5,12 @@ ms.author: bricelam
 ms.date: 11/01/2018
 ms.assetid: 2BDE29FC-4161-41A0-841E-69F51CCD9341
 uid: core/modeling/spatial
-ms.openlocfilehash: 5b45f83ca7f02665f52ccfe16b5af506a6046a62
-ms.sourcegitcommit: cc0ff36e46e9ed3527638f7208000e8521faef2e
+ms.openlocfilehash: 2222df84be7bfde3f252766bef1cfab39b476efa
+ms.sourcegitcommit: ebfd3382fc583bc90f0da58e63d6e3382b30aa22
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 03/06/2020
-ms.locfileid: "78417406"
+ms.lasthandoff: 06/25/2020
+ms.locfileid: "85370451"
 ---
 # <a name="spatial-data"></a>Dane przestrzenne
 
@@ -19,20 +19,20 @@ ms.locfileid: "78417406"
 
 Dane przestrzenne reprezentują lokalizację fizyczną i kształt obiektów. Wiele baz danych zapewnia obsługę tego typu danych, dzięki czemu można je indeksować i badać wraz z innymi danymi. Typowe scenariusze obejmują zapytania dotyczące obiektów w danej odległości od lokalizacji lub wybierając obiekt, którego obramowanie zawiera daną lokalizację. EF Core obsługuje mapowanie do typów danych przestrzennych przy użyciu biblioteki przestrzennej [NetTopologySuite](https://github.com/NetTopologySuite/NetTopologySuite) .
 
-## <a name="installing"></a>Instalowanie programu
+## <a name="installing"></a>Instalowanie
 
 Aby można było używać danych przestrzennych z EF Core, należy zainstalować odpowiedni pomocniczy pakiet NuGet. Który pakiet należy zainstalować zależy od dostawcy, którego używasz.
 
 Dostawca EF Core                        | Przestrzenny pakiet NuGet
 --------------------------------------- | ---------------------
-Microsoft.EntityFrameworkCore.SqlServer | [Microsoft. EntityFrameworkCore. SqlServer. NetTopologySuite](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite)
-Microsoft.EntityFrameworkCore.Sqlite    | [Microsoft. EntityFrameworkCore. sqlite. NetTopologySuite](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Sqlite.NetTopologySuite)
-Microsoft.EntityFrameworkCore.InMemory  | [NetTopologySuite](https://www.nuget.org/packages/NetTopologySuite)
-Npgsql.EntityFrameworkCore.PostgreSQL   | [Npgsql. EntityFrameworkCore. PostgreSQL. NetTopologySuite](https://www.nuget.org/packages/Npgsql.EntityFrameworkCore.PostgreSQL.NetTopologySuite)
+Microsoft. EntityFrameworkCore. SqlServer | [Microsoft. EntityFrameworkCore. SqlServer. NetTopologySuite](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite)
+Microsoft. EntityFrameworkCore. sqlite    | [Microsoft. EntityFrameworkCore. sqlite. NetTopologySuite](https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Sqlite.NetTopologySuite)
+Microsoft. EntityFrameworkCore. inMemory  | [NetTopologySuite](https://www.nuget.org/packages/NetTopologySuite)
+Npgsql. EntityFrameworkCore. PostgreSQL   | [Npgsql. EntityFrameworkCore. PostgreSQL. NetTopologySuite](https://www.nuget.org/packages/Npgsql.EntityFrameworkCore.PostgreSQL.NetTopologySuite)
 
 ## <a name="reverse-engineering"></a>Odwrócenie inżynierii
 
-Przestrzenne pakiety NuGet umożliwiają również [Tworzenie modeli odtwarzania](../managing-schemas/scaffolding.md) z właściwościami przestrzennymi, ale należy zainstalować pakiet ***przed*** uruchomieniem `Scaffold-DbContext` lub `dotnet ef dbcontext scaffold`. W przeciwnym razie otrzymasz ostrzeżenia dotyczące nieznajdowania mapowań typów dla kolumn, a kolumny zostaną pominięte.
+Przestrzenne pakiety NuGet umożliwiają również [Tworzenie modeli odtwarzania](../managing-schemas/scaffolding.md) z właściwościami przestrzennymi, ale należy zainstalować pakiet ***przed*** uruchomieniem `Scaffold-DbContext` lub `dotnet ef dbcontext scaffold` . W przeciwnym razie otrzymasz ostrzeżenia dotyczące nieznajdowania mapowań typów dla kolumn, a kolumny zostaną pominięte.
 
 ## <a name="nettopologysuite-nts"></a>NetTopologySuite (NKTY przerwania)
 
@@ -46,14 +46,14 @@ optionsBuilder.UseSqlServer(
     x => x.UseNetTopologySuite());
 ```
 
-Istnieje kilka typów danych przestrzennych. Używany typ zależy od typów kształtów, które mają być dozwolone. Poniżej znajduje się hierarchia typów NKTY przerwania, których można użyć do właściwości w modelu. Znajdują się one w przestrzeni nazw `NetTopologySuite.Geometries`.
+Istnieje kilka typów danych przestrzennych. Używany typ zależy od typów kształtów, które mają być dozwolone. Poniżej znajduje się hierarchia typów NKTY przerwania, których można użyć do właściwości w modelu. Znajdują się one w `NetTopologySuite.Geometries` przestrzeni nazw.
 
 * Geometrii
   * Moment
   * LineString
-  * Tworząc
+  * Wielokąt
   * GeometryCollection
-    * MultiPoint
+    * Usług
     * MultiLineString
     * MultiPolygon
 
@@ -89,11 +89,11 @@ class Country
 
 ### <a name="creating-values"></a>Tworzenie wartości
 
-Można użyć konstruktorów do tworzenia obiektów geometrycznych; jednak NKTY przerwania zaleca się użycie fabryki geometrycznej. Pozwala to określić domyślny SRID (System referencyjny przestrzennej używany przez współrzędne) i zapewnia kontrolę nad bardziej zaawansowanymi elementami, takimi jak model precyzji (używany podczas obliczeń) i sekwencją współrzędnych (określa, które współrzędne są wymiarami i miary--są dostępne).
+Można użyć konstruktorów do tworzenia obiektów geometrycznych; jednak NKTY przerwania zaleca się użycie fabryki geometrycznej. Pozwala to określić domyślny SRID (System referencyjny przestrzennej używany przez współrzędne) i zapewnia kontrolę nad bardziej zaawansowanymi elementami, takimi jak model precyzji (używany podczas obliczeń) i sekwencją współrzędnych (określa, które wymiary i miary--są dostępne).
 
 ``` csharp
 var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
-var currentLocation = geometryFactory.CreatePoint(-122.121512, 47.6739882);
+var currentLocation = geometryFactory.CreatePoint(new Coordinate(-122.121512, 47.6739882));
 ```
 
 > [!NOTE]
@@ -101,7 +101,7 @@ var currentLocation = geometryFactory.CreatePoint(-122.121512, 47.6739882);
 
 ### <a name="longitude-and-latitude"></a>Długości i szerokości geograficznej
 
-Współrzędne w NKTY przerwania są pod względem wartości X i Y. Aby przedstawić długość i szerokość geograficzną, użyj X dla długości geograficznej i Y dla szerokości geograficznej. Należy pamiętać, że jest to **wsteczne** w formacie `latitude, longitude`, w którym są zwykle wyświetlane te wartości.
+Współrzędne w NKTY przerwania są pod względem wartości X i Y. Aby przedstawić długość i szerokość geograficzną, użyj X dla długości geograficznej i Y dla szerokości geograficznej. Należy zauważyć, że jest to **Wstecz** od `latitude, longitude` formatu, w którym są zwykle wyświetlane te wartości.
 
 ### <a name="srid-ignored-during-client-operations"></a>SRID zignorowane podczas operacji klienta
 
@@ -207,13 +207,13 @@ var currentCountry = db.Countries
     .FirstOrDefault(c => c.Border.Contains(currentLocation));
 ```
 
-## <a name="sql-server"></a>Oprogramowanie SQL Server
+## <a name="sql-server"></a>SQL Server
 
 Jeśli używasz SQL Server, musisz wiedzieć o kilku dodatkowych kwestiach.
 
 ### <a name="geography-or-geometry"></a>Geografia lub geometria
 
-Domyślnie właściwości przestrzenne są mapowane do `geography` kolumn w SQL Server. Aby użyć `geometry`, należy [skonfigurować typ kolumny](xref:core/modeling/entity-properties#column-data-types) w modelu.
+Domyślnie właściwości przestrzenne są mapowane na `geography` kolumny w SQL Server. Aby użyć `geometry` , należy [skonfigurować typ kolumny](xref:core/modeling/entity-properties#column-data-types) w modelu.
 
 ### <a name="geography-polygon-rings"></a>Pierścienie wielokątów geograficznych
 
@@ -221,7 +221,7 @@ W przypadku używania `geography` typu kolumny SQL Server nakładają dodatkowe 
 
 ### <a name="fullglobe"></a>FullGlobe
 
-SQL Server ma niestandardowy typ geometrii reprezentujący pełny Globus przy użyciu typu kolumny `geography`. Ma również sposób reprezentowania wielokątów w oparciu o pełny Globus (bez pierścienia zewnętrznego). Żadna z tych elementów nie jest obsługiwana przez NKTY przerwania.
+SQL Server ma niestandardowy typ geometrii reprezentujący pełny Globus przy użyciu `geography` typu kolumny. Ma również sposób reprezentowania wielokątów w oparciu o pełny Globus (bez pierścienia zewnętrznego). Żadna z tych elementów nie jest obsługiwana przez NKTY przerwania.
 
 > [!WARNING]
 > FullGlobe i wielokąty oparte na nim nie są obsługiwane przez NKTY przerwania.
@@ -260,7 +260,7 @@ make install
 
 ### <a name="configuring-srid"></a>Konfigurowanie SRID
 
-W SpatiaLite, kolumny muszą określać SRID na kolumnę. Domyślny SRID jest `0`. Określ inny SRID przy użyciu metody ForSqliteHasSrid.
+W SpatiaLite, kolumny muszą określać SRID na kolumnę. Wartość domyślna to SRID `0` . Określ inny SRID przy użyciu metody ForSqliteHasSrid.
 
 ``` csharp
 modelBuilder.Entity<City>().Property(c => c.Location)
@@ -343,7 +343,7 @@ Wielokąt. ExteriorRing | ✔ | ✔ | ✔ | ✔
 Wielokąt. GetInteriorRingN (int) | ✔ | ✔ | ✔ | ✔
 Wielokąt. NumInteriorRings | ✔ | ✔ | ✔ | ✔
 
-## <a name="additional-resources"></a>Dodatkowe zasoby
+## <a name="additional-resources"></a>Zasoby dodatkowe
 
 * [Dane przestrzenne w SQL Server](https://docs.microsoft.com/sql/relational-databases/spatial/spatial-data-sql-server)
 * [Strona główna SpatiaLite](https://www.gaia-gis.it/fossil/libspatialite)

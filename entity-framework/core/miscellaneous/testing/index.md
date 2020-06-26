@@ -4,12 +4,12 @@ description: Różne podejścia do testowania aplikacji korzystających EF Core
 author: ajcvickers
 ms.date: 04/22/2020
 uid: core/miscellaneous/testing/index
-ms.openlocfilehash: a5ff85a60af1f56a0924d6fa0646195146a6827e
-ms.sourcegitcommit: 1f0f93c66b2b50e03fcbed90260e94faa0279c46
+ms.openlocfilehash: 71222f17ac4cc1b71052a2e7e916ebcedd2ae0f4
+ms.sourcegitcommit: ebfd3382fc583bc90f0da58e63d6e3382b30aa22
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 06/04/2020
-ms.locfileid: "84418913"
+ms.lasthandoff: 06/25/2020
+ms.locfileid: "85370542"
 ---
 # <a name="testing-code-that-uses-ef-core"></a>Testowanie kodu korzystającego ze środowiska EF Core
 
@@ -92,7 +92,7 @@ Aby EF Core uzyskać szczegółowe wskazówki, zobacz [testowanie przy użyciu o
 ## <a name="approach-3-the-ef-core-in-memory-database"></a>Podejście 3: EF Core bazy danych w pamięci
 
 EF Core zawiera bazę danych w pamięci, która jest używana do wewnętrznego testowania EF Core samego siebie.
-Ta baza danych nie jest **podstawą do testowania aplikacji, które używają EF Core**. Są to:
+Ta baza danych jest ogólnie **nieodpowiednia do testowania aplikacji, które używają EF Core**. Są to:
 
 * Nie jest to relacyjna baza danych.
 * Nie obsługuje transakcji.
@@ -102,7 +102,7 @@ Ta baza danych nie jest **podstawą do testowania aplikacji, które używają EF
 Żadna z tych elementów nie jest bardzo ważna podczas testowania EF Core wewnętrznych, ponieważ jest ona używana szczególnie w przypadku, gdy baza danych nie ma znaczenia dla testu.
 Z drugiej strony te rzeczy są bardzo ważne podczas testowania aplikacji, która używa EF Core.
 
-## <a name="unit-testing"></a>Testowanie jednostek
+## <a name="unit-testing"></a>Testy jednostkowe
 
 Należy rozważyć testowanie części logiki biznesowej, która może wymagać użycia niektórych danych z bazy danych, ale nie testowanie interakcji z bazami danych.
 Jedną z opcji jest użycie [testu podwójnego](https://en.wikipedia.org/wiki/Test_double) , takiego jak makieta lub fałszywe.

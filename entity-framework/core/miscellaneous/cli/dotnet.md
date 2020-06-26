@@ -4,14 +4,14 @@ author: bricelam
 ms.author: bricelam
 ms.date: 07/11/2019
 uid: core/miscellaneous/cli/dotnet
-ms.openlocfilehash: 6eb8b817a809dedf999ccb98307f5d8e2e41c0fb
-ms.sourcegitcommit: 59e3d5ce7dfb284457cf1c991091683b2d1afe9d
+ms.openlocfilehash: fe378fc962c0d491703a3e77dca4415ad510d673
+ms.sourcegitcommit: ebfd3382fc583bc90f0da58e63d6e3382b30aa22
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 05/20/2020
-ms.locfileid: "83672944"
+ms.lasthandoff: 06/25/2020
+ms.locfileid: "85370632"
 ---
-# <a name="entity-framework-core-tools-reference---net-cli"></a>Dokumentacja narzędzi Entity Framework Core Tools — interfejs wiersza polecenia platformy .NET
+# <a name="entity-framework-core-tools-reference---net-core-cli"></a>Dokumentacja narzędzi Entity Framework Core Tools — interfejs wiersza polecenia platformy .NET Core
 
 Narzędzia interfejsu wiersza polecenia (CLI) dla Entity Framework Core wykonują zadania deweloperskie czasu projektowania. Na przykład tworzą [migracje](/aspnet/core/data/ef-mvc/migrations?view=aspnetcore-2.0), stosują migracje i generują kod dla modelu na podstawie istniejącej bazy danych. Polecenia są rozszerzeniem dla międzyplatformowego polecenia [dotnet](/dotnet/core/tools) , które jest częścią [zestaw .NET Core SDK](https://www.microsoft.com/net/core). Te narzędzia współpracują z projektami .NET Core.
 
@@ -69,7 +69,7 @@ Procedura instalacji zależy od typu projektu i wersji:
 
 * Zainstaluj zestaw .NET Core SDK w wersji 2.1.200. Nowsze wersje nie są zgodne z narzędziami interfejsu wiersza polecenia dla EF Core 1,0 i 1,1.
 
-* Skonfiguruj aplikację tak, aby korzystała z wersji zestawu SDK 2.1.200, modyfikując jej plik [Global. JSON](/dotnet/core/tools/global-json) . Ten plik jest zwykle zawarty w katalogu rozwiązania (jeden powyżej projektu).
+* Skonfiguruj aplikację tak, aby korzystała z wersji zestawu SDK 2.1.200, modyfikując jej [global.jsw](/dotnet/core/tools/global-json) pliku. Ten plik jest zwykle zawarty w katalogu rozwiązania (jeden powyżej projektu).
 
 * Edytuj plik projektu i Dodaj `Microsoft.EntityFrameworkCore.Tools.DotNet` jako `DotNetCliToolReference` element. Określ wersję najnowszej wersji 1. x, na przykład: 1.1.6. Zobacz przykład pliku projektu na końcu tej sekcji.
 
@@ -228,7 +228,7 @@ Argumentu
 
 | Argument       | Opis                                                                                                                                                                                                             |
 |:---------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `<CONNECTION>` | Parametry połączenia z bazą danych. W przypadku projektów ASP.NET Core 2. x wartością może być *nazwa = \< Nazwa>parametrów połączenia *. W takim przypadku nazwa pochodzi ze źródeł konfiguracji skonfigurowanych dla projektu. |
+| `<CONNECTION>` | Parametry połączenia z bazą danych. W przypadku projektów ASP.NET Core 2. x wartością może być *nazwa = \<name of connection string> *. W takim przypadku nazwa pochodzi ze źródeł konfiguracji skonfigurowanych dla projektu. |
 | `<PROVIDER>`   | Dostawca do użycia. Zazwyczaj jest to nazwa pakietu NuGet, na przykład: `Microsoft.EntityFrameworkCore.SqlServer` .                                                                                           |
 
 Opcje:
@@ -238,13 +238,14 @@ Opcje:
 | <nobr>`-d`</nobr> | `--data-annotations`                   | Użyj atrybutów, aby skonfigurować model (tam, gdzie to możliwe). Jeśli ta opcja zostanie pominięta, używany jest tylko interfejs API Fluent.                                                                |
 | `-c`            | `--context <NAME>`                       | Nazwa `DbContext` klasy do wygenerowania.                                                                                                                                 |
 |                 | `--context-dir <PATH>`                   | Katalog, w którym ma zostać umieszczony `DbContext` plik klasy. Ścieżki są względne dla katalogu projektu. Przestrzenie nazw są wyprowadzane z nazw folderów.                                 |
-|                 | `--context-namespace <NAMESPACE>`        | Przestrzeń nazw, która ma być używana dla wygenerowanej `DbContext` klasy. Uwaga: zastąpienia `--namespace` .                                 |
+|                 | `--context-namespace <NAMESPACE>`        | Przestrzeń nazw, która ma być używana dla wygenerowanej `DbContext` klasy. Uwaga: zastąpienia `--namespace` . (Dostępne z EFCore 5.0.0.)        |
 | `-f`            | `--force`                                | Zastąp istniejące pliki.                                                                                                                                                      |
 | `-o`            | `--output-dir <PATH>`                    | Katalog, w którym mają zostać umieszczone pliki klas jednostek. Ścieżki są względne dla katalogu projektu.                                                                                       |
-| `-n`            | `--namespace <NAMESPACE>`                | Przestrzeń nazw, która ma być używana dla wszystkich wygenerowanych klas. Wartość domyślna jest generowana z głównej przestrzeni nazw i katalogu wyjściowego.                    |
+| `-n`            | `--namespace <NAMESPACE>`                | Przestrzeń nazw, która ma być używana dla wszystkich wygenerowanych klas. Wartość domyślna jest generowana z głównej przestrzeni nazw i katalogu wyjściowego. (Dostępne z EFCore 5.0.0.)        |
 |                 | <nobr>`--schema <SCHEMA_NAME>...`</nobr> | Schematy tabel, dla których mają zostać wygenerowane typy jednostek. Aby określić wiele schematów, powtórz `--schema` dla każdej z nich. W przypadku pominięcia tej opcji są uwzględniane wszystkie schematy.          |
 | `-t`            | `--table <TABLE_NAME>`...                | Tabele, dla których mają zostać wygenerowane typy jednostek. Aby określić wiele tabel, powtórz `-t` lub `--table` dla każdej z nich. W przypadku pominięcia tej opcji są uwzględniane wszystkie tabele.                |
 |                 | `--use-database-names`                   | Nazwy tabel i kolumn należy używać dokładnie tak, jak pojawiają się one w bazie danych. Jeśli ta opcja zostanie pominięta, nazwy baz danych są zmieniane na bardziej ściśle zgodne z konwencjami stylu nazwy języka C#. |
+|                 | `--no-onconfiguring`                     | Pomija generowanie `OnConfiguring` metody w generowanej `DbContext` klasie. (Dostępne z EFCore 5.0.0.)        |
 
 Poniższy przykład szkieletuje wszystkie schematy i tabele i umieszcza nowe pliki w folderze *models* .
 
@@ -273,7 +274,7 @@ Opcje:
 |                   | Opcja                             | Opis                                                                                                      |
 |:------------------|:-----------------------------------|:-----------------------------------------------------------------------------------------------------------------|
 | <nobr>`-o`</nobr> | <nobr>`--output-dir <PATH>`</nobr> | Katalog używany do wyprowadzania plików. Ścieżki są względne dla docelowego katalogu projektu. Wartość domyślna to "migracje". |
-| <nobr>`-n`</nobr> | <nobr>`--namespace <NAMESPACE>`</nobr> | Przestrzeń nazw, która ma być używana dla wygenerowanych klas. Wartość domyślna jest generowana z katalogu wyjściowego. |
+| <nobr>`-n`</nobr> | <nobr>`--namespace <NAMESPACE>`</nobr> | Przestrzeń nazw, która ma być używana dla wygenerowanych klas. Wartość domyślna jest generowana z katalogu wyjściowego. (Dostępne z EFCore 5.0.0.) |
 
 ## <a name="dotnet-ef-migrations-list"></a>Lista migracji dotnet
 
