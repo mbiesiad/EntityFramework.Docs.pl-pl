@@ -4,12 +4,12 @@ author: rowanmiller
 ms.date: 10/27/2016
 ms.assetid: aeb0f5f8-b212-4f89-ae83-c642a5190ba0
 uid: core/miscellaneous/connection-strings
-ms.openlocfilehash: 062a7f292d16deb3840fd116f270edb11c6e0687
-ms.sourcegitcommit: 59e3d5ce7dfb284457cf1c991091683b2d1afe9d
+ms.openlocfilehash: e955e93723fc371170641b0b3209cca014ef1c26
+ms.sourcegitcommit: 31536e52b838a84680d2e93e5bb52fb16df72a97
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 05/20/2020
-ms.locfileid: "83672918"
+ms.lasthandoff: 07/10/2020
+ms.locfileid: "86238154"
 ---
 # <a name="connection-strings"></a>Parametry połączenia
 
@@ -17,7 +17,7 @@ Większość dostawców baz danych wymaga pewnego rodzaju parametrów połączen
 
 ## <a name="winforms--wpf-applications"></a>WinForms & aplikacje WPF
 
-Aplikacje WinForms, WPF i ASP.NET 4 mają wypróbowany i przetestowany wzorzec parametrów połączenia. Parametry połączenia należy dodać do pliku App. config aplikacji (Web. config, jeśli używany jest program ASP.NET). Jeśli parametry połączenia zawierają informacje poufne, takie jak nazwa użytkownika i hasło, można chronić zawartość pliku konfiguracji za pomocą [Narzędzia do zarządzania kluczami tajnymi](/aspnet/core/security/app-secrets#secret-manager).
+Aplikacje WinForms, WPF i ASP.NET 4 mają wypróbowany i przetestowany wzorzec parametrów połączenia. Parametry połączenia należy dodać do pliku App.config aplikacji (Web.config, jeśli używasz ASP.NET). Jeśli parametry połączenia zawierają informacje poufne, takie jak nazwa użytkownika i hasło, można chronić zawartość pliku konfiguracji za pomocą [Narzędzia do zarządzania kluczami tajnymi](/aspnet/core/security/app-secrets#secret-manager).
 
 ``` xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -31,7 +31,7 @@ Aplikacje WinForms, WPF i ASP.NET 4 mają wypróbowany i przetestowany wzorzec p
 ```
 
 > [!TIP]  
-> To `providerName` ustawienie nie jest wymagane dla EF Core parametrów połączenia przechowywanych w pliku App. config, ponieważ dostawca bazy danych jest konfigurowany za pośrednictwem kodu.
+> To `providerName` ustawienie nie jest wymagane dla EF Core parametrów połączenia przechowywanych w App.config, ponieważ dostawca bazy danych jest konfigurowany za pośrednictwem kodu.
 
 Następnie można odczytać parametry połączenia przy użyciu `ConfigurationManager` interfejsu API w `OnConfiguring` metodzie kontekstu. Aby można było korzystać z tego interfejsu API, może być konieczne dodanie odwołania do `System.Configuration` zestawu struktury.
 
@@ -73,7 +73,7 @@ Na przykład można użyć [Narzędzia tajnego Menedżera](/aspnet/core/security
 
 ```dotnetcli
 dotnet user-secrets set ConnectionStrings.YourDatabaseAlias "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=YourDatabase"
-dotnet ef dbcontext scaffold Name=YourDatabaseAlias Microsoft.EntityFrameworkCore.SqlServer
+dotnet ef dbcontext scaffold Name=ConnectionStrings.YourDatabaseAlias Microsoft.EntityFrameworkCore.SqlServer
 ```
 
 Lub Poniższy przykład pokazuje parametry połączenia przechowywane w `appsettings.json` .
@@ -86,7 +86,7 @@ Lub Poniższy przykład pokazuje parametry połączenia przechowywane w `appsett
 }
 ```
 
-Następnie kontekst jest zazwyczaj skonfigurowany `Startup.cs` przy użyciu parametrów połączenia, które są odczytywane z konfiguracji. Zwróć uwagę na to, że `GetConnectionString()` Metoda poszukuje wartości konfiguracji, której kluczem jest `ConnectionStrings:<connection string name>` . Należy zaimportować przestrzeń nazw [Microsoft. Extensions. Configuration](/dotnet/api/microsoft.extensions.configuration) , aby użyć tej metody rozszerzenia.
+Następnie kontekst jest zazwyczaj skonfigurowany `Startup.cs` przy użyciu parametrów połączenia, które są odczytywane z konfiguracji. Zwróć uwagę na to, że `GetConnectionString()` Metoda poszukuje wartości konfiguracji, której kluczem jest `ConnectionStrings:<connection string name>` . Aby użyć tej metody rozszerzenia, należy zaimportować przestrzeń nazw [Microsoft.Extensions.Configwersja](/dotnet/api/microsoft.extensions.configuration) .
 
 ``` csharp
 public void ConfigureServices(IServiceCollection services)

@@ -5,12 +5,12 @@ author: lajones
 ms.date: 05/27/2020
 ms.assetid: e9dff604-3469-4a05-8f9e-18ac281d82a9
 uid: core/modeling/entity-properties
-ms.openlocfilehash: fcf3b0f8480fde2f3ba6b5fd601db115f1d246b8
-ms.sourcegitcommit: ebfd3382fc583bc90f0da58e63d6e3382b30aa22
+ms.openlocfilehash: d4e4c50d8c7febf5e42e9aa39352c0bb6a6bd409
+ms.sourcegitcommit: 31536e52b838a84680d2e93e5bb52fb16df72a97
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 06/25/2020
-ms.locfileid: "85370516"
+ms.lasthandoff: 07/10/2020
+ms.locfileid: "86238219"
 ---
 # <a name="entity-properties"></a>Właściwości jednostki
 
@@ -36,7 +36,7 @@ Określone właściwości można wykluczyć w następujący sposób:
 
 Zgodnie z Konwencją, w przypadku korzystania z relacyjnej bazy danych właściwości jednostki są mapowane na kolumny tabeli o tej samej nazwie co właściwość.
 
-Jeśli wolisz skonfigurować kolumny z różnymi nazwami, możesz to zrobić w następujący sposób:
+Jeśli wolisz skonfigurować kolumny z różnymi nazwami, możesz to zrobić, wykonując następujące fragmenty kodu:
 
 ### <a name="data-annotations"></a>[Adnotacje danych](#tab/data-annotations)
 
@@ -87,7 +87,7 @@ W poniższym przykładzie skonfigurowanie maksymalnej długości 500 spowoduje u
 
 ### <a name="precision-and-scale"></a>Precyzja i skala
 
-Począwszy od EFCore 5,0, można użyć interfejsu API Fluent, aby skonfigurować precyzję i skalowanie. Informuje dostawcę bazy danych o ile miejsca do magazynowania jest potrzebnych dla danej kolumny. Ma zastosowanie tylko do typów danych, w których dostawca umożliwia precyzję i skalowalność — zwykle po prostu `decimal` i `DateTime` .
+Począwszy od EFCore 5,0, można użyć interfejsu API Fluent, aby skonfigurować precyzję i skalowanie. Informuje dostawcę bazy danych o ile miejsca do magazynowania jest potrzebnych dla danej kolumny. Ma zastosowanie tylko do typów danych, w których dostawca pozwala na precyzję i skalowalność — zwykle `decimal` i `DateTime` .
 
 Dla `decimal` Właściwości precyzja określa maksymalną liczbę cyfr wymaganą do wyrażenia każdej wartości, która będzie zawierać kolumna, i skala definiuje maksymalną wymaganą liczbę miejsc dziesiętnych. Dla `DateTime` Właściwości precyzja określa maksymalną liczbę cyfr wymaganą do wyrażania ułamków sekund, a skala nie jest używana.
 
@@ -95,6 +95,10 @@ Dla `decimal` Właściwości precyzja określa maksymalną liczbę cyfr wymagan�
 > Entity Framework nie sprawdza poprawności precyzji ani skali przed przekazaniem danych do dostawcy. Jest on do dostawcy lub magazynu danych do zweryfikowania, zgodnie z potrzebami. Na przykład podczas określania wartości docelowej SQL Server kolumna typu danych nie `datetime` pozwala na ustawienie precyzji, natomiast `datetime2` jeden z nich może mieć dokładność z zakresu od 0 do 7 włącznie.
 
 W poniższym przykładzie skonfigurowanie właściwości tak, `Score` aby miało precyzję 14 i skalę 2, spowoduje utworzenie kolumny typu `decimal(14,2)` na SQL Server i skonfigurowanie właściwości tak, `LastUpdated` aby miała dokładność 3 spowoduje, że kolumna typu `datetime2(3)` :
+
+#### <a name="data-annotations"></a>[Adnotacje danych](#tab/data-annotations)
+
+Nie można obecnie użyć adnotacji danych do skonfigurowania.
 
 #### <a name="fluent-api"></a>[Interfejs API Fluent](#tab/fluent-api)
 
@@ -115,8 +119,8 @@ Zgodnie z Konwencją właściwość, której typ .NET może zawierać wartość 
 
 W języku C# 8 wprowadzono nową funkcję o nazwie [typu referencyjnego nullable](/dotnet/csharp/tutorials/nullable-reference-types), która umożliwia dodawanie adnotacji do typów odwołań, wskazujących, czy są one prawidłowe dla nich puste. Ta funkcja jest domyślnie wyłączona, a jeśli ta opcja jest włączona, modyfikuje zachowanie EF Core w następujący sposób:
 
-* Jeśli typy odwołań do wartości null są wyłączone (wartość domyślna), wszystkie właściwości z typami odwołań platformy .NET są konfigurowane jako opcjonalne według Konwencji (np. `string` ).
-* Jeśli typy odwołań do wartości null są włączone, właściwości zostaną skonfigurowane na podstawie wartości null w języku C# typu .NET: `string?` zostaną skonfigurowane jako opcjonalne, a następnie `string` zostaną skonfigurowane zgodnie z wymaganiami.
+* Jeśli typy odwołań do wartości null są wyłączone (wartość domyślna), wszystkie właściwości z typami odwołań platformy .NET są konfigurowane jako opcjonalne według Konwencji (na przykład `string` ).
+* Jeśli typy odwołań do wartości null są włączone, właściwości zostaną skonfigurowane na podstawie wartości null w języku C# typu .NET: `string?` zostaną skonfigurowane jako opcjonalne, ale `string` zostaną skonfigurowane zgodnie z wymaganiami.
 
 W poniższym przykładzie przedstawiono typ jednostki z wymaganymi i opcjonalnymi właściwościami z włączoną funkcją odwołania do wartości null (ustawienie domyślne) i włączony:
 
@@ -156,7 +160,7 @@ Właściwość, która będzie opcjonalna w Konwencji, można skonfigurować tak
 > [!NOTE]
 > Ta funkcja jest wprowadzana w EF Core 5,0.
 
-Sortowanie można definiować w kolumnach tekstowych, określając, w jaki sposób są porównywane i uporządkowane. Na przykład następujące konfiguruje kolumnę SQL Server, aby nie uwzględniać wielkości liter:
+Sortowanie można definiować w kolumnach tekstowych, określając, w jaki sposób są porównywane i uporządkowane. Na przykład poniższy fragment kodu konfiguruje SQL Server kolumny, aby nie uwzględniać wielkości liter:
 
 [!code-csharp[Main](../../../samples/core/Miscellaneous/Collations/Program.cs?range=42-43)]
 

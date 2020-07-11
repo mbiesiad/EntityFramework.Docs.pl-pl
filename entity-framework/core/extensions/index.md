@@ -4,12 +4,12 @@ author: ErikEJ
 ms.date: 04/11/2020
 ms.assetid: 14fffb6c-a687-4881-a094-af4a1359a296
 uid: core/extensions/index
-ms.openlocfilehash: 47a5601e996afab9c0aa0538a2a2b47f204f7753
-ms.sourcegitcommit: ebfd3382fc583bc90f0da58e63d6e3382b30aa22
+ms.openlocfilehash: 5b7945bd24ac19a82b08f4d5709555cf53485f4c
+ms.sourcegitcommit: 31536e52b838a84680d2e93e5bb52fb16df72a97
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 06/25/2020
-ms.locfileid: "85370359"
+ms.lasthandoff: 07/10/2020
+ms.locfileid: "86238258"
 ---
 # <a name="ef-core-tools--extensions"></a>Rozszerzenia narzędzi EF Core &
 
@@ -24,17 +24,17 @@ Te narzędzia i rozszerzenia zapewniają dodatkową funkcjonalność dla Entity 
 
 LLBLGen Pro to rozwiązanie do modelowania jednostek z obsługą Entity Framework i Entity Framework Core. Umożliwia ona łatwe definiowanie modelu jednostki i mapowanie go do bazy danych przy użyciu najpierw pierwszej lub modelu bazy danych, dzięki czemu możesz od razu zacząć pisać zapytania. Dla EF Core: 2, 3
 
-[witryna sieci web](https://www.llblgen.com/)
+[Witryna internetowa](https://www.llblgen.com/)
 
 ### <a name="devart-entity-developer"></a>Devart Entity Developer
 
 Deweloper jednostki jest zaawansowanym projektantem ORM dla ADO.NET Entity Framework, NHibernate, LinqConnect, Telerik Data Access i LINQ to SQL. Obsługuje ona projektowanie EF Core modeli wizualnie, przy użyciu pierwszej metody modelu lub pierwszej podejścia do bazy danych, a także generowania kodu w języku C# lub Visual Basic. Dla EF Core: 1, 2, 3, 5.
 
-[witryna sieci web](https://www.devart.com/entitydeveloper/)
+[Witryna internetowa](https://www.devart.com/entitydeveloper/)
 
 ### <a name="nhydrate-orm-for-entity-framework"></a>nHydrate ORM dla Entity Framework
 
-Obiekt ORM, który tworzy klasy o jednoznacznie określonym typie, rozszerzalny dla Entity Framework. Wygenerowany kod jest Entity Framework Core. Nie ma żadnej różnicy. Nie jest to zamiennik dla EF lub niestandardowej ORM. Jest to Wizualizacja warstwa modelowania, która umożliwia zespołowi zarządzanie złożonymi schematami bazy danych. Dobrze sprawdza się w przypadku oprogramowania SCM, takiego jak Git, umożliwiając dostęp dla użytkowników do modelu z minimalnymi konfliktami. Instalator śledzi zmiany modelu i tworzy skrypty uaktualniania. Dla EF Core: 3.
+Obiekt ORM, który tworzy klasy o jednoznacznie określonym typie, rozszerzalny dla Entity Framework. Wygenerowany kod jest Entity Framework Core. Nie ma żadnych różnic. Nie jest to zamiennik dla EF lub niestandardowej ORM. Jest to Wizualizacja warstwa modelowania, która umożliwia zespołowi zarządzanie złożonymi schematami bazy danych. Dobrze sprawdza się w przypadku oprogramowania SCM, takiego jak Git, umożliwiając dostęp dla użytkowników do modelu z minimalnymi konfliktami. Instalator śledzi zmiany modelu i tworzy skrypty uaktualniania. Dla EF Core: 3.
 
 [Witryna usługi GitHub](https://github.com/nHydrate/nHydrate)
 
@@ -157,6 +157,12 @@ Pamięć podręczna zapytań o wysokiej wydajności. Dla EF Core: 2.
 
 [Repozytorium GitHub](https://github.com/SteffenMangold/EntityFrameworkCore.Cacheable)
 
+### <a name="entityframeworkcorencache"></a>EntityFrameworkCore.NCache
+
+NCache Entity Framework Core jest dostawcą rozproszonej pamięci podręcznej drugiego poziomu na potrzeby buforowania wyników zapytania. Rozproszona architektura NCache sprawia, że jest bardziej skalowalna i wysoka dostępność. Dla EF Core 2.
+
+[Witryna internetowa](https://www.alachisoft.com/ncache/ef-core-cache.html)
+
 ### <a name="entity-framework-plus"></a>Entity Framework Plus
 
 Rozszerza kontekst DbContext z funkcjami takimi jak: Filter include, Audit, buforowanie, Future Query, Batch Delete, Batch Update i innych. Dla EF Core: 2, 3.
@@ -168,7 +174,7 @@ Rozszerza kontekst DbContext z funkcjami takimi jak: Filter include, Audit, bufo
 
 Rozszerza swój kontekst dbwith operacji zbiorczych o wysokiej wydajności: BulkSaveChanges, BulkInsert, BulkUpdate, BulkDelete, BulkMerge i inne. Dla EF Core: 2, 3.
 
-[witryna sieci web](https://entityframework-extensions.net/)
+[Witryna internetowa](https://entityframework-extensions.net/)
 
 ### <a name="expressionify"></a>Expressionify
 
@@ -185,7 +191,7 @@ Technologia Integrated Language Query (LINQ) dla relacyjnych baz danych. Pozwala
 
 W związku z tym, w wyniku tego, w programie SQL Server, "inna" Biblioteka klas uwidacznia interfejs API lokalnie, dosłownie *"język zintegrowany języka SQL"*.
 
-[witryna sieci web](http://xlinq.live/)
+[Witryna internetowa](http://xlinq.live/)
 
 ### <a name="ramses"></a>Ramses
 
@@ -224,3 +230,9 @@ Alternatywny translator zapytań LINQ do wyrażeń SQL. Dla EF Core: 3.
 Obejmuje obsługę zaawansowanych funkcji SQL, takich jak cyklicznych, kopia zbiorcza, wskazówki tabeli, funkcje okienkowe, tabele tymczasowe oraz operacje tworzenia/aktualizowania/usuwania po stronie bazy danych.
 
 [Repozytorium GitHub](https://github.com/linq2db/linq2db.EntityFrameworkCore)
+
+### <a name="efcoresoftdelete"></a>EFCore.SoftDelete
+
+Implementacja nietrwałego usuwania jednostek. Dla EF Core: 3.
+
+[NuGet](https://www.nuget.org/packages/EFCore.SoftDelete)

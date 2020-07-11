@@ -3,21 +3,23 @@ title: Planowanie dla Entity Framework Core 5,0
 author: ajcvickers
 ms.date: 06/11/2020
 uid: core/what-is-new/ef-core-5.0/plan
-ms.openlocfilehash: 249560bc14f72fd524be91bb1670dbaf78ae6b60
-ms.sourcegitcommit: ebfd3382fc583bc90f0da58e63d6e3382b30aa22
+ms.openlocfilehash: a107f901b215e7abaa5905852f81c2d9ab094b98
+ms.sourcegitcommit: 31536e52b838a84680d2e93e5bb52fb16df72a97
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 06/25/2020
-ms.locfileid: "85370581"
+ms.lasthandoff: 07/10/2020
+ms.locfileid: "86238323"
 ---
 # <a name="plan-for-entity-framework-core-50"></a>Planowanie dla Entity Framework Core 5,0
 
 Zgodnie z opisem w [procesie planowania](xref:core/what-is-new/release_planning)dane wejściowe od uczestników projektu zostały zebrane w ramach wstępnego planu dla wydania EF Core 5,0.
 
-> [!IMPORTANT] 
+> [!IMPORTANT]
 > Ten plan jest nadal wykonywany w toku. Nic tutaj jest zobowiązaniem. Ten plan jest punktem początkowym, który będzie się rozwijać, gdy douczymy się więcej. Niektóre elementy, które nie są obecnie planowane dla 5,0, mogą zostać pobrane. Niektóre elementy aktualnie planowane dla 5,0 mogą zostać punted.
 
-### <a name="version-number-and-release-date"></a>Numer wersji i Data wydania.
+## <a name="general-information"></a>Informacje ogólne
+
+### <a name="version-number-and-release-date"></a>Numer wersji i Data wydania
 
 EF Core 5,0 jest obecnie zaplanowane do wydania w ramach [programu .net 5,0](https://devblogs.microsoft.com/dotnet/introducing-net-5/). Wybrano wersję "5,0" do dopasowania z platformą .NET 5,0.
 
@@ -27,7 +29,7 @@ EF Core 5,0 jest planowane do uruchamiania na dowolnej platformie .NET 5,0 w opa
 
 EF Core 5,0 nie będzie działać na .NET Framework.
 
-### <a name="breaking-changes"></a>Fundamentalne zmiany
+### <a name="breaking-changes"></a>Zmiany powodujące niezgodność
 
 EF Core 5,0 będzie zawierać pewne istotne [zmiany](xref:core/what-is-new/ef-core-5.0/breaking-changes), ale będą znacznie mniej surowe niż w przypadku EF Core 3,0. Naszym celem jest umożliwienie nieprzerwanego aktualizowania większości aplikacji.
 
@@ -110,7 +112,7 @@ EF Core 3,0 zmieniono zachowanie domyślne w celu utworzenia pojedynczego zapyta
 Spowodowało to duże regresje wydajności dla zapytań, które używają elementu include dla wielu kolekcji.
 
 W EF Core 5,0 zachowywane jest nowe zachowanie domyślne.
-Jednak EF Core 5,0 zezwoli teraz na generowanie wielu zapytań dla kolekcji, gdzie istnieje pojedyncze zapytanie powodujące niską wydajność. 
+Jednak EF Core 5,0 zezwoli teraz na generowanie wielu zapytań dla kolekcji, gdzie istnieje pojedyncze zapytanie powodujące niską wydajność.
 
 ## <a name="rationalize-totable-toquery-toview-fromsql-etc"></a>Racjonalizacja ToTable, ToQuery, ToView, Z tabel itp.
 
@@ -165,7 +167,7 @@ Chcemy zapewnić lepsze środowisko w tym miejscu, które pozwala na łatwe Migr
 
 Może to być wiele małych ulepszeń w EF Core (na przykład lepszych migracji przy użyciu oprogramowania SQLite), a także wskazówki i średniookresowe współpracę z innymi zespołami w celu ulepszania kompleksowych środowisk, które wykraczają poza prawie Dr.
 
-## <a name="ef-core-platforms-experience"></a>Środowisko EF Core platform 
+## <a name="ef-core-platforms-experience"></a>Środowisko EF Core platform
 
 Potencjalni deweloperzy: @roji i@bricelam
 
@@ -247,10 +249,11 @@ Rozmiar koszulki: L
 Stan: w toku
 
 Już trwa proces aktualizacji dokumentacji dla wersji 3,0 i 3,1. Pracujemy również nad:
-  * Remontowanie dokumentów wprowadzających wprowadzenie, aby zwiększyć ich podejście/łatwiejsze w obserwowanie
-  * Reorganizacja dokumentów, aby ułatwić znajdowanie i Dodawanie odsyłaczy
-  * Dodawanie dalszych szczegółów i wyjaśnień do istniejących dokumentów
-  * Aktualizowanie przykładów i Dodawanie kolejnych przykładów
+
+* Remontowanie dokumentów wprowadzających wprowadzenie, aby zwiększyć ich podejście/łatwiejsze w obserwowanie
+* Reorganizacja dokumentów, aby ułatwić znajdowanie i Dodawanie odsyłaczy
+* Dodawanie dalszych szczegółów i wyjaśnień do istniejących dokumentów
+* Aktualizowanie przykładów i Dodawanie kolejnych przykładów
 
 ## <a name="fixing-bugs"></a>Naprawianie usterek
 
@@ -286,6 +289,6 @@ Są to poprawki i udoskonalenia błędów, które **nie** są obecnie planowane 
 
 Ponadto zawsze należy wziąć pod uwagę [najczęstsze problemy związane](https://github.com/dotnet/efcore/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc) z planowaniem. Wszystkie te problemy w wersji są zawsze bolesnym, ale potrzebujemy realistycznego planu dla zasobów, które mamy.
 
-## <a name="feedback"></a>Opinia
+## <a name="suggestions"></a>Sugestie
 
 Twoja opinia na temat planowania jest ważna. Najlepszym sposobem na wskazanie znaczenia problemu jest zagłosowanie (kciuki) dla tego problemu w serwisie GitHub. Te dane zostaną następnie [przetworzone do procesu planowania](xref:core/what-is-new/release_planning) dla kolejnej wersji.

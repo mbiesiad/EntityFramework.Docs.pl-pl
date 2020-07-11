@@ -4,12 +4,12 @@ author: rowanmiller
 ms.date: 10/27/2016
 ms.assetid: f9fb64e2-6699-4d70-a773-592918c04c19
 uid: core/querying/related-data
-ms.openlocfilehash: 86b9d08377ea8295b746e5f0217a408edcfe1517
-ms.sourcegitcommit: ebfd3382fc583bc90f0da58e63d6e3382b30aa22
+ms.openlocfilehash: d3a1810599771befb451715d93454fff63949771
+ms.sourcegitcommit: 31536e52b838a84680d2e93e5bb52fb16df72a97
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 06/25/2020
-ms.locfileid: "85370476"
+ms.lasthandoff: 07/10/2020
+ms.locfileid: "86238310"
 ---
 # <a name="loading-related-data"></a>Ładowanie powiązanych danych
 
@@ -49,12 +49,57 @@ Możesz połączyć wszystkie te elementy, aby uwzględnić powiązane dane z wi
 
 [!code-csharp[Main](../../../samples/core/Querying/RelatedData/Sample.cs#IncludeTree)]
 
-Możesz chcieć dołączyć wiele powiązanych jednostek dla jednej z dołączanych jednostek. Na przykład, podczas wykonywania zapytania `Blogs` , należy dołączyć `Posts` zarówno, jak `Author` i `Tags` `Posts` . W tym celu należy określić wszystkie ścieżki dołączania, zaczynając od elementu głównego. Na przykład `Blog -> Posts -> Author` i `Blog -> Posts -> Tags` . Nie oznacza to, że nastąpi nadmiarowe sprzężenia; w większości przypadków program Dr konsoliduje sprzężenia podczas generowania bazy danych SQL.
+Możesz chcieć dołączyć wiele powiązanych jednostek dla jednej z dołączanych jednostek. Na przykład, podczas wykonywania zapytania `Blogs` , należy dołączyć `Posts` zarówno, jak `Author` i `Tags` `Posts` . W tym celu należy określić wszystkie ścieżki dołączania, zaczynając od elementu głównego. Na przykład `Blog -> Posts -> Author` i `Blog -> Posts -> Tags`. Nie oznacza to, że nastąpi nadmiarowe sprzężenia; w większości przypadków program Dr konsoliduje sprzężenia podczas generowania bazy danych SQL.
 
 [!code-csharp[Main](../../../samples/core/Querying/RelatedData/Sample.cs#MultipleLeafIncludes)]
 
-> [!CAUTION]
-> Od wersji 3.0.0 każda z nich spowoduje `Include` dodanie dodatkowego sprzężenia do zapytań SQL generowanych przez dostawców relacyjnych, podczas gdy poprzednie wersje wygenerowały dodatkowe zapytania SQL. Może to znacząco zmienić wydajność zapytań, aby lepiej lub gorszyć. W szczególności zapytania LINQ o przekroczeniu dużej liczbie `Include` operatorów mogą wymagać podzielenia na wiele oddzielnych zapytań LINQ w celu uniknięcia problemu z wybuchem kartezjańskiego.
+### <a name="single-and-split-queries"></a>Pojedyncze i podzielone zapytania
+
+> [!NOTE]
+> Ta funkcja jest wprowadzana w EF Core 5,0.
+
+W relacyjnych bazach danych wszystkie powiązane jednostki są domyślnie ładowane przez wprowadzenie sprzężeń:
+
+```sql
+SELECT [b].[BlogId], [b].[OwnerId], [b].[Rating], [b].[Url], [p].[PostId], [p].[AuthorId], [p].[BlogId], [p].[Content], [p].[Rating], [p].[Title]
+FROM [Blogs] AS [b]
+LEFT JOIN [Post] AS [p] ON [b].[BlogId] = [p].[BlogId]
+ORDER BY [b].[BlogId], [p].[PostId]
+```
+
+Jeśli typowy blog ma wiele powiązanych wpisów, wiersze dla tych wpisów pomogą zduplikować informacje o blogu, prowadząc do problemu "kartezjańskiego eksplozji". W miarę ładowania większej liczby relacji jeden-do-wielu, ilość zduplikowanych danych może wzrosnąć i niekorzystnie wpłynąć na wydajność aplikacji.
+
+EF pozwala określić, że dana kwerenda LINQ ma być *podzielona* na wiele zapytań SQL. Zamiast sprzężeń, podzielone zapytania wykonują dodatkowe zapytania SQL dla każdej dołączonej nawigacji "jeden do wielu":
+
+[!code-csharp[Main](../../../samples/core/Querying/RelatedData/Sample.cs?name=AsSplitQuery&highlight=5)]
+
+Spowoduje to wygenerowanie następującego kodu SQL:
+
+```sql
+SELECT [b].[BlogId], [b].[OwnerId], [b].[Rating], [b].[Url]
+FROM [Blogs] AS [b]
+ORDER BY [b].[BlogId]
+
+SELECT [p].[PostId], [p].[AuthorId], [p].[BlogId], [p].[Content], [p].[Rating], [p].[Title], [b].[BlogId]
+FROM [Blogs] AS [b]
+INNER JOIN [Post] AS [p] ON [b].[BlogId] = [p].[BlogId]
+ORDER BY [b].[BlogId]
+```
+
+Pozwala to uniknąć problemów z wydajnością skojarzonych z przyłączami i rozłożeniem kartezjańskiego, ale również ma pewne wady:
+
+* Chociaż większość baz danych gwarantuje spójność danych dla pojedynczych zapytań, nie istnieją takie gwarancje dla wielu zapytań. Oznacza to, że jeśli baza danych jest aktualizowana współbieżnie, gdy wykonywane są zapytania, dane wyniki mogą nie być spójne. Można to zmniejszyć przez zapakowanie zapytań w transakcji możliwej do serializacji lub migawki, chociaż może to spowodować problemy z wydajnością. Aby uzyskać więcej informacji, zapoznaj się z dokumentacją bazy danych.
+* Każde zapytanie oznacza obecnie dodatkową sieć w sieci do bazy danych programu; może to obniżyć wydajność, zwłaszcza w przypadku, gdy opóźnienie do bazy danych jest wysokie (na przykład usługi w chmurze). EF Core poprawi to w przyszłości, tworząc zbiorczo zapytania w ramach jednej roundtrip.
+* Niektóre bazy danych umożliwiają zużywanie wyników wielu zapytań w tym samym czasie (SQL Server z usługami MARS i SQLite), co pozwala na aktywne tylko pojedyncze zapytanie w danym punkcie. Oznacza to, że wszystkie wyniki z wcześniejszych zapytań muszą być buforowane w pamięci aplikacji przed wykonaniem późniejszych zapytań, co znacznie zwiększa wymagania dotyczące pamięci.
+
+Niestety, nie ma żadnej strategii na potrzeby ładowania powiązanych jednostek, które pasują do wszystkich scenariuszy. Należy uważnie rozważyć zalety i wady pojedynczych i podzielnych zapytań, a następnie wybrać ten, który odpowiada Twoim potrzebom.
+
+> [!NOTE]
+> Jednostki powiązane jeden-do-jednego są zawsze ładowane za pośrednictwem sprzężeń, ponieważ nie ma to wpływu na wydajność.
+>
+> W tej chwili użycie dzielenia zapytania na SQL Server wymaga ustawień `MultipleActiveResultSets=true` w parametrach połączenia. To wymaganie zostanie usunięte w przyszłej wersji zapoznawczej.
+>
+> Przyszłe wersje zapoznawcze EF Core 5,0 umożliwiają określanie dzielenia zapytania jako domyślnego dla kontekstu.
 
 ### <a name="filtered-include"></a>Filtr obejmujący
 
