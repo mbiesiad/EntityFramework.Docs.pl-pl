@@ -144,6 +144,10 @@
               items:
                 - name: Omówienie
                   href: core/managing-schemas/migrations/index.md
+                - name: Zarządzanie migracjami
+                  href: core/managing-schemas/migrations/managing.md
+                - name: Stosowanie migracji
+                  href: core/managing-schemas/migrations/applying.md
                 - name: Środowiska zespołowe
                   href: core/managing-schemas/migrations/teams.md
                 - name: Operacje niestandardowe
