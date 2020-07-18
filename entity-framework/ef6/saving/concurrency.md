@@ -3,14 +3,15 @@ title: Obsługa konfliktów współbieżności — EF6
 author: divega
 ms.date: 10/23/2016
 ms.assetid: 2318e4d3-f561-4720-bbc3-921556806476
-ms.openlocfilehash: a99f824fe256a10b84f539a5339a09624315efa4
-ms.sourcegitcommit: 59e3d5ce7dfb284457cf1c991091683b2d1afe9d
+ms.openlocfilehash: 4d29fd7a4d9b6003f71bc8411cea2d863a4c5429
+ms.sourcegitcommit: d85263b5d5d665dbaf94de8832e2917bce048b34
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 05/20/2020
-ms.locfileid: "83672710"
+ms.lasthandoff: 07/17/2020
+ms.locfileid: "86451245"
 ---
-# <a name="handling-concurrency-conflicts"></a>Obsługa konfliktów współbieżności
+# <a name="handling-concurrency-conflicts-ef6"></a>Obsługa konfliktów współbieżności (EF6)
+
 Optymistyczna współbieżność obejmuje optymistycznie próbę zapisania jednostki w bazie danych w celu uzyskania, że dane nie uległy zmianie od momentu załadowania jednostki. Jeśli spowoduje to wypróbowanie, że dane uległy zmianie, zostanie zgłoszony wyjątek i należy rozwiązać konflikt przed podjęciem ponownej próby zapisania. W tym temacie omówiono sposób obsługi takich wyjątków w Entity Framework. Techniki przedstawione w tym temacie dotyczą również modeli utworzonych przy użyciu Code First i programu Dr Designer.  
 
 Ten wpis nie jest odpowiednim miejscem do pełnej dyskusji optymistycznej współbieżności. W poniższych sekcjach założono pewną wiedzę na temat rozwiązywania współbieżności i przedstawiono wzorce dla typowych zadań.  
@@ -23,7 +24,7 @@ DbUpdateConcurrencyException jest generowany przez metody SaveChanges, gdy zosta
 
 ## <a name="resolving-optimistic-concurrency-exceptions-with-reload-database-wins"></a>Rozpoznawanie optymistycznych wyjątków współbieżności z ponownym załadowaniem (baza danych: WINS)  
 
-Metoda reload może służyć do zastępowania bieżących wartości jednostki wartościami teraz w bazie danych. Następnie jednostka jest zazwyczaj podawana do użytkownika w postaci jakiejś i musi próbować ponownie wprowadzić zmiany i ponownie zapisać. Na przykład:  
+Metoda reload może służyć do zastępowania bieżących wartości jednostki wartościami teraz w bazie danych. Następnie jednostka jest zazwyczaj podawana do użytkownika w postaci jakiejś i musi próbować ponownie wprowadzić zmiany i ponownie zapisać. Przykład:  
 
 ``` csharp
 using (var context = new BloggingContext())
@@ -52,7 +53,7 @@ using (var context = new BloggingContext())
 }
 ```  
 
-Dobrym sposobem symulowania wyjątku współbieżności jest ustawienie punktu przerwania w wywołaniu metody SaveChanges, a następnie zmodyfikowanie jednostki, która jest zapisywana w bazie danych przy użyciu innego narzędzia, takiego jak SQL Server Management Studio. Możesz również wstawić wiersz przed metody SaveChanges, aby zaktualizować bazę danych bezpośrednio przy użyciu polecenia SqlCommand. Na przykład:  
+Dobrym sposobem symulowania wyjątku współbieżności jest ustawienie punktu przerwania w wywołaniu metody SaveChanges, a następnie zmodyfikowanie jednostki, która jest zapisywana w bazie danych przy użyciu innego narzędzia, takiego jak SQL Server Management Studio. Możesz również wstawić wiersz przed metody SaveChanges, aby zaktualizować bazę danych bezpośrednio przy użyciu polecenia SqlCommand. Przykład:  
 
 ``` csharp
 context.Database.SqlCommand(
@@ -94,7 +95,7 @@ using (var context = new BloggingContext())
 
 ## <a name="custom-resolution-of-optimistic-concurrency-exceptions"></a>Niestandardowe rozpoznawanie optymistycznych wyjątków współbieżności  
 
-Czasami warto połączyć wartości znajdujące się obecnie w bazie danych z wartościami znajdującymi się obecnie w jednostce. Zwykle wymaga to pewnej logiki niestandardowej lub interakcji z użytkownikiem. Można na przykład przedstawić formularz użytkownikowi zawierającym bieżące wartości, wartości w bazie danych i domyślny zestaw rozwiązanych wartości. Następnie użytkownik może edytować rozwiązane wartości zgodnie z potrzebami, a następnie te rozwiązane wartości, które zostaną zapisane w bazie danych. Można to zrobić za pomocą obiektów dbpropertyvalue zwracanych z CurrentValues i GetDatabaseValues w wpisie jednostki. Na przykład:  
+Czasami warto połączyć wartości znajdujące się obecnie w bazie danych z wartościami znajdującymi się obecnie w jednostce. Zwykle wymaga to pewnej logiki niestandardowej lub interakcji z użytkownikiem. Można na przykład przedstawić formularz użytkownikowi zawierającym bieżące wartości, wartości w bazie danych i domyślny zestaw rozwiązanych wartości. Następnie użytkownik może edytować rozwiązane wartości zgodnie z potrzebami, a następnie te rozwiązane wartości, które zostaną zapisane w bazie danych. Można to zrobić za pomocą obiektów dbpropertyvalue zwracanych z CurrentValues i GetDatabaseValues w wpisie jednostki. Przykład:  
 
 ``` csharp
 using (var context = new BloggingContext())

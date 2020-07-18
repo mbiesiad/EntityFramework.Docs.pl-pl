@@ -3,19 +3,20 @@ title: Nieprzetworzone zapytania SQL — EF6
 author: divega
 ms.date: 10/23/2016
 ms.assetid: 9e1ee76e-2499-408c-81e8-9b6c5d1945a0
-ms.openlocfilehash: 168aee67186535bf2a50705e86bfc5a88147e369
-ms.sourcegitcommit: cc0ff36e46e9ed3527638f7208000e8521faef2e
+ms.openlocfilehash: d336066b982e682e81067bbdac5b3781524cf6be
+ms.sourcegitcommit: d85263b5d5d665dbaf94de8832e2917bce048b34
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 03/06/2020
-ms.locfileid: "78417096"
+ms.lasthandoff: 07/17/2020
+ms.locfileid: "86451219"
 ---
-# <a name="raw-sql-queries"></a>Pierwotne zapytania SQL
+# <a name="raw-sql-queries-ef6"></a>Nieprzetworzone zapytania SQL (EF6)
+
 Entity Framework umożliwia wykonywanie zapytań przy użyciu LINQ z klasami jednostek. Mogą jednak wystąpić sytuacje, w których chcesz uruchamiać zapytania przy użyciu RAW SQL bezpośrednio względem bazy danych. Obejmuje to wywoływanie procedur składowanych, które mogą być przydatne w przypadku modeli Code First, które obecnie nie obsługują mapowania na procedury składowane. Techniki przedstawione w tym temacie dotyczą również modeli utworzonych przy użyciu Code First i programu Dr Designer.  
 
 ## <a name="writing-sql-queries-for-entities"></a>Pisanie zapytań SQL dla jednostek  
 
-Metoda sqlQuery w Nieogólnymi umożliwia zapisanie nieprzetworzonego zapytania SQL, które zwróci wystąpienia jednostki. Zwracane obiekty będą śledzone według kontekstu, tak jakby były zwracane przez zapytanie LINQ. Na przykład:  
+Metoda sqlQuery w Nieogólnymi umożliwia zapisanie nieprzetworzonego zapytania SQL, które zwróci wystąpienia jednostki. Zwracane obiekty będą śledzone według kontekstu, tak jakby były zwracane przez zapytanie LINQ. Przykład:  
 
 ``` csharp  
 using (var context = new BloggingContext())
@@ -54,7 +55,7 @@ using (var context = new BloggingContext())
 
 ## <a name="writing-sql-queries-for-non-entity-types"></a>Pisanie zapytań SQL dla typów innych niż Entity  
 
-Zapytanie SQL zwracające wystąpienia dowolnego typu, w tym typy pierwotne, można utworzyć za pomocą metody sqlQuery w klasie Database. Na przykład:  
+Zapytanie SQL zwracające wystąpienia dowolnego typu, w tym typy pierwotne, można utworzyć za pomocą metody sqlQuery w klasie Database. Przykład:  
 
 ``` csharp
 using (var context = new BloggingContext())
@@ -68,7 +69,7 @@ Wyniki zwrócone z sqlQuery w bazie danych nigdy nie będą śledzone przez kont
 
 ## <a name="sending-raw-commands-to-the-database"></a>Wysyłanie poleceń RAW do bazy danych  
 
-Polecenia niebędące zapytaniami można wysyłać do bazy danych przy użyciu metody ExecuteSqlCommand w bazie danych. Na przykład:  
+Polecenia niebędące zapytaniami można wysyłać do bazy danych przy użyciu metody ExecuteSqlCommand w bazie danych. Przykład:  
 
 ``` csharp
 using (var context = new BloggingContext())
