@@ -65,6 +65,8 @@
               href: core/get-started/install/index.md
             - name: Samouczek ASP.NET Core >>
               href: /aspnet/core/data/ef-rp/intro
+            - name: Samouczek platformy Xamarin
+              href: core/get-started/xamarin.md
         - name: Podstawy
           items:
             - name: Parametry połączeń
