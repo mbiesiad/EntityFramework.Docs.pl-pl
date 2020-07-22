@@ -4,16 +4,16 @@ author: roji
 ms.date: 09/09/2019
 ms.assetid: bde4e0ee-fba3-4813-a849-27049323d301
 uid: core/miscellaneous/nullable-reference-types
-ms.openlocfilehash: c16a475c363320cd18804a4efe78ccae1ae22f0d
-ms.sourcegitcommit: cc0ff36e46e9ed3527638f7208000e8521faef2e
+ms.openlocfilehash: 3acd446d64a94ffecb12c181e3910528d2293448
+ms.sourcegitcommit: 51148929e3889c48227d96c95c4e310d53a3d2c9
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 03/06/2020
-ms.locfileid: "78416656"
+ms.lasthandoff: 07/21/2020
+ms.locfileid: "86873360"
 ---
 # <a name="working-with-nullable-reference-types"></a>Praca z typami odwołań dopuszczających wartości null
 
-C#8 wprowadzono nową funkcję o nazwie [dopuszczającej wartość null](/dotnet/csharp/tutorials/nullable-reference-types), co pozwala na dodawanie adnotacji do typów odwołań wskazujących, czy są one prawidłowe dla nich, aby zawierały wartość null. Jeśli dopiero zaczynasz tę funkcję, zalecamy zapoznanie się z nią, czytając C# dokumenty.
+W języku C# 8 wprowadzono nową funkcję o nazwie [dopuszczającej wartość null](/dotnet/csharp/tutorials/nullable-reference-types), co pozwala na dodawanie adnotacji do typów odwołań wskazujących, czy są one prawidłowe dla nich, aby zawierały wartość null. Jeśli jesteś nowym elementem tej funkcji, zalecamy zapoznanie się z nim, odczytując dokumenty w języku C#.
 
 Na tej stronie EF Core wprowadzono pomoc techniczną dla typów referencyjnych dopuszczających wartości null oraz opisano najlepsze rozwiązania dotyczące pracy z nimi.
 
@@ -26,7 +26,7 @@ Główna dokumentacja dotycząca wymaganych i opcjonalnych właściwości oraz i
 
 ## <a name="dbcontext-and-dbset"></a>DbContext i Nieogólnymi
 
-Gdy włączone są typy odwołań dopuszczających wartość C# null, kompilator emituje ostrzeżenia dla każdej niezainicjowanej właściwości, która nie dopuszcza wartości null. W związku z tym typowa Metoda definiowania `DbSet` niedopuszczających wartości null w kontekście spowoduje teraz wygenerowanie ostrzeżenia. Jednak EF Core zawsze inicjuje wszystkie właściwości `DbSet` w typach pochodnych DbContext, dzięki czemu są one gwarantowane, że nigdy nie będzie mieć wartości null, nawet jeśli kompilator nie będzie mógł tego wiedzieć. W związku z tym zaleca się pozostawienie właściwości `DbSet`, które nie dopuszczają wartości null, umożliwiając dostęp do nich bez sprawdzania wartości null — i wyciszenie ostrzeżeń kompilatora przez jawne ustawienie ich jako null za pomocą operatora łagodniejszej null (!):
+W przypadku włączenia typów referencyjnych dopuszczających wartość null kompilator języka C# emituje ostrzeżenia dla każdej niezainicjowanej właściwości niemożliwej do uwzględnienia w wartości null. W związku z tym powszechną metodą posiadania niezainicjowanych właściwości Nieogólnymi dla typu kontekstu spowoduje teraz wygenerowanie ostrzeżenia. Aby rozwiązać ten problem, należy ustawić właściwości Nieogólnymi tylko do odczytu i zainicjować je w następujący sposób:
 
 [!code-csharp[Main](../../../samples/core/Miscellaneous/NullableReferenceTypes/NullableReferenceTypesContext.cs?name=Context&highlight=3-4)]
 
@@ -40,7 +40,7 @@ Jednym ze sposobów postępowania z tymi scenariuszami jest posiadanie właściw
 
 [!code-csharp[Main](../../../samples/core/Miscellaneous/NullableReferenceTypes/Order.cs?range=10-17)]
 
-Ponieważ właściwość nawigacji nie dopuszcza wartości null, jest konfigurowana wymagana Nawigacja; i tak długo, jak nawigacja zostanie prawidłowo załadowana, zależna będzie dostępna za pośrednictwem właściwości. Jeśli jednak właściwość jest dostępna bez wcześniejszego poprawnego załadowania powiązanej jednostki, zgłaszany jest InvalidOperationException, ponieważ kontrakt interfejsu API został niepoprawnie użyty. Należy pamiętać, że EF musi być skonfigurowany tak, aby zawsze miał dostęp do pola zapasowego, a nie do właściwości, ponieważ polega na możliwym odczytaniu wartości nawet wtedy, gdy ustawienie nie zostanie ustawione; Zapoznaj się z dokumentacją dotyczącą [pól zapasowych](xref:core/modeling/backing-field) , aby to zrobić, i rozważ określenie `PropertyAccessMode.Field`, aby upewnić się, że konfiguracja jest poprawna.
+Ponieważ właściwość nawigacji nie dopuszcza wartości null, jest konfigurowana wymagana Nawigacja; i tak długo, jak nawigacja zostanie prawidłowo załadowana, zależna będzie dostępna za pośrednictwem właściwości. Jeśli jednak właściwość jest dostępna bez wcześniejszego poprawnego załadowania powiązanej jednostki, zgłaszany jest InvalidOperationException, ponieważ kontrakt interfejsu API został niepoprawnie użyty. Należy pamiętać, że EF musi być skonfigurowany tak, aby zawsze miał dostęp do pola zapasowego, a nie do właściwości, ponieważ polega na możliwym odczytaniu wartości nawet wtedy, gdy ustawienie nie zostanie ustawione; Zapoznaj się z dokumentacją dotyczącą [pól zapasowych](xref:core/modeling/backing-field) , aby to zrobić, i rozważ określenie, `PropertyAccessMode.Field` Aby upewnić się, że konfiguracja jest poprawna.
 
 Jako alternatywę Terser można po prostu zainicjować właściwość null przy użyciu operatora null-łagodniejszej (!):
 
@@ -65,5 +65,5 @@ Jeśli znajdziesz się w tej partii, a typy jednostek, których dotyczy, są gł
 
 ## <a name="limitations"></a>Ograniczenia
 
-* Proces odtwarzania nie obsługuje C# [ C# obecnie 8 typów referencyjnych dopuszczających wartość null (NRTs)](/dotnet/csharp/tutorials/nullable-reference-types): EF Core zawsze generuje kod, który zakłada, że ta funkcja jest wyłączona. Na przykład kolumny tekstu dopuszczające wartość null będą szkieletem jako właściwość o typie `string`, a nie `string?`, z interfejsem API Fluent lub adnotacjami danych używanymi do konfigurowania, czy właściwość jest wymagana. Można edytować kod szkieletowy i zastąpić je adnotacjami o C# wartości null. Obsługa tworzenia szkieletów dla typów odwołań do wartości null jest śledzona przez [#15520](https://github.com/aspnet/EntityFrameworkCore/issues/15520)problemu.
+* Proces odtwarzania nie obsługuje obecnie [typów referencyjnych języka C# 8 dopuszczających wartość null (NRTs)](/dotnet/csharp/tutorials/nullable-reference-types): EF Core zawsze generuje kod C#, który zakłada, że ta funkcja jest wyłączona. Na przykład kolumny tekstu dopuszczające wartość null będą szkieletem jako właściwość typu `string` , a nie `string?` z interfejsem API Fluent lub adnotacjami danych używanymi do konfigurowania, czy właściwość jest wymagana. Można edytować kod szkieletowy i zastąpić je za pomocą adnotacji o wartości null w języku C#. Obsługa tworzenia szkieletów dla typów odwołań do wartości null jest śledzona przez [#15520](https://github.com/aspnet/EntityFrameworkCore/issues/15520)problemu.
 * Publiczna powierzchnia interfejsu API EF Core nie została jeszcze dostosowana do wartości null (Publiczny interfejs API to "null-Oblivious"), co sprawia, że niewygodna jest używana, gdy funkcja NRT jest włączona. Dotyczy to szczególnie operatorów asynchronicznych LINQ uwidocznionych przez EF Core, takich jak [FirstOrDefaultAsync](/dotnet/api/microsoft.entityframeworkcore.entityframeworkqueryableextensions.firstordefaultasync#Microsoft_EntityFrameworkCore_EntityFrameworkQueryableExtensions_FirstOrDefaultAsync__1_System_Linq_IQueryable___0__System_Linq_Expressions_Expression_System_Func___0_System_Boolean___System_Threading_CancellationToken_). Planujemy rozwiązać ten rozwiązanie w wersji 5,0.
