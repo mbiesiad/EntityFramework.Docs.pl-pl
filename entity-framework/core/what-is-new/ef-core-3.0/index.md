@@ -4,12 +4,12 @@ author: divega
 ms.date: 02/19/2019
 ms.assetid: 2EBE2CCC-E52D-483F-834C-8877F5EB0C0C
 uid: core/what-is-new/ef-core-3.0/index
-ms.openlocfilehash: 39684cdcc17e3baa4b77cf29d54b626294771332
-ms.sourcegitcommit: 387cbd8109c0fc5ce6bdc85d0dec1aed72ad4c33
+ms.openlocfilehash: ab61716fbf9cd4a256903a99540b6ecea2b5d37c
+ms.sourcegitcommit: 949faaba02e07e44359e77d7935f540af5c32093
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 04/23/2020
-ms.locfileid: "82103142"
+ms.lasthandoff: 08/03/2020
+ms.locfileid: "87526839"
 ---
 # <a name="new-features-in-entity-framework-core-30"></a>Nowe funkcje w Entity Framework Core 3,0
 
@@ -32,7 +32,7 @@ Najważniejszym zmianą projektu jest to, jak obsługujemy wyrażenia LINQ, któ
 W poprzednich wersjach EF Core zidentyfikować, jakie fragmenty zapytania można przetłumaczyć na SQL i wykonać pozostałą część zapytania na kliencie.
 Ten typ wykonywania po stronie klienta jest pożądany w niektórych sytuacjach, ale w wielu innych przypadkach może to spowodować niewydajne zapytania.
 
-Na przykład jeśli EF Core 2,2 nie może przetłumaczyć predykatu `Where()` w wywołaniu, wykonał instrukcję SQL bez filtru, przesłał wszystkie wiersze z bazy danych, a następnie przefiltrowanych je w pamięci:
+Na przykład jeśli EF Core 2,2 nie może przetłumaczyć predykatu w `Where()` wywołaniu, wykonał instrukcję SQL bez filtru, przesłał wszystkie wiersze z bazy danych, a następnie przefiltrowanych je w pamięci:
 
 ``` csharp
 var specialCustomers = context.Customers
@@ -41,7 +41,7 @@ var specialCustomers = context.Customers
 
 To może być akceptowalne, jeśli baza danych zawiera niewielką liczbę wierszy, ale może powodować znaczne problemy z wydajnością lub nawet niepowodzenie aplikacji, jeśli baza danych zawiera dużą liczbę wierszy.
 
-W EF Core 3,0 ograniczenie oceny klienta ma miejsce tylko w projekcji najwyższego poziomu (zasadniczo jest to ostatnie wywołanie do `Select()`).
+W EF Core 3,0 ograniczenie oceny klienta ma miejsce tylko w projekcji najwyższego poziomu (zasadniczo jest to ostatnie wywołanie do `Select()` ).
 Gdy EF Core 3,0 wykrywa wyrażenia, które nie mogą być przetłumaczone w innym miejscu zapytania, zgłasza wyjątek czasu wykonania.
 
 Aby ocenić warunek predykatu na kliencie, jak w poprzednim przykładzie, deweloperzy muszą jawnie przełączać ocenę zapytania do LINQ to Objects:
@@ -57,7 +57,7 @@ Zapoznaj się z dokumentacją dotyczącą istotnych [zmian](xref:core/what-is-ne
 
 ### <a name="single-sql-statement-per-linq-query"></a>Pojedyncza instrukcja SQL na zapytanie LINQ
 
-Innym aspektem projektu, który został znacząco zmieniony w 3,0, jest zawsze generowanie pojedynczej instrukcji SQL na zapytanie LINQ. W poprzednich wersjach użyto do wygenerowania w niektórych przypadkach wielu instrukcji SQL, przetłumaczonych `Include()` wywołań właściwości nawigacji kolekcji i przetłumaczonych zapytań, które miały pewne wzorce z podzapytaniami. Mimo że było to w niektórych przypadkach wygodne, a `Include()` w przypadku, gdy nawet pomaga uniknąć wysyłania nadmiarowych danych przez sieć, implementacja była złożona i powodowała pewne niezwykle niewydajne zachowania (zapytania o N + 1). Istniały sytuacje, w których dane zwrócone przez wiele zapytań były potencjalnie niespójne.
+Innym aspektem projektu, który został znacząco zmieniony w 3,0, jest zawsze generowanie pojedynczej instrukcji SQL na zapytanie LINQ. W poprzednich wersjach użyto do wygenerowania w niektórych przypadkach wielu instrukcji SQL, przetłumaczonych `Include()` wywołań właściwości nawigacji kolekcji i przetłumaczonych zapytań, które miały pewne wzorce z podzapytaniami. Mimo że było to w niektórych przypadkach wygodne, a w przypadku, gdy `Include()` nawet pomaga uniknąć wysyłania nadmiarowych danych przez sieć, implementacja była złożona i powodowała pewne niezwykle niewydajne zachowania (zapytania o N + 1). Istniały sytuacje, w których dane zwrócone przez wiele zapytań były potencjalnie niespójne.
 
 Podobnie jak w przypadku oceny klienta, jeśli EF Core 3,0 nie można przetłumaczyć zapytania LINQ na pojedynczą instrukcję SQL, zgłasza wyjątek czasu wykonania. Ale wprowadziliśmy EF Core możliwości tłumaczenia wielu wspólnych wzorców, które były używane do generowania wielu zapytań do pojedynczego zapytania z sprzężeniami.
 
@@ -69,11 +69,11 @@ Aby uzyskać więcej informacji, zobacz [dokumentację dostawcy Cosmos DB](xref:
 
 ## <a name="c-80-support"></a>Obsługa języka C# 8,0
 
-EF Core 3,0 wykorzystuje kilka [nowych funkcji w języku C# 8,0](https://docs.microsoft.com/dotnet/csharp/whats-new/csharp-8):
+EF Core 3,0 wykorzystuje kilka [nowych funkcji w języku C# 8,0](/dotnet/csharp/whats-new/csharp-8):
 
 ### <a name="asynchronous-streams"></a>Strumienie asynchroniczne
 
-Asynchroniczne wyniki zapytania są teraz udostępniane przy użyciu nowego interfejsu `IAsyncEnumerable<T>` standardowego i mogą być używane przy `await foreach`użyciu programu.
+Asynchroniczne wyniki zapytania są teraz udostępniane przy użyciu nowego `IAsyncEnumerable<T>` interfejsu standardowego i mogą być używane przy użyciu programu `await foreach` .
 
 ``` csharp
 var orders =
@@ -87,11 +87,11 @@ await foreach(var o in orders.AsAsyncEnumerable())
 }
 ```
 
-Aby uzyskać więcej informacji, zobacz [strumienie asynchroniczne w dokumentacji języka C#](https://docs.microsoft.com/dotnet/csharp/whats-new/csharp-8#asynchronous-streams) .
+Aby uzyskać więcej informacji, zobacz [strumienie asynchroniczne w dokumentacji języka C#](/dotnet/csharp/whats-new/csharp-8#asynchronous-streams) .
 
 ### <a name="nullable-reference-types"></a>Typy referencyjne dopuszczające wartość null
 
-Gdy ta nowa funkcja jest włączona w kodzie, EF Core bada wartości null właściwości typu odwołania i stosuje je do odpowiednich kolumn i relacji w bazie danych: właściwości typów odwołań niedopuszczających wartości null są traktowane tak, jakby miały atrybut adnotacji `[Required]` danych.
+Gdy ta nowa funkcja jest włączona w kodzie, EF Core bada wartości null właściwości typu odwołania i stosuje je do odpowiednich kolumn i relacji w bazie danych: właściwości typów odwołań niedopuszczających wartości null są traktowane tak, jakby miały `[Required]` atrybut adnotacji danych.
 
 Na przykład w poniższej klasie właściwości oznaczone jako typu `string?` zostaną skonfigurowane jako opcjonalne, a `string` program zostanie skonfigurowany zgodnie z wymaganiami:
 
@@ -113,7 +113,7 @@ Nowy interfejs API przechwycenia w EF Core 3,0 umożliwia automatyczne wywoływa
 
 Podobnie jak w przypadku funkcji przechwycenia, które istniały w EF 6, Interceptory umożliwiają przechwycenie operacji przed lub po ich wystąpieniu. Gdy przechwytuje je przed ich przystąpieniem, można wykonywać wykonywanie i dostarczać alternatywne wyniki z logiki przechwycenia.
 
-Na przykład, aby manipulować tekstem poleceń, można utworzyć `DbCommandInterceptor`:
+Na przykład, aby manipulować tekstem poleceń, można utworzyć `DbCommandInterceptor` :
 
 ``` csharp
 public class HintCommandInterceptor : DbCommandInterceptor
@@ -130,7 +130,7 @@ public class HintCommandInterceptor : DbCommandInterceptor
 }
 ```
 
-I zarejestruj go w `DbContext`:
+I zarejestruj go w  `DbContext` :
 
 ``` csharp
 services.AddDbContext(b => b
@@ -171,7 +171,7 @@ protected override void OnModelCreating(ModelBuilder modelBuilder)
 
 Począwszy od EF Core 3,0, jeśli `OrderDetails` jest własnością `Order` lub jawnie zmapowana do tej samej tabeli, będzie możliwe dodanie `Order` bez `OrderDetails` i wszystkich `OrderDetails` właściwości, z wyjątkiem tego, że klucz podstawowy zostanie zmapowany na kolumny dopuszczające wartość null.
 
-Podczas wykonywania zapytania, EF Core zostanie ustawiona `OrderDetails` na `null` , Jeśli którakolwiek z wymaganych właściwości nie ma wartości lub jeśli nie ma żadnych wymaganych właściwości poza kluczem podstawowym i wszystkie właściwości są `null`.
+Podczas wykonywania zapytania, EF Core zostanie ustawiona `OrderDetails` na, `null` Jeśli którakolwiek z wymaganych właściwości nie ma wartości lub jeśli nie ma żadnych wymaganych właściwości poza kluczem podstawowym i wszystkie właściwości są `null` .
 
 ``` csharp
 public class Order

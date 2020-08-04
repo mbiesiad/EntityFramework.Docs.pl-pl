@@ -1,27 +1,27 @@
 ---
-title: Odwołanie do narzędzi core entity framework — EF Core
+title: Dokumentacja narzędzi Entity Framework Core Tools — EF Core
 author: bricelam
 ms.author: bricelam
 ms.date: 09/19/2018
 uid: core/miscellaneous/cli/index
-ms.openlocfilehash: 237192c55ea3542521a7a292ac8550d72e4ef82c
-ms.sourcegitcommit: 9b562663679854c37c05fca13d93e180213fb4aa
+ms.openlocfilehash: 2821263f1e9cd962569e8050b01d704cf858e6c8
+ms.sourcegitcommit: 949faaba02e07e44359e77d7935f540af5c32093
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 04/07/2020
-ms.locfileid: "78416722"
+ms.lasthandoff: 08/03/2020
+ms.locfileid: "87526489"
 ---
-# <a name="entity-framework-core-tools-reference"></a>Odwołanie do narzędzi Core framework framework
+# <a name="entity-framework-core-tools-reference"></a>Dokumentacja narzędzi Entity Framework Core Tools
 
-Narzędzia Entity Framework Core pomagają w zadaniach tworzenia w czasie projektowania. Są one używane głównie do zarządzania migracjami `DbContext` i do tworzenia szkieletu typów i jednostek przez inżynierię odwrotną schematu bazy danych.
+Narzędzia Entity Framework Core ułatwiają wykonywanie zadań deweloperskich w czasie projektowania. Są one głównie używane do zarządzania migracjami oraz do tworzenia szkieletów `DbContext` i typów jednostek przez odtwarzanie schematu bazy danych.
 
-* [Narzędzia konsoli Menedżera pakietów EF Core](powershell.md) są uruchamiane w konsoli Menedżera [pakietów](https://docs.microsoft.com/nuget/tools/package-manager-console) w programie Visual Studio.
+* [Narzędzia konsoli Menedżera pakietów EF Core](powershell.md) uruchamiane w [konsoli Menedżera pakietów](/nuget/tools/package-manager-console) w programie Visual Studio.
 
-* [Narzędzia interfejsu wiersza polecenia EF Core .NET (CLI)](dotnet.md) są rozszerzeniem międzyplatformowych [narzędzi interfejsu wiersza polecenia .NET Core.](https://docs.microsoft.com/dotnet/core/tools/) Narzędzia te wymagają projektu zestawu SDK `Sdk="Microsoft.NET.Sdk"` .NET Core (jeden z lub podobny w pliku projektu).
+* [EF Core narzędzia interfejsu wiersza polecenia (CLI) platformy .NET](dotnet.md) to rozszerzenie [narzędzi interfejs wiersza polecenia platformy .NET Core](/dotnet/core/tools/)dla wielu platform. Te narzędzia wymagają projektu zestaw .NET Core SDK (jeden z `Sdk="Microsoft.NET.Sdk"` lub podobny w pliku projektu).
 
-Oba narzędzia udostępniają tę samą funkcjonalność. Jeśli tworzysz w programie Visual Studio, zaleca się korzystanie z narzędzi **konsoli Menedżera pakietów,** ponieważ zapewniają one bardziej zintegrowane środowisko.
+Oba narzędzia uwidaczniają te same funkcje. Jeśli tworzysz program w programie Visual Studio, zalecamy korzystanie z narzędzi **konsoli Menedżera pakietów** , ponieważ zapewniają one bardziej zintegrowane środowisko pracy.
 
 ## <a name="next-steps"></a>Następne kroki
 
-* [Referencje do konsoli Menedżera pakietów EF Core](powershell.md)
-* [Odwołanie do narzędzi interfejsu wiersza polecenia EF Core .NET](dotnet.md)
+* [Dokumentacja narzędzi konsoli Menedżera pakietów EF Core](powershell.md)
+* [Dokumentacja narzędzi interfejsu wiersza polecenia platformy .NET EF Core](dotnet.md)

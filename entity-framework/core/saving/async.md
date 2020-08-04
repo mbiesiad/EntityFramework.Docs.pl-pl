@@ -1,23 +1,23 @@
 ---
-title: Oszczędzanie asynchroniczne - EF Core
+title: Zapisywanie asynchroniczne — EF Core
 author: rowanmiller
 ms.date: 01/24/2017
 ms.assetid: b64a606e-ecd9-4807-829a-b6ec05ade33f
 uid: core/saving/async
-ms.openlocfilehash: 0823b86f0579dd3e42f6bd2aebfb433d3cbe00ab
-ms.sourcegitcommit: 9b562663679854c37c05fca13d93e180213fb4aa
+ms.openlocfilehash: aa1fbfdc44895eace04354063435f98370aed2c4
+ms.sourcegitcommit: 949faaba02e07e44359e77d7935f540af5c32093
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 04/07/2020
-ms.locfileid: "78417643"
+ms.lasthandoff: 08/03/2020
+ms.locfileid: "87526917"
 ---
 # <a name="asynchronous-saving"></a>Zapisywanie asynchroniczne
 
-Asynchroniczne zapisywanie pozwala uniknąć blokowania wątku, gdy zmiany są zapisywane w bazie danych. Może to być przydatne, aby uniknąć zamrożenia interfejsu użytkownika aplikacji grubego klienta. Operacje asynchroniczne można również zwiększyć przepływność w aplikacji sieci web, gdzie wątek może zostać zwolniona do obsługi innych żądań podczas wykonywania operacji bazy danych. Aby uzyskać więcej informacji, zobacz [Programowanie asynchroniczne w języku C#](https://docs.microsoft.com/dotnet/csharp/async).
+Zapisywanie asynchroniczne pozwala uniknąć blokowania wątku, podczas gdy zmiany są zapisywane w bazie danych. Może to być przydatne, aby uniknąć zamarzania interfejsu użytkownika aplikacji z szeroką obsługą klienta. Operacje asynchroniczne mogą również zwiększyć przepływność w aplikacji sieci Web, gdzie wątek może zostać zwolniony do obsługi innych żądań podczas kończenia operacji bazy danych. Aby uzyskać więcej informacji, zobacz [programowanie asynchroniczne w języku C#](/dotnet/csharp/async).
 
 > [!WARNING]  
-> EF Core nie obsługuje wielu równoległych operacji uruchamianych w tym samym wystąpieniu kontekstu. Należy zawsze czekać na zakończenie operacji przed rozpoczęciem następnej operacji. Zazwyczaj odbywa się to `await` przy użyciu słowa kluczowego w każdej operacji asynchroniiowej.
+> EF Core nie obsługuje wielu operacji równoległych wykonywanych w tym samym wystąpieniu kontekstu. Przed rozpoczęciem następnej operacji zawsze należy czekać na ukończenie operacji. Zwykle jest to wykonywane przy użyciu `await` słowa kluczowego dla każdej operacji asynchronicznej.
 
-Entity Framework `DbContext.SaveChangesAsync()` Core zapewnia asynchroniiową alternatywę `DbContext.SaveChanges()`dla .
+Entity Framework Core stanowi `DbContext.SaveChangesAsync()` alternatywę asynchroniczną dla `DbContext.SaveChanges()` .
 
 [!code-csharp[Main](../../../samples/core/Saving/Async/Sample.cs#Sample)]

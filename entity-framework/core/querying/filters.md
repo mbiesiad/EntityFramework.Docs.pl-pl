@@ -3,12 +3,12 @@ title: Filtry zapytania globalnego — EF Core
 author: anpete
 ms.date: 11/03/2017
 uid: core/querying/filters
-ms.openlocfilehash: 233289b0c50e15f4555b342bc654211ce04c24d3
-ms.sourcegitcommit: ebfd3382fc583bc90f0da58e63d6e3382b30aa22
+ms.openlocfilehash: 57d81919dedb853d2a41066f76ec20685ae41d6b
+ms.sourcegitcommit: 949faaba02e07e44359e77d7935f540af5c32093
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 06/25/2020
-ms.locfileid: "85370464"
+ms.lasthandoff: 08/03/2020
+ms.locfileid: "87526904"
 ---
 # <a name="global-query-filters"></a>Filtry zapytań globalnych
 
@@ -43,7 +43,7 @@ Wyrażenia predykatu przesłane do wywołań _HasQueryFilter_ będą teraz autom
 > Zwróć uwagę na użycie pola poziomu wystąpienia DbContext: `_tenantId` służy do ustawiania bieżącej dzierżawy. Filtry na poziomie modelu będą używać wartości z poprawnego wystąpienia kontekstu (czyli wystąpienia, które wykonuje zapytanie).
 
 > [!NOTE]
-> Obecnie nie jest możliwe zdefiniowanie wielu filtrów zapytania w tej samej jednostce — zostanie zastosowana tylko Ostatnia z nich. Można jednak zdefiniować pojedynczy filtr z wieloma warunkami przy użyciu operatora logicznego _and_ ([ `&&` w języku C#](https://docs.microsoft.com/dotnet/csharp/language-reference/operators/boolean-logical-operators#conditional-logical-and-operator-)).
+> Obecnie nie jest możliwe zdefiniowanie wielu filtrów zapytania w tej samej jednostce — zostanie zastosowana tylko Ostatnia z nich. Można jednak zdefiniować pojedynczy filtr z wieloma warunkami przy użyciu operatora logicznego _and_ ([ `&&` w języku C#](/dotnet/csharp/language-reference/operators/boolean-logical-operators#conditional-logical-and-operator-)).
 
 ## <a name="use-of-navigations"></a>Korzystanie z nawigacji
 

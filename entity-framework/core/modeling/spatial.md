@@ -5,12 +5,12 @@ ms.author: bricelam
 ms.date: 11/01/2018
 ms.assetid: 2BDE29FC-4161-41A0-841E-69F51CCD9341
 uid: core/modeling/spatial
-ms.openlocfilehash: 2222df84be7bfde3f252766bef1cfab39b476efa
-ms.sourcegitcommit: ebfd3382fc583bc90f0da58e63d6e3382b30aa22
+ms.openlocfilehash: 85124b7e252797ccd952d0d332e7309eff97ba56
+ms.sourcegitcommit: 949faaba02e07e44359e77d7935f540af5c32093
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 06/25/2020
-ms.locfileid: "85370451"
+ms.lasthandoff: 08/03/2020
+ms.locfileid: "87526670"
 ---
 # <a name="spatial-data"></a>Dane przestrzenne
 
@@ -48,7 +48,7 @@ optionsBuilder.UseSqlServer(
 
 Istnieje kilka typów danych przestrzennych. Używany typ zależy od typów kształtów, które mają być dozwolone. Poniżej znajduje się hierarchia typów NKTY przerwania, których można użyć do właściwości w modelu. Znajdują się one w `NetTopologySuite.Geometries` przestrzeni nazw.
 
-* Geometrii
+* Geometria
   * Moment
   * LineString
   * Wielokąt
@@ -345,7 +345,7 @@ Wielokąt. NumInteriorRings | ✔ | ✔ | ✔ | ✔
 
 ## <a name="additional-resources"></a>Zasoby dodatkowe
 
-* [Dane przestrzenne w SQL Server](https://docs.microsoft.com/sql/relational-databases/spatial/spatial-data-sql-server)
+* [Dane przestrzenne w SQL Server](/sql/relational-databases/spatial/spatial-data-sql-server)
 * [Strona główna SpatiaLite](https://www.gaia-gis.it/fossil/libspatialite)
 * [Dokumentacja przestrzenna Npgsql](https://www.npgsql.org/efcore/mapping/nts.html)
 * [Dokumentacja PostGIS](https://postgis.net/documentation/)

@@ -4,12 +4,12 @@ author: rowanmiller
 ms.date: 10/27/2016
 ms.assetid: a628795e-64df-4f24-a5e8-76bc261e7ed8
 uid: core/modeling/backing-field
-ms.openlocfilehash: 5c1b2e8036a8556d69cac2ec22722fc72d6da4aa
-ms.sourcegitcommit: 387cbd8109c0fc5ce6bdc85d0dec1aed72ad4c33
+ms.openlocfilehash: e015c4f3fca767d25bee179c027813bd9fcf4c07
+ms.sourcegitcommit: 949faaba02e07e44359e77d7935f540af5c32093
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 04/23/2020
-ms.locfileid: "82103155"
+ms.lasthandoff: 08/03/2020
+ms.locfileid: "87526761"
 ---
 # <a name="backing-fields"></a>Pola zapasowe
 
@@ -24,7 +24,7 @@ Według Konwencji następujące pola zostaną odnalezione jako pola zapasowe dla
 * `m_<camel-cased property name>`
 * `m_<property name>`
 
-W poniższym przykładzie `Url` właściwość jest skonfigurowana tak, aby zawierała `_url` jako pole zapasowe:
+W poniższym przykładzie `Url` Właściwość jest skonfigurowana tak, aby zawierała `_url` jako pole zapasowe:
 
 [!code-csharp[Main](../../../samples/core/Modeling/Conventions/BackingField.cs#Sample)]
 
@@ -46,10 +46,10 @@ Domyślnie EF zawsze odczytuje i zapisu do pola zapasowego — przy założeniu,
 
 [!code-csharp[Main](../../../samples/core/Modeling/FluentAPI/BackingFieldAccessMode.cs?name=BackingFieldAccessMode&highlight=6)]
 
-Aby uzyskać pełny zestaw obsługiwanych opcji, zobacz [Wyliczenie PropertyAccessMode](https://docs.microsoft.com/dotnet/api/microsoft.entityframeworkcore.propertyaccessmode) .
+Aby uzyskać pełny zestaw obsługiwanych opcji, zobacz [Wyliczenie PropertyAccessMode](/dotnet/api/microsoft.entityframeworkcore.propertyaccessmode) .
 
 > [!NOTE]
-> W EF Core 3,0 domyślny tryb dostępu do właściwości został zmieniony z `PreferFieldDuringConstruction` na `PreferField`.
+> W EF Core 3,0 domyślny tryb dostępu do właściwości został zmieniony z `PreferFieldDuringConstruction` na `PreferField` .
 
 ## <a name="field-only-properties"></a>Właściwości tylko dla pól
 

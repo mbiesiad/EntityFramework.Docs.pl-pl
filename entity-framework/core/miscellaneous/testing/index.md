@@ -4,12 +4,12 @@ description: Różne podejścia do testowania aplikacji korzystających EF Core
 author: ajcvickers
 ms.date: 04/22/2020
 uid: core/miscellaneous/testing/index
-ms.openlocfilehash: 71222f17ac4cc1b71052a2e7e916ebcedd2ae0f4
-ms.sourcegitcommit: ebfd3382fc583bc90f0da58e63d6e3382b30aa22
+ms.openlocfilehash: 7929c284c2794b2fcc95235ae413d56895ebb6e2
+ms.sourcegitcommit: 949faaba02e07e44359e77d7935f540af5c32093
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 06/25/2020
-ms.locfileid: "85370542"
+ms.lasthandoff: 08/03/2020
+ms.locfileid: "87526813"
 ---
 # <a name="testing-code-that-uses-ef-core"></a>Testowanie kodu korzystającego ze środowiska EF Core
 
@@ -63,7 +63,7 @@ LocalDB nie ma żadnych problemów:
 Na komputerze deweloperskim nigdy nie udało Ci się znaleźć problemu związanego z uruchomioną usługą bazy danych.
 LocalDB mogą jednak być odpowiednie dla niektórych osób, szczególnie w mniej wydajnych maszynach deweloperskich.
 
-Uruchomienie SQL Server (lub dowolnego innego systemu bazy danych) w kontenerze platformy Docker (lub podobny) jest innym sposobem, aby uniknąć uruchamiania systemu bazy danych bezpośrednio na komputerze deweloperskim.  
+[Uruchomienie SQL Server](/sql/linux/quickstart-install-connect-docker?view=sql-server-ver15) (lub dowolnego innego systemu bazy danych) w kontenerze platformy Docker (lub podobny) jest innym sposobem, aby uniknąć uruchamiania systemu bazy danych bezpośrednio na komputerze deweloperskim.  
 
 ## <a name="approach-2-sqlite"></a>Podejście 2: SQLite
 
@@ -92,7 +92,7 @@ Aby EF Core uzyskać szczegółowe wskazówki, zobacz [testowanie przy użyciu o
 ## <a name="approach-3-the-ef-core-in-memory-database"></a>Podejście 3: EF Core bazy danych w pamięci
 
 EF Core zawiera bazę danych w pamięci, która jest używana do wewnętrznego testowania EF Core samego siebie.
-Ta baza danych jest ogólnie **nieodpowiednia do testowania aplikacji, które używają EF Core**. Są to:
+Ta baza danych jest ogólnie **nieodpowiednia do testowania aplikacji, które używają EF Core**. W szczególności:
 
 * Nie jest to relacyjna baza danych.
 * Nie obsługuje transakcji.
@@ -102,7 +102,7 @@ Ta baza danych jest ogólnie **nieodpowiednia do testowania aplikacji, które u�
 Żadna z tych elementów nie jest bardzo ważna podczas testowania EF Core wewnętrznych, ponieważ jest ona używana szczególnie w przypadku, gdy baza danych nie ma znaczenia dla testu.
 Z drugiej strony te rzeczy są bardzo ważne podczas testowania aplikacji, która używa EF Core.
 
-## <a name="unit-testing"></a>Testy jednostkowe
+## <a name="unit-testing"></a>Testowanie jednostek
 
 Należy rozważyć testowanie części logiki biznesowej, która może wymagać użycia niektórych danych z bazy danych, ale nie testowanie interakcji z bazami danych.
 Jedną z opcji jest użycie [testu podwójnego](https://en.wikipedia.org/wiki/Test_double) , takiego jak makieta lub fałszywe.

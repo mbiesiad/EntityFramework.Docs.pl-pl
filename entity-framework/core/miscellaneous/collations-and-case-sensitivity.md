@@ -5,12 +5,12 @@ author: roji
 ms.date: 04/27/2020
 ms.assetid: bde4e0ee-fba3-4813-a849-27049323d301
 uid: core/miscellaneous/collations-and-case-sensitivity
-ms.openlocfilehash: b3874847922cb39aa57d50813e6e50ff7db72eb9
-ms.sourcegitcommit: ebfd3382fc583bc90f0da58e63d6e3382b30aa22
+ms.openlocfilehash: 46a13d341c1b721bb243ee2b205bdc2f4d7e7aee
+ms.sourcegitcommit: 949faaba02e07e44359e77d7935f540af5c32093
 ms.translationtype: MT
 ms.contentlocale: pl-PL
-ms.lasthandoff: 06/25/2020
-ms.locfileid: "85370568"
+ms.lasthandoff: 08/03/2020
+ms.locfileid: "87526449"
 ---
 # <a name="collations-and-case-sensitivity"></a>Sortowanie i rozróżnianie wielkości liter
 
@@ -68,11 +68,11 @@ Należy pamiętać, że niektóre bazy danych umożliwiają zdefiniowanie sortow
 
 W przypadku platformy .NET równość w postaci ciągów jest domyślnie rozróżniana: `s1 == s2` wykonuje porównanie porządkowe, które wymaga, aby ciągi były takie same. Ponieważ domyślne sortowanie baz danych jest różne i dlatego pożądane jest proste równość używania indeksów, EF Core nie podejmuje próby przetłumaczenia prostej równości na operacje z uwzględnieniem wielkości liter w bazie danych: równość języka C# jest tłumaczona bezpośrednio do poziomu równości SQL, co może być zależne od wielkości liter, w zależności od określonej używanej bazy danych i jej konfiguracji sortowania.
 
-Ponadto platforma .NET zapewnia przeciążenia [`string.Equals`](https://docs.microsoft.com/dotnet/api/system.string.equals#System_String_Equals_System_String_System_StringComparison_) akceptujące [`StringComparison`](https://docs.microsoft.com/dotnet/api/system.stringcomparison) Wyliczenie, które umożliwia określanie uwzględniania wielkości liter i kultury dla porównania. Zgodnie z projektem, EF Core zaniechania tłumaczenia tych przeciążeń na SQL i próba ich użycia spowoduje wyjątek. Dla jednego z tych EF Core nie wie, w jakim przypadku należy użyć sortowania bez uwzględniania wielkości liter lub wielkości liter. Co ważniejsze, zastosowanie sortowania w większości przypadków uniemożliwi użycie indeksu, znacząco wpływając na wydajność dla bardzo podstawowej i powszechnie używanej konstrukcji platformy .NET. Aby wymusić użycie porównania z rozróżnianiem wielkości liter lub bez uwzględniania wielkości liter, określ sortowanie jawnie za pomocą podanego `EF.Functions.Collate` [powyżej](#explicit-collations-and-indexes).
+Ponadto platforma .NET zapewnia przeciążenia [`string.Equals`](/dotnet/api/system.string.equals#System_String_Equals_System_String_System_StringComparison_) akceptujące [`StringComparison`](/dotnet/api/system.stringcomparison) Wyliczenie, które umożliwia określanie uwzględniania wielkości liter i kultury dla porównania. Zgodnie z projektem, EF Core zaniechania tłumaczenia tych przeciążeń na SQL i próba ich użycia spowoduje wyjątek. Dla jednego z tych EF Core nie wie, w jakim przypadku należy użyć sortowania bez uwzględniania wielkości liter lub wielkości liter. Co ważniejsze, zastosowanie sortowania w większości przypadków uniemożliwi użycie indeksu, znacząco wpływając na wydajność dla bardzo podstawowej i powszechnie używanej konstrukcji platformy .NET. Aby wymusić użycie porównania z rozróżnianiem wielkości liter lub bez uwzględniania wielkości liter, określ sortowanie jawnie za pomocą podanego `EF.Functions.Collate` [powyżej](#explicit-collations-and-indexes).
 
 ## <a name="database-specific-information"></a>Informacje specyficzne dla bazy danych
 
-* [SQL Server dokumentacja dotycząca sortowania](https://docs.microsoft.com/sql/relational-databases/collations/collation-and-unicode-support).
-* [Dokumentacja Microsoft. Data. sqlite dotycząca sortowania](https://docs.microsoft.com/dotnet/standard/data/sqlite/collation).
+* [SQL Server dokumentacja dotycząca sortowania](/sql/relational-databases/collations/collation-and-unicode-support).
+* [Dokumentacja Microsoft. Data. sqlite dotycząca sortowania](/dotnet/standard/data/sqlite/collation).
 * [PostgreSQL dokumentację dotyczącą sortowania](https://www.postgresql.org/docs/current/collation.html).
 * [Dokumentacja bazy danych MySQL dotycząca sortowania](https://dev.mysql.com/doc/refman/en/charset-general.html).
