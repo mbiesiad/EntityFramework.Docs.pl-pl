@@ -65,6 +65,8 @@
               href: core/get-started/install/index.md
             - name: Samouczek ASP.NET Core >>
               href: /aspnet/core/data/ef-rp/intro
+            - name: Samouczek WPF .NET Core
+              href: core/get-started/wpf.md
             - name: Samouczek platformy Xamarin
               href: core/get-started/xamarin.md
         - name: Podstawy
@@ -528,7 +530,7 @@
                       href: ef6/resources/licenses/ef5/fra.md
                     - name: Włoski
                       href: ef6/resources/licenses/ef5/ita.md
-                    - name: japoński
+                    - name: Japoński
                       href: ef6/resources/licenses/ef5/jpn.md
                     - name: koreański
                       href: ef6/resources/licenses/ef5/kor.md
@@ -556,7 +558,7 @@
                       href: ef6/resources/licenses/ef6/fra.md
                     - name: Włoski
                       href: ef6/resources/licenses/ef6/ita.md
-                    - name: japoński
+                    - name: Japoński
                       href: ef6/resources/licenses/ef6/jpn.md
                     - name: koreański
                       href: ef6/resources/licenses/ef6/kor.md
