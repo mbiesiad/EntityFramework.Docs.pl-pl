@@ -74,7 +74,7 @@ Ten sam proces jest używany w przypadku wszelkich dalszych migracji dodawanych 
 
 ### <a name="why-bother-with-the-model-snapshot"></a>Dlaczego bawić się z migawką modelu?
 
-Być może zastanawiasz się, dlaczego EF 'bawi się' z migawekami modelu — dlaczego od razu nie patrzy się w bazę danych. Jeśli tak, przeczytaj. Jeśli nie jesteś zainteresowany, możesz pominąć tę sekcję.
+Być może zastanawiasz się, dlaczego EF 'bawi się' z migawkami modelu — dlaczego od razu nie patrzy się w bazę danych. Jeśli tak, przeczytaj. Jeśli nie jesteś zainteresowany, możesz pominąć tę sekcję.
 
 Istnieje wiele powodów, w których zachowanie migawek modelu jest zachowywane:
 
