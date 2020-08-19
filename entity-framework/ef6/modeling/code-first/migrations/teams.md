@@ -12,39 +12,39 @@ ms.locfileid: "85370412"
 ---
 # <a name="code-first-migrations-in-team-environments"></a>Migracje Code First w środowiskach zespołu
 > [!NOTE]
-> W tym artykule założono, że wiesz, jak używać Migracje Code First w podstawowych scenariuszach. Jeśli tego nie zrobisz, musisz przeczytać [migracje Code First](~/ef6/modeling/code-first/migrations/index.md) przed kontynuowaniem.
+> W tym artykule założono, że wiesz, jak używać Migracje Code First w podstawowych scenariuszach. Jeśli tego nie znasz, musisz przeczytać [migracje Code First](~/ef6/modeling/code-first/migrations/index.md) przed kontynuowaniem.
 
-## <a name="grab-a-coffee-you-need-to-read-this-whole-article"></a>Weź pod nich kawę, musisz przeczytać ten cały artykuł
+## <a name="grab-a-coffee-you-need-to-read-this-whole-article"></a>Zaopatrz się w kawę, powinieneś przeczytać cały ten artykuł
 
-Problemy w środowiskach zespołu polegają głównie na scalaniu migracji, gdy dwaj deweloperzy wygenerowały migracje w lokalnej bazie kodu. Chociaż kroki, które należy rozwiązać, są bardzo proste, wymagają one pełnego poznania sposobu działania migracji. Nie przeskoczę do końca — Poświęć chwilę na zapoznanie się z całym artykułem, aby upewnić się, że powiodło się.
+Problemy w środowiskach zespołu polegają głównie na scalaniu migracji, gdy dwaj programiści wygenerowali migracje w lokalnej bazie kodu. Chociaż kroki do rozwiązania tego, są bardzo proste, wymagają one pełnego poznania sposobu działania migracji. Nie przeskakuj do końca — Poświęć chwilę na zapoznanie się z całym artykułem, aby mieć pewność, że powiodło się.
 
 ## <a name="some-general-guidelines"></a>Niektóre ogólne wytyczne
 
-Zanim Dig się na zarządzanie scalanymi migracjami wygenerowanymi przez wielu deweloperów, poniżej przedstawiono niektóre ogólne wskazówki dotyczące konfigurowania sukcesu.
+Zanim wkopiemy się w zarządzanie scalanymi migracjami wygenerowanymi przez wielu deweloperów, poniżej przedstawiono niektóre ogólne wskazówki dotyczące konfigurowania sukcesu.
 
 ### <a name="each-team-member-should-have-a-local-development-database"></a>Każdy członek zespołu powinien mieć lokalną bazę danych programistycznych
 
-Migracja korzysta z tabeli ** \_ \_ MigrationsHistory** do przechowywania migracji, które zostały zastosowane do bazy danych programu. Jeśli masz wielu deweloperów generujących różne migracje przy próbie docelowej tej samej bazy danych (i w ten sposób udostępnianie tabeli ** \_ \_ MigrationsHistory** ), migracje są bardzo mylone.
+Migracja korzysta z tabeli **\_\_MigrationsHistory** do przechowywania migracji, które zostały zastosowane do bazy danych programu. Jeśli masz wielu deweloperów generujących różne migracje przy próbie docelowej tej samej bazy danych (i w ten sposób udostępnianie tabeli **\_\_MigrationsHistory**), migracje są bardzo mylone.
 
 Oczywiście, jeśli masz członków zespołu, którzy nie generują migracji, nie ma żadnego problemu, aby udostępnić centralną bazę danych programistycznych.
 
 ### <a name="avoid-automatic-migrations"></a>Unikaj automatycznych migracji
 
-Dolna linia polega na pierwszym wyszukiwaniu automatycznych migracji w środowiskach zespołu, ale w rzeczywistości nie działają. Jeśli chcesz dowiedzieć się, dlaczego należy czytać — Jeśli nie, możesz przejść do następnej sekcji.
+Dolna linia polega na pierwszym wyszukiwaniu automatycznych migracji w środowiskach zespołu, ale w rzeczywistości nie działają. Jeśli chcesz dowiedzieć się dlaczego, należy czytać dalej — Jeśli nie, możesz przejść do następnej sekcji.
 
 Automatyczne migracje umożliwiają zaktualizowanie schematu bazy danych w taki sposób, aby był zgodny z bieżącym modelem bez konieczności generowania plików kodu (migracje oparte na kodzie). Migracje automatyczne działają bardzo dobrze w środowisku zespołu, jeśli kiedykolwiek były używane, i nigdy nie generują żadnych migracji opartych na kodzie. Problem polega na tym, że automatyczne migracje są ograniczone i nie obsługują wielu operacji — zmiana nazw właściwości/kolumn, przenoszenie danych do innej tabeli itp. Aby obsłużyć te scenariusze, można wykonać generowanie migracji opartych na kodzie (i edytowanie kodu szkieletowego), które są mieszane między zmianami, które są obsługiwane przez migracje automatyczne. Dzięki temu nie można scalić zmian, gdy dwaj deweloperzy zaewidencjonują migracje.
 
 ## <a name="screencasts"></a>Screencasts
 
-Jeśli wolisz obejrzeć zrzut ekranu przedstawiający niż odczytanie tego artykułu, następujące dwa wideo obejmują tę samą zawartość co ten artykuł.
+Jeśli wolisz obejrzeć zrzut ekranu przedstawiający to, zamiast czytanie tego artykułu, dwa następujące widea obejmują tę samą zawartość co ten artykuł.
 
-### <a name="video-one-migrations---under-the-hood"></a>Wideo one: "migracje — pod okapem"
+### <a name="video-one-migrations---under-the-hood"></a>Wideo 1: "migracje — pod okapem"
 
-[Ten zrzut ekranu przedstawiający](https://channel9.msdn.com/blogs/ef/migrations-under-the-hood) dotyczy sposobu, w jaki migracja śledzi i używa informacji o modelu do wykrywania zmian modelu.
+[Ten przedstawiający zrzut ekranu](https://channel9.msdn.com/blogs/ef/migrations-under-the-hood) dotyczy sposobu, w jaki migracja śledzi i używa informacji o modelu do wykrywania zmian modelu.
 
-### <a name="video-two-migrations---team-environments"></a>Wideo dwa: "migracje-środowiska zespołu"
+### <a name="video-two-migrations---team-environments"></a>Wideo 2: "migracje-środowiska zespołu"
 
-Na podstawie koncepcji z poprzedniego wideo [Ten zrzut ekranu przedstawiający](https://channel9.msdn.com/blogs/ef/migrations-team-environments) obejmuje problemy, które pojawiają się w środowisku zespołowym i sposoby ich rozwiązywania.
+Na podstawie koncepcji z poprzedniego wideo [Ten przedstawiający zrzut ekranu](https://channel9.msdn.com/blogs/ef/migrations-team-environments) obejmuje problemy, które pojawiają się w środowisku zespołowym i sposoby ich rozwiązywania.
 
 ## <a name="understanding-how-migrations-works"></a>Zrozumienie, jak działa migracja
 
@@ -58,13 +58,13 @@ Po dodaniu pierwszej migracji do projektu, w konsoli Menedżera pakietów jest u
 
 Bieżący model jest obliczany na podstawie kodu (1). Wymagane obiekty bazy danych są następnie obliczane przez model różnią się (2) — ponieważ jest to pierwsza migracja, model różni się tylko za pomocą pustego modelu do porównania. Wymagane zmiany są przesyłane do generatora kodu w celu utworzenia wymaganego kodu migracji (3), który jest następnie dodawany do rozwiązania programu Visual Studio (4).
 
-Oprócz faktycznego kodu migracji, który jest przechowywany w pliku kodu głównego, migracja również generuje kilka dodatkowych plików powiązanych z kodem. Te pliki są metadanymi, które są używane przez migracje i nie są coś, co należy edytować. Jeden z tych plików jest plikiem zasobów (. resx) zawierającym migawkę modelu w momencie wygenerowania migracji. Zobaczysz, jak to jest używane w następnym kroku.
+Oprócz faktycznego kodu migracji, który jest przechowywany w pliku kodu głównego, migracja również generuje kilka dodatkowych plików powiązanych z kodem. Te pliki są metadanymi, które są używane przez migracje i nie są coś, co należy edytować. Jeden z tych plików jest plikiem zasobów (.resx) zawierającym migawkę modelu w momencie wygenerowania migracji. Zobaczysz, jak to jest używane w następnym kroku.
 
 W tym momencie prawdopodobnie chcesz uruchomić polecenie **Update-Database** , aby zastosować zmiany do bazy danych, a następnie przejdź do implementacji innych obszarów aplikacji.
 
 ### <a name="subsequent-migrations"></a>Kolejne migracje
 
-Później powrócisz i wprowadzisz pewne zmiany do modelu — w naszym przykładzie dodamy do **blogu**Właściwość **adresu URL** . Następnie można wydać polecenie, takie jak **dodanie AddUrl migracji** , aby przeprowadzić szkielet migracji w celu zastosowania odpowiednich zmian w bazie danych. Poniżej przedstawiono kroki wysokiego poziomu wykonywane przez to polecenie.
+Później powrócisz i wprowadzisz pewne zmiany do modelu — w naszym przykładzie dodamy do **blogu** Właściwość **adresu URL**. Następnie można wydać polecenie, takie jak **Add-Migration AddUrl** , aby przeprowadzić szkielet migracji w celu zastosowania odpowiednich zmian w bazie danych. Poniżej przedstawiono kroki wysokiego poziomu wykonywane przez to polecenie.
 
 ![Druga migracja](~/ef6/media/secondmigration.png)
 
@@ -72,9 +72,9 @@ Podobnie jak w przypadku ostatniego czasu bieżący model jest obliczany na pods
 
 Ten sam proces jest używany w przypadku wszelkich dalszych migracji dodawanych do projektu.
 
-### <a name="why-bother-with-the-model-snapshot"></a>Dlaczego bother z migawką modelu?
+### <a name="why-bother-with-the-model-snapshot"></a>Dlaczego bawić się z migawką modelu?
 
-Może być zastanawiasz się, dlaczego EF obydwa z migawek modelu — dlaczego nie tylko Przyjrzyj się bazie danych. Jeśli tak, przeczytaj. Jeśli nie jesteś zainteresowany, możesz pominąć tę sekcję.
+Być może zastanawiasz się, dlaczego EF 'bawi się' z migawekami modelu — dlaczego od razu nie patrzy się w bazę danych. Jeśli tak, przeczytaj. Jeśli nie jesteś zainteresowany, możesz pominąć tę sekcję.
 
 Istnieje wiele powodów, w których zachowanie migawek modelu jest zachowywane:
 
@@ -105,27 +105,27 @@ Deweloperzy \# 1 i Developer \# 2 wprowadzają teraz pewne zmiany w modelu EF w 
 
 ![Zmiany lokalne](~/ef6/media/localchanges.png)
 
-Jest to cieszymy dzień dla deweloperów \# 1, gdy nastąpiła najpierw przesłanie zmian. Ponieważ nikt inny nie zaewidencjonuje się, ponieważ synchronizuje swoje repozytorium, może po prostu przesłać zmiany bez wykonywania scalania.
+Jest to radosny dzień dla dewelopera \# 1, gdy nastąpiło najpierw przesłanie zmian. Ponieważ nikt inny nie zaewidencjonuje się, ponieważ synchronizuje swoje repozytorium, może po prostu przesłać zmiany bez wykonywania scalania.
 
 ![Prześlij](~/ef6/media/submit.png)
 
-Teraz czas na \# przesłanie dewelopera 2. Nie cieszymy. Ponieważ ktoś inny przesłał zmiany od czasu ich synchronizacji, będzie musiał ściągnąć zmiany i scalić. System kontroli źródła prawdopodobnie będzie mógł automatycznie scalić zmiany na poziomie kodu, ponieważ są one bardzo proste. Stan \# repozytorium lokalnego dewelopera 2 po synchronizacji przedstawiono na poniższej ilustracji. 
+Teraz czas na przesłanie dewelopera \# 2. Tu już nie ma tyle radości. Ponieważ ktoś inny przesłał zmiany od czasu ich synchronizacji, będzie musiał ściągnąć zmiany i scalić. System kontroli źródła prawdopodobnie będzie mógł automatycznie scalić zmiany na poziomie kodu, ponieważ są one bardzo proste. Stan repozytorium lokalnego dewelopera \# 2 po synchronizacji przedstawiono na poniższej ilustracji. 
 
 ![Ściąganie](~/ef6/media/pull.png)
 
-Na tym etapie deweloper \# 2 może uruchomić program **Update-Database** , który wykryje nową migrację **addrating** (która nie została zastosowana do \# bazy danych dewelopera 2) i zastosuje ją. Teraz kolumna **Rating** zostanie dodana do tabeli **Blogi** , a baza danych jest zsynchronizowana z modelem.
+Na tym etapie deweloper \# 2 może uruchomić program **Update-Database** , który wykryje nową migrację **AddRating** (która nie została zastosowana do bazy danych dewelopera \# 2) i zastosuje ją. Teraz kolumna **Rating** zostanie dodana do tabeli **Blogi** , a baza danych jest zsynchronizowana z modelem.
 
-Istnieje kilka problemów, chociaż:
+Jest jednak kilka problemów:
 
-1.  Mimo że **Aktualizacja bazy danych** zostanie zastosowana do migracji **addrating** , zostanie również zgłoszone ostrzeżenie: *nie można zaktualizować bazy danych tak, aby była zgodna z bieżącym modelem, ponieważ istnieją oczekujące zmiany i automatyczna migracja jest wyłączona...*
+1.  Mimo że **Aktualizacja bazy danych** zostanie zastosowana do migracji **AddRating** , zostanie również zgłoszone ostrzeżenie: *nie można zaktualizować bazy danych tak, aby była zgodna z bieżącym modelem, ponieważ istnieją oczekujące zmiany i automatyczna migracja jest wyłączona...*
     Problem polega na tym, że migawka modelu przechowywana w ostatniej migracji (**Addreader**) nie zawiera właściwości **Rating** w **blogu** (ponieważ nie była częścią modelu podczas generowania migracji). Code First wykryje, że model w ostatniej migracji nie jest zgodny z bieżącym modelem i generuje ostrzeżenie.
 2.  Uruchomienie aplikacji spowoduje, że zostanie InvalidOperationException, że "*model z kopią zapasową kontekstu" BloggingContext "został zmieniony od czasu utworzenia bazy danych. Rozważ użycie Migracje Code First do zaktualizowania bazy danych... "*
     Problem polega na tym, że migawka modelu przechowywana w ostatniej migracji nie jest zgodna z bieżącym modelem.
-3.  Na koniec oczekujemy, że operacja **Add-Migration** spowoduje wygenerowanie pustej migracji (ponieważ nie ma zmian do zastosowania do bazy danych). Jednak ponieważ migracja porównuje bieżący model z tą z ostatniej migracji (w której brakuje właściwości **Rating** ), w rzeczywistości będzie szkieletować inne wywołanie **addColumn** do dodania w kolumnie **Rating** . Oczywiście ta migracja nie powiedzie się podczas **aktualizacji bazy danych** , ponieważ kolumna **klasyfikacji** już istnieje.
+3.  Na koniec oczekujemy, że operacja **Add-Migration** spowoduje wygenerowanie pustej migracji (ponieważ nie ma zmian do zastosowania do bazy danych). Jednak ponieważ migracja porównuje bieżący model z tą z ostatniej migracji (w której brakuje właściwości **Rating** ), w rzeczywistości będzie szkieletować inne wywołanie **AddColumn** do dodania w kolumnie **Rating** . Oczywiście ta migracja nie powiedzie się podczas aktualizacji BD **Update-Database** , ponieważ kolumna **Rating** już istnieje.
 
 ## <a name="resolving-the-merge-conflict"></a>Rozwiązywanie konfliktu scalania
 
-Dobrą wiedzą, że nie jest zbyt trudne do rozdzielenia z scalaniem ręcznie — pod warunkiem, że wiesz, jak działa migracja. Dlatego jeśli pominięto w tej sekcji... Niestety, musisz najpierw wrócić do pozostałej części artykułu.
+Dobra wiadomość jest taka, że nie jest to zbyt trudne do rozdzielenia ze scalaniem ręcznie — pod warunkiem, że wiesz, jak działa migracja. Dlatego jeśli pominięto tę sekcję... Niestety, ale musisz najpierw wrócić do pozostałej części artykułu.
 
 Dostępne są dwie opcje, najłatwiej jest wygenerować pustą migrację, która ma prawidłowy bieżący model jako migawkę. Druga opcja polega na aktualizacji migawki w ostatniej migracji w celu uzyskania poprawnej migawki modelu. Druga opcja jest nieco trudniejsza i nie może być używana w każdym scenariuszu, ale jest również przejrzysta, ponieważ nie obejmuje dodawania dodatkowej migracji.
 
@@ -141,8 +141,8 @@ Następujący proces może służyć do tego podejścia, od momentu wprowadzenia
 2.  Synchronizuj z kontrolą źródła.
 3.  Uruchom opcję **Update-Database** , aby zastosować nowe migracje, które zostały zaewidencjonowane przez innych deweloperów.
     **_Uwaga:_** *Jeśli nie otrzymasz żadnych ostrzeżeń z polecenia Update-Database, nie było żadnych nowych migracji od innych deweloperów i nie ma potrzeby wykonywania dalszych scalania.*
-4.  Uruchom polecenie **Add- &lt; Migration \_ Wybierz \_ nazwę &gt; – IgnoreChanges** (na przykład polecenie **Add-Migration Merge – IgnoreChanges**). Spowoduje to wygenerowanie migracji ze wszystkimi metadanymi (łącznie z migawką bieżącego modelu), ale zignoruje wszelkie zmiany, które wykryje podczas porównywania bieżącego modelu z migawką w ostatniej migracji (co oznacza, że można uzyskać pustą metodę w **górę** i **w dół** ).
-5.  Uruchom **aktualizację-Database** , aby ponownie zastosować najnowszą migrację ze zaktualizowanymi metadanymi.
+4.  Uruchom polecenie **Add-Migration <wybierz_nazwę> –IgnoreChanges** (na przykład polecenie **Add-Migration Merge – IgnoreChanges**). Spowoduje to wygenerowanie migracji ze wszystkimi metadanymi (łącznie z migawką bieżącego modelu), ale zignoruje wszelkie zmiany, które wykryje podczas porównywania bieżącego modelu z migawką w ostatniej migracji (co oznacza, że można uzyskać pustą metodę w **górę** i **w dół** ).
+5.  Uruchom **Update-Database** , aby ponownie zastosować najnowszą migrację ze zaktualizowanymi metadanymi.
 6.  Kontynuuj opracowywanie lub Prześlij do kontroli źródła (po uruchomieniu testów jednostkowych kursu).
 
 Poniżej znajduje się stan \# lokalnej bazy kodu dewelopera 2 po użyciu tego podejścia.
@@ -163,15 +163,15 @@ Następujący proces może służyć do tego podejścia, od momentu wprowadzenia
 2.  Synchronizuj z kontrolą źródła.
 3.  Uruchom opcję **Update-Database** , aby zastosować nowe migracje, które zostały zaewidencjonowane przez innych deweloperów.
     **_Uwaga:_** *Jeśli nie otrzymasz żadnych ostrzeżeń z polecenia Update-Database, nie było żadnych nowych migracji od innych deweloperów i nie ma potrzeby wykonywania dalszych scalania.*
-4.  Uruchom **Update-Database – TargetMigration &lt; sekundę \_ Ostatnia \_ migracja &gt; ** (w przykładzie poniżej zostałaby to **Aktualizacja-Database – TargetMigration addrating**). Spowoduje to przywrócenie bazy danych z powrotem do stanu drugiej ostatniej migracji — w praktyce "cofnięto stosowanie" ostatniej migracji z bazy danych.
+4.  Uruchom **Update-Database –TargetMigration <second_last_migration>** (w przykładzie poniżej zostałaby **Update-Database –TargetMigration AddRating**). Spowoduje to przywrócenie bazy danych z powrotem do stanu drugiej ostatniej migracji — w praktyce "cofnięto stosowanie" ostatniej migracji z bazy danych.
     **_Uwaga:_** *ten krok jest wymagany, aby można było bezpiecznie edytować metadane migracji, ponieważ metadane są również przechowywane w \_ \_ MigrationsHistoryTable bazy danych. Dlatego należy używać tej opcji tylko wtedy, gdy Ostatnia migracja jest tylko w lokalnej bazie kodu. Jeśli podczas ostatniej zastosowanej migracji istnieją inne bazy danych, należy również ponownie je wycofać i zastosować ostatniej migracji w celu zaktualizowania metadanych.* 
-5.  Uruchom ** &lt; pełną nazwę migracji z \_ \_ uwzględnieniem \_ sygnatury czasowej \_ \_ ostatniej \_ migracji** &gt; (w przykładzie, w którym został on wykonany, będzie coś takiego jak **Add-Migration 201311062215252 \_ addreader**).
+5.  Uruchom **Add-Migration <full_name_including_timestamp_of_last_migration>** (w przykładzie, w którym został on wykonany, będzie coś takiego jak **Add-Migration 201311062215252_AddReaders**).
     **_Uwaga:_** należy *dołączyć sygnaturę czasową, aby migracja wiedziała, że chcesz edytować istniejącą migrację, a nie utworzyć szkieletu nowej.*
     Spowoduje to zaktualizowanie metadanych ostatniej migracji w celu dopasowania do bieżącego modelu. Po zakończeniu wykonywania polecenia otrzymasz następujące ostrzeżenie, ale to dokładnie to, czego potrzebujesz. "*Został utworzony ponowny szkielet" tylko kod projektanta dla migracji "201311062215252 \_ addreader". Aby przeprowadzić ponowną próbę przetworzenia szkieletu całej migracji, użyj parametru-Force.*
-6.  Uruchom **aktualizację-Database** , aby ponownie zastosować najnowszą migrację ze zaktualizowanymi metadanymi.
+6.  Uruchom **Update-Database** , aby ponownie zastosować najnowszą migrację ze zaktualizowanymi metadanymi.
 7.  Kontynuuj opracowywanie lub Prześlij do kontroli źródła (po uruchomieniu testów jednostkowych kursu).
 
-Poniżej znajduje się stan \# lokalnej bazy kodu dewelopera 2 po użyciu tego podejścia.
+Poniżej znajduje się stan lokalnej bazy kodu dewelopera \# 2 po użyciu tego podejścia.
 
 ![Zaktualizowane metadane](~/ef6/media/updatedmetadata.png)
 
